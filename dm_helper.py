@@ -64,16 +64,18 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         }
 
     def get_topic_name(self):
-        return '{d}-topic'.format(d=self.deployment)
+        return '{d}-topic'.format(d=self._createValidGCPResourceName(self.deployment))
 
     def get_sink_name(self):
-        return '{d}-sink'.format(d=self.deployment, n=self.name)
+        return '{d}-sink'.format(d=self._createValidGCPResourceName(self.deployment)
+                                 , n=self._createValidGCPResourceName(self.name))
 
     def get_project(self):
         return self.deployment_gcp_project
 
     def get_bucket_name(self):
-        return '{d}-{n}-adswerve-ga-flat-config'.format(d=self.deployment, n=self.get_project())
+        return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._createValidGCPResourceName(self.deployment)
+                                                        , n=self._createValidGCPResourceName(self.get_project()))
 
     def get_filter(self):
         #TODO: add feature for 3 options:
@@ -81,3 +83,18 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         #       2. Intra day tables only
         #       3. Both Intra and Daily tables
         return self.FILTER
+
+    def _createValidGCPResourceName(self,pField):
+        '''
+        GCP resources must only contain letters, numbers, and dashes
+        :param pField: starting point of the field
+        :return: cleaned big query field name
+        '''
+        r = ""
+        for char in pField.lower():
+            if char.isalnum():
+                r += char
+            else:
+                r += "-"
+        return r
+
