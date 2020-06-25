@@ -27,17 +27,5 @@ Directories:
 * gcloud config set account username@domain.com
 * gcloud deployment-manager deployments create deployment-ga-flattene
   --config ga_flattener.yaml
-* gcloud deployment-manager deployments delete
-  deployment-ga-flattener -q
-
-# Notes #
-* name of deployment in gcloud command is accessed with {{
-env["deployment"] }} in JINJA templates
-* main.py cannot have numerous blank lines at the end.
-
-# TODO #
-* apply labels to all resources (where possible) to help with cost
-  measuring
-* develop default flattening queries
-* develop initial configuration for datasets
-* develop initial confiugraiton for custom dimensions
+* gcloud deployment-manager deployments delete deployment-ga-flattener
+  -q
