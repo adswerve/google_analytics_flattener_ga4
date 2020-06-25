@@ -86,7 +86,8 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
 
     def _createValidGCPResourceName(self,pField):
         '''
-        GCP resources must only contain letters, numbers, and dashes
+        GCP resources must only contain letters, numbers, undrescores, dots or dashes
+        and be between 3 and 63 chars long
         :param pField: starting point of the field
         :return: cleaned big query field name
         '''
@@ -96,5 +97,5 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
                 r += char
             else:
                 r += "-"
-        return r
+        return r[:62]
 
