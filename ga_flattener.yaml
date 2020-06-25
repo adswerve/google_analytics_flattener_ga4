@@ -40,7 +40,7 @@ resources:
   properties:
     # All the files that start with this prefix will be packed in the Cloud Function (PUBSUB)
     codeLocation: cf/
-    codeBucket: as-dev-gord-staging
+    codeBucket: apmk-staging
     codeBucketObject: function-flatten.zip
     location: us-east1
     timeout: 60s
@@ -52,7 +52,7 @@ resources:
   properties:
     # All the files that start with this prefix will be packed in the Cloud Function (HTTP)
     codeLocation: cfconfigbuilder/
-    codeBucket: as-dev-gord-staging
+    codeBucket: apmk-staging
     codeBucketObject: function-config-builder.zip
     location: us-east1
     timeout: 60s
