@@ -1,5 +1,5 @@
 # README #
-Google Analytics 360 Flattener.
+Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unnests (flattens) Google Analytics Data stored in Bigquery.  The GCP resources for the solutions are installed via Deployment Manager.
 
 ## Dependencies ##
 * Python 3.7 as base interpreter
