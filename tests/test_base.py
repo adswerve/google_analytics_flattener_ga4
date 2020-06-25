@@ -8,7 +8,7 @@ class Context(object):
 
         self.env = {
             "deployment": "deploy-unit-test"
-            , "project": "as-dev-gord"
+            , "project": "analyticspros.com:spotted-cinnamon-834"
             , "current_time": 1592017736
             , "project_number": "425632468050"
             , "username": "first.last@domain.com"
@@ -19,9 +19,9 @@ class Context(object):
 
 class BaseUnitTest(unittest.TestCase):
 
-    DATASET = 'unit_test'
+    DATASET = 'unit_test'       #specific to your project
     TABLE_TYPE = 'ga_sessions'  #or ga_sessions_intra or ga_sessions_realtime
-    DATE = '20200609'
+    DATE = '20200608'           #any historical date will suffice if that date shard exists in GA_SESSIONS_YYYYMMDD
 
     def setUp(self):
         context = Context()

@@ -3,10 +3,10 @@ import os
 import json
 
 from  tests.test_base import BaseUnitTest
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\as-dev-gord-1522f36e41ad.json"
-topic_name = "dev-gaflat-topic"
-project_id = "as-dev-gord"
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"  #mac
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\as-dev-gord-1522f36e41ad.json" #windows
+topic_name = "<your gcp project>"
+project_id = "<your gcp project>"
 dataset_id = BaseUnitTest.DATASET
 date_shard = BaseUnitTest.DATE
 

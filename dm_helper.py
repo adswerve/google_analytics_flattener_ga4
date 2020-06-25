@@ -64,9 +64,15 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         }
 
     def get_topic_name(self):
+        '''
+        TODO: make sure returned value meets resource name requirements defined in GCP
+        '''
         return '{d}-topic'.format(d=self._createValidGCPResourceName(self.deployment))
 
     def get_sink_name(self):
+        '''
+        TODO: make sure returned value meets resource name requirements defined in GCP
+        '''
         return '{d}-sink'.format(d=self._createValidGCPResourceName(self.deployment)
                                  , n=self._createValidGCPResourceName(self.name))
 
@@ -87,7 +93,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
     def _createValidGCPResourceName(self,pField):
         '''
         GCP resources must only contain letters, numbers, undrescores, dots or dashes
-        and be between 3 and 63 chars long
+        and be between 3 and 63 chars long.  Resources must start with a letter and may not end with a dash
         :param pField: starting point of the field
         :return: cleaned big query field name
         '''
