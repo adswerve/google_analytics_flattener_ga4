@@ -75,7 +75,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
 
     def get_bucket_name(self):
         return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._createValidGCPResourceName(self.deployment)
-                                                        , n=self._createValidGCPResourceName(self.get_project()))
+                                                        , n=self._createValidGCPResourceName(self.get_project()))[:62]
 
     def get_filter(self):
         #TODO: add feature for 3 options:
@@ -97,5 +97,5 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
                 r += char
             else:
                 r += "-"
-        return r[:62]
+        return r
 
