@@ -1,0 +1,16 @@
+from dm_helper import GaFlattenerDeploymentConfiguration
+def GenerateConfig(ctx):
+
+    config = GaFlattenerDeploymentConfiguration(ctx.env)
+
+    resources = {
+      'resources': [{
+          'name': 'metric-name',
+          'type': 'gcp-types/logging-v2:projects.metrics',
+          'properties': {
+              'metric': '{metric_name}'.format(metric_name=config.get_sink_name()),
+              'filter': config.get_filter(),
+            }
+       }]
+    }
+    return resources

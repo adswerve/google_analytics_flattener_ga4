@@ -1,0 +1,60 @@
+.gcloudignore
+.DS_Store
+.vscode
+
+# Python pycache:
+__pycache__/
+.pytest_cache
+
+pycache/
+.pycache
+
+#Python virtual environment
+venv/
+env/
+local/
+
+#python compiled files
+*.pyc
+
+#sandbox files
+sandbox/
+
+#Google App Engine Standard
+lib/
+
+#windows generated files
+Thumbs.db
+
+#Binary files
+*.obj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.dll
+*.lib
+*.sbr
+*.un~
+*.gz
+
+#Pycharm
+
+*.ndb
+.idea
+# node
+node_modules/
+
+

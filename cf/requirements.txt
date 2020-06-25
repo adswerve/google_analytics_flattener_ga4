@@ -1,0 +1,4 @@
+google-cloud-bigquery==1.25.0
+google-api-python-client==1.9.3
+google-cloud-storage==1.29.0
+pytest==5.4.3
