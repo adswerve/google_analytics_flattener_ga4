@@ -23,7 +23,7 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
   BigQuery datasets that have a ga_sessions table and adds them to the
   default configuration on Google's Cloud Storage in the following
   location:
-  [DEPLOY NAME]-[PROJECT_NAME]-adswerve-ga-flat-config\config_datasets.json
+  [DEPLOYMENT NAME]-[PROJECT_NAME]-adswerve-ga-flat-config\config_datasets.json
 
 ## Files ##
 * dm_helper.py: provides consistent names for GCP resources accross
@@ -40,7 +40,7 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
 
 ## Prerequisites ##
 1. Create Google GCP project or use an existing project that has Google
-   Analytics data flowing to it. Referred to as [PROJECT_NAME]
+   Analytics data flowing to it. Referred to as [PROJECT_ID]
 2. Enable the Cloud Build API
 3. Enable the Cloud Functions API
 4. Add "Logs Configuration Writer", "Cloud Functions Developer" pre
@@ -52,18 +52,18 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
 5. Install gCloud locally or use cloud shell.
 6. Clone this github repo
 7. Create bucket for staging code during deployment, for example:
-   [PROJECT_NAME]-function-code-staging.
+   [PROJECT_ID]-function-code-staging.
 8. Edit the ga_flattener.yaml file, specifically the
-   properties-->codeLocation value of the function and httpfunction
+   properties-->codeBucket value of the function and httpfunction
    resource. Make the value for both to name of the bucket created in #7
    (above step)
 
 ## Installation steps ##
-1. Execute command: gcloud config set project [PROJECT_NAME]
+1. Execute command: gcloud config set project [PROJECT_ID]
 2. Execute command: gcloud config set account username@domain.com
 3. Navigate (locally) to root directory of this repository
 4. Execute command: gcloud deployment-manager deployments create
-   [Deploy Name] --config ga_flattener.yaml
+   [Deployment Name] --config ga_flattener.yaml
 
 ## Testing / Simulating Event ##
 1. After installation, set values in lines 6-11 of
@@ -73,5 +73,5 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
 
 ## Un-install steps ##
 1. Optional command to remove solution: gcloud deployment-manager
-   deployments delete [Deploy Name] -q
+   deployments delete [Deployment Name] -q
 

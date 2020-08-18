@@ -50,7 +50,7 @@ class GaExportedNestedDataStorage(object):
             , 'visitNumber'
             , 'visitId'
             , 'userId'
-            , 'clientId'
+            # , 'clientId' # will be added if date_shard >= '20180523'
             , 'channelGrouping'
             , 'socialEngagementType'
             , 'date'
@@ -66,7 +66,7 @@ class GaExportedNestedDataStorage(object):
             , 'totals.uniqueScreenviews'
             , 'totals.timeOnScreen'
             , 'totals.totalTransactionRevenue'
-            , 'totals.sessionQualityDim'
+            # , 'totals.sessionQualityDim' # will be added if date_shard >= '20170711'
             , 'trafficSource.referralPath'
             , 'trafficSource.campaign'
             , 'trafficSource.source'
@@ -117,6 +117,13 @@ class GaExportedNestedDataStorage(object):
             , 'geoNetwork.networkLocation'
             , 'visitorId'
         ]
+
+        if self.date_shard >= '20170711':
+            self.session_fields.insert(20, 'totals.sessionQualityDim')
+
+        if self.date_shard >= '20180523':
+            self.session_fields.insert(5, 'clientId')
+
         self.hit_fields = [
             'hits.hitNumber'
             , 'hits.time'
@@ -146,8 +153,12 @@ class GaExportedNestedDataStorage(object):
             , 'hits.sourcePropertyInfo.sourcePropertyTrackingId'
             , 'hits.promotionActionInfo.promoIsView'
             , 'hits.promotionActionInfo.promoIsClick'
-            , 'hits.dataSource'
+            # , 'hits.dataSource' # will be added if date_shard >= '20161114'
         ]
+
+        if self.date_shard >= '20170711':
+            self.hit_fields.insert(28, 'hits.dataSource')
+
         self.hit_transaction_fields = [
             'hits.transaction.transactionId'
             , 'hits.transaction.transactionRevenue'
@@ -359,9 +370,12 @@ class GaExportedNestedDataStorage(object):
             , 'hits.product.isClick'
             , 'hits.product.productListName'
             , 'hits.product.productListPosition'
-            , 'hits.product.productCouponCode'
+            # , 'hits.product.productCouponCode'  # will be added if date_shard >= '20180423'
 
         ]
+        if self.date_shard >= '20180424':
+            self.hit_product_fields.insert(16, 'hits.product.productCouponCode')
+
         self.hit_promotion_fields = [
             'hits.promotion.promoId'
             , 'hits.promotion.promoName'
@@ -417,8 +431,9 @@ class GaExportedNestedDataStorage(object):
             qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
         for f in self.hit_latency_tracking_fields:
             qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_content_group_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
+        if self.date_shard >= '20161025':
+            for f in self.hit_content_group_fields:
+                qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
         if custom_vars:
             # Maximum of nr_custom_vars allowed per property
             for i in range(self.nr_custom_vars)[1:]:
@@ -528,7 +543,7 @@ class GaExportedNestedDataStorage(object):
             ,write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE)
         query_job = client.query(query,
                                  job_config=query_job_config)
-        query_job.result()  # Waits for job to complete.
+        # query_job.result()  # Waits for job to complete.
         return
 
 def flatten_ga_data(event, context):
@@ -545,7 +560,7 @@ def flatten_ga_data(event, context):
                                                 dataset=input_event.dataset,
                                                 table_name=input_event.table_name,
                                                 date_shard=input_event.table_date_shard)
-        ga_source.run_query_job(query=ga_source.get_session_query(), table_type="ga_sessions_flat")
+        ga_source.run_query_job(query=ga_source.get_session_query(), table_type="ga_flat_sessions")
         ga_source.run_query_job(query=ga_source.get_hit_query(), table_type="ga_flat_hits")
         ga_source.run_query_job(query=ga_source.get_hit_product_query(), table_type="ga_flat_products")
         ga_source.run_query_job(query=ga_source.get_hit_experiment_query(), table_type="ga_flat_experiments")

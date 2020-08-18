@@ -1,26 +1,48 @@
 from google.cloud import pubsub_v1
 import os
 import json
+import datetime, time
 
-from  tests.test_base import BaseUnitTest
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"  #mac
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\as-dev-gord-1522f36e41ad.json" #windows
-topic_name = "<your gcp project>"
-project_id = "<your gcp project>"
-dataset_id = BaseUnitTest.DATASET
-date_shard = BaseUnitTest.DATE
+from tests.test_base import BaseUnitTest
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"    # mac
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\as-dev-gord-1522f36e41ad.json"  # windows
+topic_name = "<deployment name>-function"  # pubsub topic your CF is subscribed to
+project_id = "<your gcp project id>"
+IS_TEST = True  # set to False to backfill
 
+datasets_to_backfill = ["A", "B", "C"]
+#Seconds to sleep between each property date shard
+SLEEP_TIME = 5  # throttling
+
+backfill_range_start = datetime.datetime(2020, 8, 1)
+backfill_range_end = datetime.datetime(2020, 8, 9)  # datetime.datetime.today()
+
+if IS_TEST:
+    datasets_to_backfill = [BaseUnitTest.DATASET]
+    y = int(BaseUnitTest.DATE[0:4])
+    m = int(BaseUnitTest.DATE[4:6])
+    d = int(BaseUnitTest.DATE[6:8])
+    backfill_range_start = datetime.datetime(y, m, d)
+    backfill_range_end = datetime.datetime(y, m, d)
+
+num_days_in_backfill_range = int((backfill_range_end - backfill_range_start).days) + 1
 publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path(project_id, topic_name)
+dry_run = False
 
-SAMPLE_LOAD_DATA = {"protoPayload": {
-    "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
-        "datasetId": dataset_id
-        , "projectId": project_id
-        , "tableId": "ga_sessions_%s" % date_shard
-    }}}}}}}}
+for db in range(0, num_days_in_backfill_range):
+    date_shard = (backfill_range_end - datetime.timedelta(days=db)).strftime('%Y%m%d')
+    for dataset_id in datasets_to_backfill:
+        SAMPLE_LOAD_DATA = {"protoPayload": {
+            "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
+                "datasetId": dataset_id
+                , "projectId": project_id
+                , "tableId": "ga_sessions_%s" % date_shard
+            }}}}}}}}
 
-print('Publishing backfill message to topic %s for %s.%s.ga_sessions_%s' % (topic_name,project_id, dataset_id, date_shard))
-publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
-                              , username='gcp')
+        print('Publishing backfill message to topic %s for %s.%s.ga_sessions_%s' % (topic_name, project_id, dataset_id, date_shard))
+        if not dry_run:
+            publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
+                                          , username='gcp')
+            time.sleep(SLEEP_TIME)
 
