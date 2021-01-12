@@ -27,7 +27,7 @@ class FlattenerDatasetConfig(object):
     LAST_VALUE(schema_name) OVER (PARTITION BY catalog_name ORDER BY schema_name ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_schema
   FROM
     INFORMATION_SCHEMA.SCHEMATA 
-   -- where regexp_contains(schema_name,r'^\\d+$')
+  where regexp_contains(schema_name,r'^\\d+$')
 ), static AS (
   SELECT
     "SELECT dataset_id FROM `%s.__TABLES__` where regexp_contains(table_id,r'^ga_sessions.*\\\\d{8}$') and ((UNIX_MILLIS(current_timestamp()) - creation_time)/1000)/86400 < 30 group by 1" AS sql,
