@@ -22,9 +22,10 @@ imports:
 - path: dmt_cloud_function.py
 - path: cf/main.py
 - path: cf/requirements.txt
-- path: dmt_cloud_function_http.py
 - path: cfconfigbuilder/main.py
 - path: cfconfigbuilder/requirements.txt
+- path: cfconfigbuilderps/main.py
+- path: cfconfigbuilderps/requirements.txt
 
 resources:
 - name: y_resource_bucket_name
@@ -40,20 +41,20 @@ resources:
   properties:
     # All the files that start with this prefix will be packed in the Cloud Function (PUBSUB)
     codeLocation: cf/
-    codeBucket: apmk-staging
-    codeBucketObject: function-flatten.zip
+    codeBucket: 843904533364-function-code-staging
+    triggerType: pubsub
     location: us-east1
     timeout: 60s
     runtime: python37
     availableMemoryMb: 128
     entryPoint: flatten_ga_data
 - name: httpfunction
-  type: dmt_cloud_function_http.py
+  type: dmt_cloud_function.py
   properties:
     # All the files that start with this prefix will be packed in the Cloud Function (HTTP)
     codeLocation: cfconfigbuilder/
-    codeBucket: apmk-staging
-    codeBucketObject: function-config-builder.zip
+    codeBucket: 843904533364-function-code-staging
+    triggerType: http
     location: us-east1
     timeout: 60s
     runtime: python37
