@@ -1,0 +1,62 @@
+# Copyright 2017 Google Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#All files that you are going to be using
+imports:
+- path: dmt_pubsub_topic.py
+- path: dmt_log_metric.py
+- path: dmt_log_router.py
+- path: dmt_bucket.py
+- path: dm_helper.py
+- path: dmt_cloud_function.py
+- path: cf/main.py
+- path: cf/requirements.txt
+- path: cfconfigbuilder/main.py
+- path: cfconfigbuilder/requirements.txt
+- path: cfconfigbuilderps/main.py
+- path: cfconfigbuilderps/requirements.txt
+
+resources:
+- name: y_resource_bucket_name
+  type: dmt_bucket.py
+- name: y_resource_pubsub_topic_name
+  type: dmt_pubsub_topic.py
+- name: y_resource_log_router_name
+  type: dmt_log_router.py
+- name: y_resource_log_metric_name
+  type: dmt_log_metric.py
+- name: function
+  type: dmt_cloud_function.py
+  properties:
+    # All the files that start with this prefix will be packed in the Cloud Function (PUBSUB)
+    codeLocation: cf/
+    codeBucket: 843904533364-function-code-staging
+    triggerType: pubsub
+    location: us-east1
+    timeout: 60s
+    runtime: python37
+    availableMemoryMb: 128
+    entryPoint: flatten_ga_data
+- name: httpfunction
+  type: dmt_cloud_function.py
+  properties:
+    # All the files that start with this prefix will be packed in the Cloud Function (HTTP)
+    codeLocation: cfconfigbuilder/
+    codeBucket: 843904533364-function-code-staging
+    triggerType: http
+    location: us-east1
+    timeout: 60s
+    runtime: python37
+    availableMemoryMb: 128
+    entryPoint: build_ga_flattener_config
