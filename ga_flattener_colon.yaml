@@ -54,7 +54,7 @@ resources:
     # All the files that start with this prefix will be packed in the Cloud Function (HTTP)
     codeLocation: cfconfigbuilder/
     codeBucket: 843904533364-function-code-staging
-    triggerType: http
+    triggerType: pubsub
     location: us-east1
     timeout: 60s
     runtime: python37
