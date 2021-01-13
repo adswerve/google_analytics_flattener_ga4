@@ -566,6 +566,6 @@ def flatten_ga_data(event, context):
         ga_source.run_query_job(query=ga_source.get_hit_experiment_query(), table_type="ga_flat_experiments")
         ga_source.run_query_job(query=ga_source.get_hit_promotion_query(), table_type="ga_flat_promotions")
     else:
-        print('Dataset {ds} not configured for flattening'.format(input_event.dataset))
+        print('Dataset {ds} not configured for flattening'.format(ds=input_event.dataset))
 
     print("flatten_ga_data: done - function")

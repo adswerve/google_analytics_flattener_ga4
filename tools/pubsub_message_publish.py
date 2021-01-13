@@ -4,18 +4,27 @@ import json
 import datetime, time
 
 from tests.test_base import BaseUnitTest
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"    # mac
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\as-dev-gord-1522f36e41ad.json"  # windows
-topic_name = "<deployment name>-function"  # pubsub topic your CF is subscribed to
-project_id = "<your gcp project id>"
-IS_TEST = True  # set to False to backfill
+try:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+except:
+    print("setting GOOGLE_APPLICATION_CREDENTIALS env var")
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"    # mac
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\AP Bootcamp 2019 - Gord-gordsserviceaccount-9eb6a157db12.json"  # windows
+topic_name = "gaflattener18-topic"  # pubsub topic your CF is subscribed to
+topic_name = "gaflattener20-topic"  # pubsub topic your CF is subscribed to
+project_id = "analyticspros.com:spotted-cinnamon-834"
+project_id = "as-dev-gord"
+IS_TEST = False  # set to False to backfill, True for unit testing
+dry_run = False   # set to False to Backfill
+datasets_to_backfill = ["102887025", "123456789"]     #GA Views to backfill "24973611",
 
-datasets_to_backfill = ["A", "B", "C"]
 #Seconds to sleep between each property date shard
 SLEEP_TIME = 5  # throttling
 
-backfill_range_start = datetime.datetime(2020, 8, 1)
-backfill_range_end = datetime.datetime(2020, 8, 9)  # datetime.datetime.today()
+# ga_sessions_YYYYMMDD tables of desired dates must exist in order to backfill.
+# both start and end are inclusive
+backfill_range_start = datetime.datetime(2021, 1, 7)
+backfill_range_end = datetime.datetime(2021, 1, 11)  # datetime.datetime.today()
 
 if IS_TEST:
     datasets_to_backfill = [BaseUnitTest.DATASET]
@@ -28,7 +37,7 @@ if IS_TEST:
 num_days_in_backfill_range = int((backfill_range_end - backfill_range_start).days) + 1
 publisher = pubsub_v1.PublisherClient()
 topic_path = publisher.topic_path(project_id, topic_name)
-dry_run = False
+
 
 for db in range(0, num_days_in_backfill_range):
     date_shard = (backfill_range_end - datetime.timedelta(days=db)).strftime('%Y%m%d')

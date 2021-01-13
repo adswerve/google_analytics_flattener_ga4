@@ -41,7 +41,7 @@ resources:
   properties:
     # All the files that start with this prefix will be packed in the Cloud Function (PUBSUB)
     codeLocation: cf/
-    codeBucket: 843904533364-function-code-staging
+    codeBucket: as-dev-gord-staging
     triggerType: pubsub
     location: us-east1
     timeout: 60s
@@ -53,7 +53,7 @@ resources:
   properties:
     # All the files that start with this prefix will be packed in the Cloud Function (HTTP)
     codeLocation: cfconfigbuilder/
-    codeBucket: 843904533364-function-code-staging
+    codeBucket: as-dev-gord-staging
     triggerType: http
     location: us-east1
     timeout: 60s
