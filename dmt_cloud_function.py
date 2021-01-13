@@ -23,11 +23,11 @@ def GenerateConfig(ctx):
   config = GaFlattenerDeploymentConfiguration(ctx.env)
   """Generate YAML resource configuration."""
   in_memory_output_file = BytesIO()
-  function_name = config.deployment + '-cf'
+  function_name = "{d}-{fn}".format(d=config.deployment,fn=ctx.properties['codeLocation'][:-1])
   zip_file = zipfile.ZipFile(
       in_memory_output_file, mode='w', compression=zipfile.ZIP_DEFLATED)
   for imp in ctx.imports:
-    if imp.startswith(ctx.properties['codeLocation']): 
+    if imp.startswith(ctx.properties['codeLocation']):
       zip_file.writestr(imp[len(ctx.properties['codeLocation']):],
                         ctx.imports[imp])
   # used the files below to extract a copy of what parameter 'ctx' contains for unit testing.
@@ -65,7 +65,7 @@ def GenerateConfig(ctx):
       } for cmd in cmds
   ]
   build_step = {
-      'name': 'upload-function-code',
+      'name': 'upload-{}-code'.format(function_name),
       'action': 'gcp-types/cloudbuild-v1:cloudbuild.projects.builds.create',
       'metadata': {
           'runtimePolicy': ['UPDATE_ON_CHANGE']
@@ -103,11 +103,6 @@ def GenerateConfig(ctx):
           },
           'entryPoint':
               ctx.properties['entryPoint'],
-          'eventTrigger': {
-              'resource': 'projects/{gcp_project}/topics/{topic_name}'.format(
-                  gcp_project=config.get_project(),topic_name=config.get_topic_name()),
-              'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'
-          },
           'timeout':
               ctx.properties['timeout'],
           'availableMemoryMb':
@@ -116,9 +111,22 @@ def GenerateConfig(ctx):
               ctx.properties['runtime']
       },
       'metadata': {
-          'dependsOn': ['upload-function-code']
+          'dependsOn': ['upload-{}-code'.format(function_name)]
       }
   }
+
+  if ctx.properties['triggerType'] == 'http':
+      cloud_function['properties']['httpsTrigger']= {}
+  elif ctx.properties['triggerType'] == 'pubsub':
+      cloud_function['properties']['eventTrigger']= {
+              'resource': 'projects/{gcp_project}/topics/{topic_name}{config_topic}'.format(
+                  gcp_project=config.get_project(),topic_name=config.get_topic_name()
+                  ,config_topic="config" if function_name.__contains__("config") else ""),
+              'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
+  else:
+      #future spot for cloud storage bucket listener trigger types
+      pass
+
   #add user environment variables to cloud function
   for key, value in config.user_environment_variables.items():
       cloud_function["properties"]['environmentVariables'][key] = value

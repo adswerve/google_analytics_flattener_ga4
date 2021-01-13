@@ -7,12 +7,9 @@ class ContextCloudFunction(Context):
         super(ContextCloudFunction, self).__init__()
         self.properties = {"availableMemoryMb": 128
             , "codeBucket": "bucket_name_for_code"
-            , "codeBucketObject": "function-flatten.zip"
             , "codeLocation": "cf/"
             , "entryPoint": "<entry_point_function_name_in_main>"
-            , "eventTrigger":
-                  {"eventType": "providers/cloud.pubsub/eventTypes/topic.publish"
-                , "resource": "projects/<project_name>/topics/<topic_name>"}
+            , "triggerType": 'pubsub'  #also tried {}
             , "location": "us-east1"
             , "runtime": "python37"
             , "timeout": "60s"}

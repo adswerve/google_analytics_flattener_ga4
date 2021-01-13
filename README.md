@@ -2,11 +2,9 @@
 Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unnests (flattens) Google Analytics Data stored in Bigquery.  The GCP resources for the solutions are installed via Deployment Manager.
 
 ## Dependencies ##
-* Python 3.7 as base interpreter
+* Python 3.7 or higher as base interpreter
 * Create a virtual environment
 * Install packages using cf/requirements.txt
-* pip install google-cloud-pubsub==1.6.0 [for
-  tools/pubsub_message_publish.py only]
 
 ## Directories ##
 * cf : pub/sub triggered cloud function that executes a destination
@@ -19,11 +17,11 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
   * ga_flat_promotions_yyyymmdd
 * tests : units test for both cloud functions and deployment manager
   templates
-* cfconfigbuilder : http triggered cloud function that finds all
+* cfconfigbuilder(ps) : cloud function that finds all
   BigQuery datasets that have a ga_sessions table and adds them to the
   default configuration on Google's Cloud Storage in the following
   location:
-  [DEPLOYMENT NAME]-[PROJECT_NAME]-adswerve-ga-flat-config\config_datasets.json
+  [DEPLOYMENT NAME]-[PROJECT_NUMBER]-adswerve-ga-flat-config\config_datasets.json
 
 ## Files ##
 * dm_helper.py: provides consistent names for GCP resources accross
@@ -52,26 +50,37 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
 5. Install gCloud locally or use cloud shell.
 6. Clone this github repo
 7. Create bucket for staging code during deployment, for example:
-   [PROJECT_ID]-function-code-staging.
+   [PROJECT_NUMBER]-function-code-staging.  Referred to as [BUCKET_NAME].
 8. Edit the ga_flattener.yaml file, specifically the
-   properties-->codeBucket value of the function and httpfunction
-   resource. Make the value for both to name of the bucket created in #7
-   (above step)
+   _properties-->codeBucket_ value of the function and httpfunction
+   resources. Set the value for both to [BUCKET_NAME] (see previous step)
 
 ## Installation steps ##
 1. Execute command: gcloud config set project [PROJECT_ID]
-2. Execute command: gcloud config set account username@domain.com
+2. Execute command: gcloud config set account <username@domain.com>
 3. Navigate (locally) to root directory of this repository
-4. Execute command: gcloud deployment-manager deployments create
-   [Deployment Name] --config ga_flattener.yaml
+4. If [PROJECT_ID] does **NOT** contain a colon (:) execute command: 
+   * gcloud deployment-manager deployments create [Deployment Name] --config ga_flattener.yaml
+   otherwise follow these steps:
+     1. execute command: 
+      * gcloud deployment-manager deployments create [Deployment Name] --config ga_flattener.yaml
+     2. Trigger function (with a blank message) named [Deployment Name]-cfconfigbuilderps.  It'll create the necessary configuration file in the applications Google Coud Storage bucket.
 
 ## Testing / Simulating Event ##
-1. After installation, set values in lines 6-11 of
-   tools/pubsub_message_publish.py
+1. After installation, modify values in lines 7-17 of
+   tools/pubsub_message_publish.py accordingly.
 2. Run tools/pubsub_message_publish.py, which will publish a
-   simulated logging event of GA data being ingested into BigQuery
-
+   simulated logging event of GA data being ingested into BigQuery.  Check dataset for date sharded tables named:
+    * ga_flat_experiments_(x)
+    * ga_flat_hits_(x)
+    * ga_flat_products_(x)
+    * ga_flat_promotions_(x)
+    * ga_flat_sessions_(x)
+   
 ## Un-install steps ##
 1. Optional command to remove solution: gcloud deployment-manager
    deployments delete [Deployment Name] -q
 
+## Common install errors ##
+1. * **Message:** Step #2: AccessDeniedException: 403 [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com does not have storage.objects.list access to the Google Cloud Storage bucket.
+   * **Resolution:** Ensure the bucket configured in "codeBucket" of ga_flattener*.yaml is correct. [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com only required GCP predfined role of _Cloud Build Service Account_

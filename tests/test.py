@@ -2,7 +2,6 @@ import unittest
 from tests.test_flatten_ga_data import TestCFFlattenMethods
 from tests.test_input_validator import TestInputValidator
 from tests.test_generate_config_cf import TestGenerateConfigCf
-from tests.test_generate_config_cfhttp import TestGenerateConfigCfHttp
 from tests.test_generate_config_lm import TestGenerateConfigLm
 from tests.test_generate_config_lr import TestGenerateConfigLr
 from tests.test_generate_config_pst import TestGenerateConfigPst
@@ -15,7 +14,6 @@ if __name__ == '__main__':
 
     # tests
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigCf))
-    test_suite.addTest(unittest.makeSuite(TestGenerateConfigCfHttp))
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigLm))
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigLr))
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigPst))

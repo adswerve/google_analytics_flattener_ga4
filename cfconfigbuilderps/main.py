@@ -59,15 +59,11 @@ FROM (
         for row in query_results:
             ret_val["datasets"].append(row.dataset_id)
         return ret_val
-def build_ga_flattener_config(request):
-    """HTTP Cloud Function.
+def build_ga_flattener_config(event, context):
+    """Triggered from a message on a Cloud Pub/Sub topic.
     Args:
-        request (flask.Request): The request object.
-        <http://flask.pocoo.org/docs/1.0/api/#flask.Request>
-    Returns:
-        The response text, or any set of values that can be turned into a
-        Response object using `make_response`
-        <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
+         event (dict): Event payload.
+         context (google.cloud.functions.Context): Metadata for the event.
     """
     print("build_ga_flattener_config cloud function - start")
     config = FlattenerDatasetConfig()
