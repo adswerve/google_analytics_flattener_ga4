@@ -9,7 +9,14 @@ def GenerateConfig(ctx):
           'type': 'gcp-types/pubsub-v1:projects.topics',
           'properties': {
               'topic': config.get_topic_name()
+          },
+      'accessControl':
+          {'gcpIamPolicy':
+              {'bindings':[{
+                 'role': 'roles/pubsub.publisher',
+                 'members': ["serviceAccount:cloud-logs@system.gserviceaccount.com"]
+              }]}
           }
-          }]
+        }]
       }
     return resources

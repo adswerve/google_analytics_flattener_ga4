@@ -41,17 +41,18 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
    Analytics data flowing to it. Referred to as [PROJECT_ID]
 2. Enable the Cloud Build API
 3. Enable the Cloud Functions API
-4. Add "Logs Configuration Writer", "Cloud Functions Developer" pre
+4. Enable the Identity and Access Management (IAM) API
+5. Add "Logs Configuration Writer", "Cloud Functions Developer" pre
    defined IAM roles to
    [PROJECT_NUMBER]@cloudservices.gserviceaccount.com (built in service
    account) otherwise deployment will fail with permission errors. See
    <https://cloud.google.com/deployment-manager/docs/access-control> for
    detailed explanation.
-5. Install gCloud locally or use cloud shell.
-6. Clone this github repo
-7. Create bucket for staging code during deployment, for example:
+6. Install gCloud locally or use cloud shell.
+7. Clone this github repo
+8. Create bucket for staging code during deployment, for example:
    [PROJECT_NUMBER]-function-code-staging.  Referred to as [BUCKET_NAME].
-8. Edit the ga_flattener.yaml file, specifically the
+9. Edit the ga_flattener.yaml file, specifically the
    _properties-->codeBucket_ value of the function and httpfunction
    resources. Set the value for both to [BUCKET_NAME] (see previous step)
 
@@ -63,8 +64,8 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
    * gcloud deployment-manager deployments create [Deployment Name] --config ga_flattener.yaml
    otherwise follow these steps:
      1. execute command: 
-      * gcloud deployment-manager deployments create [Deployment Name] --config ga_flattener.yaml
-     2. Trigger function (with a blank message) named [Deployment Name]-cfconfigbuilderps.  It'll create the necessary configuration file in the applications Google Coud Storage bucket.
+      * gcloud deployment-manager deployments create [Deployment Name] --config ga_flattener_colon.yaml
+     2. Trigger function (with a blank message) named [Deployment Name]-cfconfigbuilderps.  It will create the necessary configuration file in the applications Google Coud Storage bucket.
 
 ## Testing / Simulating Event ##
 1. After installation, modify values in lines 7-17 of
