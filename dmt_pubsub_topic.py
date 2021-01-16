@@ -6,7 +6,7 @@ def GenerateConfig(ctx):
     resources = {
       'resources': [{
           'name': 'topic-name',
-          'type': 'gcp-types/pubsub-v1:projects.topics',
+          'type': 'pubsub.v1.topic',
           'properties': {
               'topic': config.get_topic_name()
           },

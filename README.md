@@ -42,7 +42,7 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
 2. Enable the Cloud Build API
 3. Enable the Cloud Functions API
 4. Enable the Identity and Access Management (IAM) API
-5. Add "Logs Configuration Writer", "Cloud Functions Developer" pre
+5. Add "Logs Configuration Writer", "Cloud Functions Developer", "pub/sub Admin" pre
    defined IAM roles to
    [PROJECT_NUMBER]@cloudservices.gserviceaccount.com (built in service
    account) otherwise deployment will fail with permission errors. See
@@ -79,8 +79,8 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
     * ga_flat_sessions_(x)
    
 ## Un-install steps ##
-1. Optional command to remove solution: gcloud deployment-manager
-   deployments delete [Deployment Name] -q
+1. Optional command to remove solution: 
+   * gcloud deployment-manager deployments delete [Deployment Name] -q
 
 ## Common install errors ##
 1. * **Message:** Step #2: AccessDeniedException: 403 [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com does not have storage.objects.list access to the Google Cloud Storage bucket.
