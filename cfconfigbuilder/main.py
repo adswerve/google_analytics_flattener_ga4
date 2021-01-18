@@ -4,12 +4,6 @@ import tempfile
 import json
 import os
 
-SESSSIONS = "sessions"
-HITS = "hits"
-PRODUCTS = "products"
-PROMOTIONS = "promotions"
-EXPERIMENTS = "experiments"
-
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
@@ -65,7 +59,12 @@ FROM (
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
         for row in query_results:
-            ret_val[(row.dataset_id)]=[SESSSIONS,HITS,PRODUCTS,PROMOTIONS,EXPERIMENTS]
+            ret_val[(row.dataset_id)]=[os.environ["SESSSIONS"]
+                ,os.environ["HITS"]
+                ,os.environ["PRODUCTS"]
+                ,os.environ["PROMOTIONS"]
+                ,os.environ["EXPERIMENTS"]
+                ]
         return ret_val
 
 

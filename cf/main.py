@@ -5,11 +5,7 @@ from google.cloud import storage
 import re
 import os
 import tempfile
-SESSSIONS = "sessions"
-HITS = "hits"
-PRODUCTS = "products"
-PROMOTIONS = "promotions"
-EXPERIMENTS = "experiments"
+
 
 class InputValidator(object):
     def __init__(self,event):
@@ -21,7 +17,7 @@ class InputValidator(object):
             self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
             self.table_name = re.search('(ga_.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
         except AttributeError:
-            print('invalid message: {msg}'.format(msg=message_payload))
+            print(f'invalid message: {message_payload}')
         try:
             storage_client = storage.Client()
             bucket = storage_client.bucket(os.environ["config_bucket_name"])
@@ -31,13 +27,13 @@ class InputValidator(object):
             with open(downloaded_file, "r") as config_json:
                 self.config = json.load(config_json)
         except Exception as e:
-            print('flattener configuration error: {e}'.format(msg=message_payload))
+            print(f'flattener configuration error: {e}')
 
 
     def valid_dataset(self):
         return self.dataset in self.config.keys()
 
-    def valid_flat_table(self, nested_table):
+    def flatten_nested_table(self, nested_table):
         return nested_table in self.config[self.dataset]
 
 
@@ -570,31 +566,31 @@ def flatten_ga_data(event, context):
                                                 dataset=input_event.dataset,
                                                 table_name=input_event.table_name,
                                                 date_shard=input_event.table_date_shard)
-        if InputValidator.valid_flat_table(nested_table=SESSSIONS):
+        if input_event.flatten_nested_table(nested_table=os.environ["SESSSIONS"]):
             ga_source.run_query_job(query=ga_source.get_session_query(), table_type="ga_flat_sessions")
-            print(f'Ran {SESSSIONS} flattening query for {input_event.dataset}')
+            print(f'Ran {os.environ["SESSSIONS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{SESSSIONS} flattening query for {input_event.dataset} not configured to run')
-        if InputValidator.valid_flat_table(nested_table=HITS):
+            print(f'{os.environ["SESSSIONS"]} flattening query for {input_event.dataset} not configured to run')
+        if input_event.flatten_nested_table(nested_table=os.environ["HITS"]):
             ga_source.run_query_job(query=ga_source.get_hit_query(), table_type="ga_flat_hits")
-            print(f'Ran {HITS} flattening query for {input_event.dataset}')
+            print(f'Ran {os.environ["HITS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{HITS} flattening query for {input_event.dataset} not configured to run')
-        if InputValidator.valid_flat_table(nested_table=PRODUCTS):
+            print(f'{os.environ["HITS"]} flattening query for {input_event.dataset} not configured to run')
+        if input_event.flatten_nested_table(nested_table=os.environ["PRODUCTS"]):
             ga_source.run_query_job(query=ga_source.get_hit_product_query(), table_type="ga_flat_products")
-            print(f'Ran {PRODUCTS} flattening query for {input_event.dataset}')
+            print(f'Ran {os.environ["PRODUCTS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{PRODUCTS} flattening query for {input_event.dataset} not configured to run')
-        if InputValidator.valid_flat_table(nested_table=PROMOTIONS):
+            print(f'{os.environ["PRODUCTS"]} flattening query for {input_event.dataset} not configured to run')
+        if input_event.flatten_nested_table(nested_table=os.environ["PROMOTIONS"]):
             ga_source.run_query_job(query=ga_source.get_hit_promotion_query(), table_type="ga_flat_promotions")
-            print(f'Ran {PROMOTIONS} flattening query for {input_event.dataset}')
+            print(f'Ran {os.environ["PROMOTIONS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{PROMOTIONS} flattening query for {input_event.dataset} not configured to run')
-        if InputValidator.valid_flat_table(nested_table=EXPERIMENTS):
+            print(f'{os.environ["PROMOTIONS"]} flattening query for {input_event.dataset} not configured to run')
+        if input_event.flatten_nested_table(nested_table=os.environ["EXPERIMENTS"]):
             ga_source.run_query_job(query=ga_source.get_hit_experiment_query(), table_type="ga_flat_experiments")
-            print(f'Ran {EXPERIMENTS} flattening query for {input_event.dataset}')
+            print(f'Ran {os.environ["EXPERIMENTS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{EXPERIMENTS} flattening query for {input_event.dataset} not configured to run')
+            print(f'{os.environ["EXPERIMENTS"]} flattening query for {input_event.dataset} not configured to run')
     else:
         print(f'Dataset {input_event.dataset} not configured for flattening')
 

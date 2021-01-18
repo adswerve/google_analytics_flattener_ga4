@@ -4,13 +4,6 @@ import tempfile
 import json
 import os
 
-SESSSIONS = "sessions"
-HITS = "hits"
-PRODUCTS = "products"
-PROMOTIONS = "promotions"
-EXPERIMENTS = "experiments"
-
-
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         self.bucket_name = os.environ["config_bucket_name"]
@@ -65,7 +58,12 @@ FROM (
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
         for row in query_results:
-            ret_val[(row.dataset_id)]=[SESSSIONS,HITS,PRODUCTS,PROMOTIONS,EXPERIMENTS]
+            ret_val[(row.dataset_id)]=[os.environ["SESSSIONS"]
+                ,os.environ["HITS"]
+                ,os.environ["PRODUCTS"]
+                ,os.environ["PROMOTIONS"]
+                ,os.environ["EXPERIMENTS"]
+                ]
         return ret_val
 
 
@@ -75,10 +73,8 @@ def build_ga_flattener_config(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
-    print("build_ga_flattener_config cloud function - start")
     config = FlattenerDatasetConfig()
     store = FlattenerDatasetConfigStorage()
     json_config = config.get_ga_datasets()
     store.upload_config(config=json_config)
     print("build_ga_flattener_config: {}".format(json.dumps(json_config)))
-    print("build_ga_flattener_config cloud function - end")

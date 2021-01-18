@@ -1,10 +1,10 @@
 # README #
 Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unnests (flattens) Google Analytics Data stored in Bigquery.  The GCP resources for the solutions are installed via Deployment Manager.
 
-## Dependencies ##
+## Local dependencies ##
 * Python 3.7 or higher as base interpreter
 * Create a virtual environment
-* Install packages using cf/requirements.txt
+* Install python packages using cf/requirements.txt
 
 ## Directories ##
 * cf : pub/sub triggered cloud function that executes a destination
@@ -67,10 +67,13 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
       * gcloud deployment-manager deployments create [Deployment Name] --config ga_flattener_colon.yaml
      2. Trigger function (with a blank message) named [Deployment Name]-cfconfigbuilderps.  It will create the necessary configuration file in the applications Google Coud Storage bucket.
 
+## Verification steps ##
+1. After installation, a configuration file named config_datasets.json will exists in gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/ (Cloud Storage Bucket within [PROJECT_ID]).  This file will contains all the datasets that have "ga_sessions_yyyymmdd" tables and which tables to unnest.  This configuration is required for the cloud function to execute.
+
 ## Testing / Simulating Event ##
-1. After installation, modify values in lines 7-17 of
+1. Modify values in lines 7-17 of
    tools/pubsub_message_publish.py accordingly.
-2. Run tools/pubsub_message_publish.py, which will publish a
+2. Run tools/pubsub_message_publish.py locally, which will publish a
    simulated logging event of GA data being ingested into BigQuery.  Check dataset for date sharded tables named:
     * ga_flat_experiments_(x)
     * ga_flat_hits_(x)
@@ -84,4 +87,4 @@ Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unn
 
 ## Common install errors ##
 1. * **Message:** Step #2: AccessDeniedException: 403 [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com does not have storage.objects.list access to the Google Cloud Storage bucket.
-   * **Resolution:** Ensure the bucket configured in "codeBucket" of ga_flattener*.yaml is correct. [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com only required GCP predfined role of _Cloud Build Service Account_
+   * **Resolution:** Ensure the value (Cloud Storage bucket name) configured in "codeBucket" setting of ga_flattener*.yaml is correct. [PROJECT_NUMBER]@cloudbuild.gserviceaccount.com only requires GCP predefined role of _Cloud Build Service Account_
