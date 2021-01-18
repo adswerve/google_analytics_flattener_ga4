@@ -4,7 +4,6 @@ import tempfile
 import json
 import os
 
-
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         self.bucket_name = os.environ["config_bucket_name"]
@@ -78,10 +77,8 @@ def build_ga_flattener_config(request):
         Response object using `make_response`
         <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
     """
-    print("build_ga_flattener_config cloud function - start")
     config = FlattenerDatasetConfig()
     store = FlattenerDatasetConfigStorage()
     json_config = config.get_ga_datasets()
     store.upload_config(config=json_config)
     print("build_ga_flattener_config: {}".format(json.dumps(json_config)))
-    print("build_ga_flattener_config cloud function - end")
