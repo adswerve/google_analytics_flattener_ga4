@@ -4,6 +4,13 @@ import tempfile
 import json
 import os
 
+SESSSIONS = "sessions"
+HITS = "hits"
+PRODUCTS = "products"
+PROMOTIONS = "promotions"
+EXPERIMENTS = "experiments"
+
+
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         self.bucket_name = os.environ["config_bucket_name"]
@@ -16,6 +23,7 @@ class FlattenerDatasetConfigStorage(object):
         with open(filepath, "w") as f:
             f.write(json.dumps(config))
         blob.upload_from_filename(filepath)
+
 
 class FlattenerDatasetConfig(object):
     def __init__(self):
@@ -52,13 +60,15 @@ FROM (
 """
 
     def get_ga_datasets(self):
-        ret_val = {"datasets": []}
+        ret_val = {}
         client = bigquery.Client()
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
         for row in query_results:
-            ret_val["datasets"].append(row.dataset_id)
+            ret_val[(row.dataset_id)]=[SESSSIONS,HITS,PRODUCTS,PROMOTIONS,EXPERIMENTS]
         return ret_val
+
+
 def build_ga_flattener_config(request):
     """HTTP Cloud Function.
     Args:
