@@ -8,8 +8,9 @@ try:
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
 except:
     print("setting GOOGLE_APPLICATION_CREDENTIALS env var")
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"    # mac
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\AP Bootcamp 2019 - Gord-gordsserviceaccount-9eb6a157db12.json"  # windows
+    # TODO: uncomment the line that corresponds to your system
+    # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"    # mac
+    # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\AP Bootcamp 2019 - Gord-gordsserviceaccount-9eb6a157db12.json"  # windows
 topic_name = "gafltnr-topic"  # pubsub topic your CF is subscribed to
 project_id = "analyticspros.com:spotted-cinnamon-834"
 IS_TEST = False  # set to False to backfill, True for unit testing
