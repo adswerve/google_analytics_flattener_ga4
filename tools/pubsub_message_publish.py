@@ -1,28 +1,30 @@
 from google.cloud import pubsub_v1
-import os
 import json
 import datetime, time
-
 from tests.test_base import BaseUnitTest
-try:
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-except:
-    print("setting GOOGLE_APPLICATION_CREDENTIALS env var")
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "./credentials/as-dev-ian-0ef537352615.json"    # mac
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "c:\\auth_keys\\AP Bootcamp 2019 - Gord-gordsserviceaccount-9eb6a157db12.json"  # windows
-topic_name = "gafltnr-topic"  # pubsub topic your CF is subscribed to
-project_id = "analyticspros.com:spotted-cinnamon-834"
-IS_TEST = False  # set to False to backfill, True for unit testing
-dry_run = False   # set to False to Backfill
-datasets_to_backfill = ["102887025"]     #GA Views to backfill, "24973611"
 
+# To authenticate, run the following command.  The account you choose will execute this python script
+# gcloud auth application-default login
+
+'''*****************************'''
+''' Configuration Section Start '''
+'''*****************************'''
+topic_name = "gafltnr-topic"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
+project_id = "12345-project-gcp"  # GCP project ID, example:  [PROJECT_ID]
+dry_run = True   # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
+# Desired dates to backfill, both start and end are inclusive
+backfill_range_start = datetime.datetime(2021, 1, 10)
+backfill_range_end = datetime.datetime(2021, 1, 10)  # datetime.datetime.today()
+datasets_to_backfill = ["123456789"]     #GA Views to backfill, "24973611"
+'''*****************************'''
+'''  Configuration Section End  '''
+'''*****************************'''
 #Seconds to sleep between each property date shard
 SLEEP_TIME = 5  # throttling
 
-# ga_sessions_YYYYMMDD tables of desired dates must exist in order to backfill.
-# both start and end are inclusive
-backfill_range_start = datetime.datetime(2015, 5, 26)
-backfill_range_end = datetime.datetime(2016, 12, 5)  # datetime.datetime.today()
+#Unit Testing flag
+IS_TEST = False  # set to False to backfill, True for unit testing
+
 
 if IS_TEST:
     datasets_to_backfill = [BaseUnitTest.DATASET]

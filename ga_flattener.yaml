@@ -39,7 +39,7 @@ resources:
 - name: function
   type: dmt_cloud_function.py
   properties:
-    # All the files that start with this prefix will be packed in the Cloud Function (PUBSUB)
+    # All the files that start with this prefix will be packed in the Cloud Function that flattens the data
     codeLocation: cf/
     codeBucket: as-dev-gord-staging
     triggerType: pubsub
@@ -51,7 +51,7 @@ resources:
 - name: httpfunction
   type: dmt_cloud_function.py
   properties:
-    # All the files that start with this prefix will be packed in the Cloud Function (HTTP)
+    # All the files that start with this prefix will be packed in the Cloud Function that sets up the configuration
     codeLocation: cfconfigbuilder/
     codeBucket: as-dev-gord-staging
     triggerType: http
