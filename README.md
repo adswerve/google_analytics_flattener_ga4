@@ -41,15 +41,21 @@ _**The following steps are only required if you plan to backfill historical tabl
 13. Install the python dependent packages into the virtual environment.  (Command: pip install -r cf\requirements.txt)
 
 ## Installation steps ##
-1. Execute command: gcloud config set project **[PROJECT_ID]**
+1. Execute command in Google Cloud SDK Shell: gcloud config set project **[PROJECT_ID]**
 2. Execute command: gcloud config set account <username@domain.com>. **Note** - This must be the installing user from above prerequisites.
 3. Navigate (locally) to root directory of this repository
 4. If **[PROJECT_ID]** does **NOT** contain a colon (:) execute command: 
-   * gcloud deployment-manager deployments create **[Deployment Name]** --config ga_flattener.yaml
+    * gcloud deployment-manager deployments create **[Deployment Name]** --config ga_flattener.yaml
+  
    otherwise follow these steps:
      1. execute command: 
       * gcloud deployment-manager deployments create **[Deployment Name]** --config ga_flattener_colon.yaml
      2. Trigger function (with a blank message) named **[Deployment Name]**-cfconfigbuilderps.  It will create the necessary configuration file in the applications Google Coud Storage bucket.  An easy method to do this is to browse to https://console.cloud.google.com/functions and click the cloud function named **[Deployment Name]**-cfconfigbuilderps and go to the testing section and click "TEST THIS FUNCTION".
+     
+    ### **[Deployment Name]** naming convention 
+    * Note that **[Deployment Name]** cannot have underscores in its name, but can have hyphens. 
+    * Example of a valid name: gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml
+    * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid values of **[Deployment Name]** 
 
 ## Verification steps ##
 1. After installation, a configuration file named config_datasets.json exists in **gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).  This file contains all the datasets that have "ga_sessions_yyyymmdd" tables and which tables to unnest.  This configuration is required for this GA flattener solution to run daily or to backfill historical data.  Edit this file accordingly to include or exclude certain datasets or tables to unnest.  For example:
@@ -58,7 +64,7 @@ _**The following steps are only required if you plan to backfill historical tabl
 
 _**The following steps are only required if you plan to backfill historical tables._**   
 2. Modify values in the configuration section of tools/pubsub_message_publish.py accordingly.  **Suggestion:** Use a small date range to start, like yesterday only.
-3. From a gcloud command prompt, authenticate the installating user using command:
+3. From a gcloud command prompt, authenticate the installing user using command:
    _gcloud auth application-default login_
 4. Run tools/pubsub_message_publish.py locally, which will publish a
    simulated logging event of GA data being ingested into BigQuery.  Check dataset(s) that are configured for new date sharded tables such as (depending on what is configured):
@@ -69,7 +75,8 @@ _**The following steps are only required if you plan to backfill historical tabl
     * ga_flat_sessions_(x)
    
 ## Un-install steps ##
-1. Optional command to remove solution: 
+1. Delete the config_datasets.json file from gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/ (Cloud Storage Bucket within [PROJECT_ID])
+2. Optional command to remove solution: 
    * gcloud deployment-manager deployments delete **[Deployment Name]** -q
 
 ## Common errors ##
