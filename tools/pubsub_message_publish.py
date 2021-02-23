@@ -9,7 +9,7 @@ from tests.test_base import BaseUnitTest
 '''*****************************'''
 ''' Configuration Section Start '''
 '''*****************************'''
-topic_name = "gafltnr-topic"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
+topic_id = "gafltnr-topic"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
 project_id = "12345-project-gcp"  # GCP project ID, example:  [PROJECT_ID]
 dry_run = True   # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
@@ -36,7 +36,7 @@ if IS_TEST:
 
 num_days_in_backfill_range = int((backfill_range_end - backfill_range_start).days) + 1
 publisher = pubsub_v1.PublisherClient()
-topic_path = publisher.topic_path(project_id, topic_name)
+topic_path = publisher.topic_path(project_id, topic_id)
 
 
 for db in range(0, num_days_in_backfill_range):
@@ -49,7 +49,7 @@ for db in range(0, num_days_in_backfill_range):
                 , "tableId": "ga_sessions_%s" % date_shard
             }}}}}}}}
 
-        print('Publishing backfill message to topic %s for %s.%s.ga_sessions_%s' % (topic_name, project_id, dataset_id, date_shard))
+        print('Publishing backfill message to topic %s for %s.%s.ga_sessions_%s' % (topic_id, project_id, dataset_id, date_shard))
         if not dry_run:
             publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
                                           , username='gcp')
