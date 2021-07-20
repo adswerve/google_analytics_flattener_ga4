@@ -9,13 +9,13 @@ from tests.test_base import BaseUnitTest
 '''*****************************'''
 ''' Configuration Section Start '''
 '''*****************************'''
-topic_id = "gafltnr-topic"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
-project_id = "12345-project-gcp"  # GCP project ID, example:  [PROJECT_ID]
+topic_id =  "ga-flattener-deployment-topic"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
+project_id = "as-dev-ruslan"  # GCP project ID, example:  [PROJECT_ID]
 dry_run = True   # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
-backfill_range_start = datetime.datetime(2021, 1, 10)
-backfill_range_end = datetime.datetime(2021, 1, 10)  # datetime.datetime.today()
-datasets_to_backfill = ["123456789"]     #GA Views to backfill, "24973611"
+backfill_range_start = datetime.datetime(2021, 7, 14)
+backfill_range_end = datetime.datetime(2021, 7, 14)  # datetime.datetime.today()
+datasets_to_backfill = ["24973611"]     #GA Views to backfill, "24973611"
 '''*****************************'''
 '''  Configuration Section End  '''
 '''*****************************'''

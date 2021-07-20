@@ -7,11 +7,11 @@ class Context(object):
         self.properties = {}
 
         self.env = {
-            "deployment": "deploy-unit-test"
-            , "project": "analyticspros.com:spotted-cinnamon-834"
-            , "current_time": 1592017736
-            , "project_number": "425632468050"
-            , "username": "first.last@domain.com"
+            "deployment": "ga-flattener-deployment"
+            , "project": "as-dev-ruslan"
+            , "current_time": 1626736965
+            , "project_number": "522429634784"
+            , "username": "ruslan.bergenov@adswerve.com"
             , "name": "resource_name"
             , "type": "dmt_resource_type.py"}
 
@@ -19,9 +19,9 @@ class Context(object):
 
 class BaseUnitTest(unittest.TestCase):
 
-    DATASET = 'unit_test'       #specific to your project
+    DATASET = '24973611'       #specific to your project
     TABLE_TYPE = 'ga_sessions'  #or ga_sessions_intra or ga_sessions_realtime
-    DATE = '20200608'           #any historical date will suffice if that date shard exists in GA_SESSIONS_YYYYMMDD
+    DATE = '20210718'           #any historical date will suffice if that date shard exists in GA_SESSIONS_YYYYMMDD
 
     def setUp(self):
         context = Context()
