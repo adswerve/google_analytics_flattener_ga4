@@ -25,6 +25,9 @@ The GCP resources for the solutions are installed via Deployment Manager.
      * Logs Configuration Writer
      * Cloud Functions Developer
      * pub/sub Admin
+    
+If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com yet. To fix this, enable Compute Engine API and then disable it. The service account **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com will appear in your GCP project under IAM.
+
 5. As the installing user for **[PROJECT_ID]**, create bucket for staging code during deployment, for example:
    **[PROJECT_NUMBER]**-function-code-staging.  Referred to as **[BUCKET_NAME]**.
 6. Clone this github repo or download the source code from the releases section to your local machine or 
