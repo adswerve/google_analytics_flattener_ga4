@@ -17,7 +17,7 @@ class FlattenerDatasetConfigStorage(object):
             f.write(json.dumps(config))
         blob.upload_from_filename(filepath)
 
-
+#TODO: ga4 - update
 class FlattenerDatasetConfig(object):
     def __init__(self):
         self.query = """

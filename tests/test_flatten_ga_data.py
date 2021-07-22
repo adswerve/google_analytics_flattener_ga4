@@ -4,7 +4,7 @@ from cf.main import GaExportedNestedDataStorage
 
 
 class TestCFFlattenMethods(BaseUnitTest):
-    
+    # TODO: ga4 - update
     def test_flatten_ga_data(self):
         c = Context()
         ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],

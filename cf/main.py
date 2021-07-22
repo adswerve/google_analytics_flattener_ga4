@@ -36,7 +36,7 @@ class InputValidator(object):
     def flatten_nested_table(self, nested_table):
         return nested_table in self.config[self.dataset]
 
-
+#TODO: ga4 - update
 class GaExportedNestedDataStorage(object):
     def __init__(self, gcp_project, dataset, table_name,date_shard, type='DAILY'):
         self.gcp_project = gcp_project

@@ -4,6 +4,8 @@ from cfconfigbuilder.main import FlattenerDatasetConfigStorage
 from cfconfigbuilderps.main import FlattenerDatasetConfig as FlattenerDatasetConfigPS
 from cfconfigbuilderps.main import FlattenerDatasetConfigStorage as FlattenerDatasetConfigStoragePS
 
+#TODO: question: what's the diff between these two unit tests?
+
 class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
     
     def test_build_flattener_ga_dataset_config(self):

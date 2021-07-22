@@ -57,7 +57,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         protoPayload.authenticationInfo.principalEmail="analytics-processing-dev@system.gserviceaccount.com" 
         NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"ga_sessions_intraday"
         '''
-
+        # TODO: ga4 - update
         self.user_environment_variables = {
             "config_bucket_name": self.get_bucket_name(),
             "config_filename": "config_datasets.json",

@@ -1,3 +1,4 @@
+# TODO: ga4 - update
 """deletes all flat tables from dataset
 purpose: clean up after a unit test
 USE WITH CAUTION
