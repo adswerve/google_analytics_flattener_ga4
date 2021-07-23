@@ -7,7 +7,7 @@ from tests.test_generate_config_lr import TestGenerateConfigLr
 from tests.test_generate_config_pst import TestGenerateConfigPst
 from tests.test_generate_config_b import TestGenerateConfigB
 from tests.test_build_ga_flattener_config import TestCFBuildFlattenerGaDatasetConfig
-from tests.test_compare_queries import TestGenerateQuery
+from tests.test_verify_queries import TestGenerateQuery
 
 
 if __name__ == '__main__':

@@ -6,9 +6,11 @@ from tests.rsc import sample_desired_queries
 class TestGenerateQuery(BaseUnitTest):
 
     def test_check_sql_queries(self):
-        """compares dynamically generated queries to an expected baseline example"""
-
-        #TODO: refactor so there's less repetition, maybe with some loop and helper function
+        """Compares dynamically generated queries to hardcoded expected baseline examples"""
+        #TODO: refactor so there's less repetition, maybe with some
+        #   loop
+        #   helper function
+        #   matching lookup dict?
 
         c = Context()
         ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
