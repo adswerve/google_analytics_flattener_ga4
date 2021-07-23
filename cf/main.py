@@ -158,7 +158,7 @@ class GaExportedNestedDataStorage(object):
             "app_info.id",
             "app_info.version",
             "app_info.install_store",
-            "app_info.fire",
+            "app_info.firebase_app_id",
             "app_info.install_source",
 
             "traffic_source.name",
@@ -170,8 +170,8 @@ class GaExportedNestedDataStorage(object):
             "event_dimensions.hostname",
 
             "ecommerce.total_item_quantity",
-            "ecommerce.purc",
-            "ecommerce.purc",
+            "ecommerce.purchase_revenue_in_usd",
+            "ecommerce.purchase_revenue",
             "ecommerce.refund_value_in_usd",
             "ecommerce.refund_value",
             "ecommerce.shipping_value_in_usd",
@@ -186,10 +186,10 @@ class GaExportedNestedDataStorage(object):
         return self.alias[key]
 
     def get_unique_event_id(self, unique_event_id_fields):
-        return 'CONCAT(%s, "_", %s, "_", %s, "_", %s) as session_id' % (unique_event_id_fields[0],
+        return 'CONCAT(%s, "_", %s, "_", %s, "_", %s) as event_id' % (unique_event_id_fields[0],
                                                                         unique_event_id_fields[1],
                                                                         unique_event_id_fields[2],
-                                                                        unique_event_id_fields[2])
+                                                                        unique_event_id_fields[3])
 
     def get_event_params_query(self):
         qry = "SELECT "
@@ -243,12 +243,19 @@ class GaExportedNestedDataStorage(object):
 
         qry += ",UNNEST (items) AS items"
 
-
-
         return qry
 
     def get_events_query(self):
-        pass
+        qry = "SELECT "
+
+        qry += self.get_unique_event_id(self.unique_event_id_fields)
+
+        for f in self.events_fields:
+            qry += ",%s as %s" % (f, f.replace(".", "_"))
+
+        qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
+                                                 d=self.date_shard)
+        return qry
 
     def _createValidBigQueryFieldName(self, pField):
         '''
