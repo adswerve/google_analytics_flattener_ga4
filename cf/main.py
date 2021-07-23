@@ -206,119 +206,35 @@ class GaExportedNestedDataStorage(object):
                                                  d=self.date_shard)
 
         qry += ",UNNEST (event_params) AS event_params"
+
         return qry
 
-    def get_hit_query(self, custom_vars=False):
-        qry = "select "
-        qry += 'CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as session_id' % (self.session_fields[0],
-                                                                                               self.session_fields[1],
-                                                                                               self.session_fields[2])
-        qry += ',CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as hit_id' \
-               % (self.session_fields[0]
-                  , self.session_fields[1]
-                  , self.session_fields[2]
-                  , self.hit_fields[0].replace("hits", self.alias["hits"]))
-        for f in self.hit_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_ecommerce_action_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_transaction_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_refund_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_item_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_app_info_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_exception_info_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_social_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        for f in self.hit_latency_tracking_fields:
-            qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        if self.date_shard >= '20161025':
-            for f in self.hit_content_group_fields:
-                qry += ",%s as %s" % (f.replace("hits", self.alias["hits"]), f.replace(".", "_"))
-        if custom_vars:
-            # Maximum of nr_custom_vars allowed per property
-            for i in range(self.nr_custom_vars)[1:]:
-                qry += ",(SELECT MAX(IF(index=%s, customVarName, NULL)) FROM UNNEST(%s.customVariables)) " \
-                       "AS customVariableName%s,(SELECT MAX(IF(index=%s, customVarValue, NULL)) FROM " \
-                       "UNNEST(%s.customVariables)) AS customVariableValue%s" % \
-                       (str(i), self.ALIAS_HITS, str(i), str(i), self.ALIAS_HITS, str(i))
-        qry += ' , CONCAT("{",( SELECT STRING_AGG(CONCAT(\'"\',CAST(cd.index AS STRING),\'"\',":",\'"\',' \
-               'cd.value,\'"\')) FROM UNNEST(%s.customDimensions) as cd WHERE NOT cd.value=""),' \
-               '"}") hit_custom_dimensions' % \
-               self.alias["hits"]
-        qry += ' , CONCAT("{",( SELECT STRING_AGG(CONCAT(\'"\',CAST(cm.index AS STRING),\'"\',":",\'"\',' \
-               'CAST(cm.value AS STRING),\'"\')) FROM  UNNEST(%s.customMetrics) as cm),"}") hit_custom_metrics' % \
-               self.alias["hits"]
-        qry += " from `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
+    def get_user_properties_query(self):
+        qry = "SELECT "
+
+        qry += self.get_unique_event_id(self.unique_event_id_fields)
+
+        qry += ",%s as %s" % (self.user_properties_fields[0], self.user_properties_fields[0].replace(".", "_"))
+
+        qry += ",CONCAT(IFNULL(%s, ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), '')) AS user_properties_value" \
+               % (self.user_properties_fields[1], self.user_properties_fields[2], self.user_properties_fields[3],
+                  self.user_properties_fields[4])
+
+        qry += ",%s as %s" % (self.user_properties_fields[5], self.user_properties_fields[5].replace(".", "_"))
+
+        qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
                                                  d=self.date_shard)
-        qry += ",unnest(hits) as %s" % self.alias["hits"]
+
+        qry += ",UNNEST (user_properties) AS user_properties"
 
         return qry
 
-    def get_hit_product_query(self):
-        qry = "select "
-        qry += 'CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as session_id' % (self.session_fields[0],
-                                                                                               self.session_fields[1],
-                                                                                               self.session_fields[2])
-        qry += ',CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as hit_id' \
-               % (self.session_fields[0],
-                  self.session_fields[1],
-                  self.session_fields[2],
-                  self.hit_fields[0].replace("hits", self.alias["hits"]))
-        for f in self.hit_product_fields:
-            qry += ",%s as %s" % (f.replace("hits.product", self.alias["product"]), f.replace(".", "_"))
-        qry += ' , CONCAT("{",( SELECT STRING_AGG(CONCAT(\'"\',CAST(cd.index AS STRING),\'"\',":",\'"\',' \
-               'cd.value,\'"\')) FROM UNNEST(%s.customDimensions) as cd WHERE NOT cd.value=""),' \
-               '"}") hit_custom_dimensions' % \
-               self.alias["product"]
-        qry += ' , CONCAT("{",( SELECT STRING_AGG(CONCAT(\'"\',CAST(cm.index AS STRING),\'"\',":",\'"\',' \
-               'CAST(cm.value AS STRING),\'"\')) FROM  UNNEST(%s.customMetrics) as cm),"}") hit_custom_metrics' % \
-               self.alias["product"]
-        qry += " from `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
-                                                 d=self.date_shard)
-        qry += ",unnest(hits) as %s" % self.alias["hits"]
-        qry += ",unnest(%s.product) as %s" % (self.alias['hits'], self.alias["product"])
-        return qry
 
-    def get_hit_promotion_query(self):
-        qry = "select "
-        qry += 'CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as session_id' % (self.session_fields[0],
-                                                                                               self.session_fields[1],
-                                                                                               self.session_fields[2])
-        qry += ',CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as hit_id' \
-               % (self.session_fields[0],
-                  self.session_fields[1],
-                  self.session_fields[2],
-                  self.hit_fields[0].replace("hits", self.alias["hits"]))
-        for f in self.hit_promotion_fields:
-            qry += ",%s as %s" % (f.replace("hits.promotion", self.alias["promotion"]), f.replace(".", "_"))
-        qry += " from `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
-                                                 d=self.date_shard)
-        qry += ",unnest(hits) as %s" % self.alias["hits"]
-        qry += ",unnest(%s.promotion) as %s" % (self.alias['hits'], self.alias["promotion"])
-        return qry
+    def get_items_query(self):
+        pass
 
-    def get_hit_experiment_query(self):
-        qry = "select "
-        qry += 'CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as session_id' % (self.session_fields[0],
-                                                                                               self.session_fields[1],
-                                                                                               self.session_fields[2])
-        qry += ',CONCAT(%s, ".", CAST(%s as STRING), ".", CAST(%s as STRING), ".", CAST(%s as STRING)) as hit_id' \
-               % (self.session_fields[0],
-                  self.session_fields[1],
-                  self.session_fields[2],
-                  self.hit_fields[0].replace("hits", self.alias["hits"]))
-        for f in self.hit_experiment_fields:
-            qry += ",%s as %s" % (f.replace("hits.experiment", self.alias["experiment"]), f.replace(".", "_"))
-        qry += " from `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
-                                                 d=self.date_shard)
-        qry += ",unnest(hits) as %s" % self.alias["hits"]
-        qry += ",unnest(%s.experiment) as %s" % (self.alias['hits'], self.alias["experiment"])
-        return qry
+    def get_events_query(self):
+        pass
 
     def _createValidBigQueryFieldName(self, pField):
         '''
@@ -367,25 +283,34 @@ def flatten_ga_data(event, context):
                                                 dataset=input_event.dataset,
                                                 table_name=input_event.table_name,
                                                 date_shard=input_event.table_date_shard)
+
+        # EVENT_PARAMS
+        if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
+            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="ga_flat_event_params")
+            print(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
+        else:
+            print(f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
+
+        # USER_PROPERTIES
+        if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
+            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="ga_flat_user_properties")
+            print(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
+        else:
+            print(f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
+
+        # ITEMS
+        if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
+            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="ga_flat_items")
+            print(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
+        else:
+            print(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
+
+        # EVENTS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
-            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="ga_flat_events")
+            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="ga_flat_events")
             print(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
         else:
             print(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
-        # if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
-        #     ga_source.run_query_job(query=ga_source.get_hit_query(), table_type="ga_flat_event_params")
-        #     print(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
-        # else:
-        #     print(f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
-        # if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
-        #     ga_source.run_query_job(query=ga_source.get_hit_product_query(), table_type="ga_flat_user_properties")
-        #     print(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
-        # else:
-        #     print(f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
-        # if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
-        #     ga_source.run_query_job(query=ga_source.get_hit_promotion_query(), table_type="ga_flat_items")
-        #     print(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
-        # else:
-        #     print(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
+
     else:
         print(f'Dataset {input_event.dataset} not configured for flattening')

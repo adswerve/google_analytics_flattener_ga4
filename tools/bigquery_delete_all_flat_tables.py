@@ -13,6 +13,7 @@ from google.cloud import bigquery
 '''*****************************'''
 my_project_id = 'as-dev-ga4-flattener-320623'
 my_dataset_id = 'analytics_222460912'
+delete = True
 '''*****************************'''
 '''  Configuration Section End  '''
 '''*****************************'''
@@ -27,11 +28,13 @@ tables_to_delete=[]
 for table in tables:
     if table.table_id.startswith("flat_"): #will perform the action only if the table has the desired prefix
         tables_to_delete.append(table.table_id)
-        print(str(table.full_table_id))
+        print(table.full_table_id)
 
 print(tables_to_delete) #the list of the desired tables names, now you can use your script to delete them all
 
 
-for table_id in tables_to_delete:
-    table_ref = client.dataset(my_dataset_id).table(table_id)
-    client.delete_table(table_ref)
+if delete:
+    for table_id in tables_to_delete:
+        table_ref = client.dataset(my_dataset_id).table(table_id)
+        client.delete_table(table_ref)
+        print("deleted table", table.full_table_id)
