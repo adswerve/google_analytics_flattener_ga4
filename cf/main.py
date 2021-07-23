@@ -231,7 +231,21 @@ class GaExportedNestedDataStorage(object):
 
 
     def get_items_query(self):
-        pass
+        qry = "SELECT "
+
+        qry += self.get_unique_event_id(self.unique_event_id_fields)
+
+        for f in self.items_fields:
+            qry += ",%s as %s" % (f, f.replace(".", "_"))
+
+        qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
+                                                 d=self.date_shard)
+
+        qry += ",UNNEST (items) AS items"
+
+
+
+        return qry
 
     def get_events_query(self):
         pass
