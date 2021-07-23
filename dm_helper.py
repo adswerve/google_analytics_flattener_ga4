@@ -61,11 +61,10 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         self.user_environment_variables = {
             "config_bucket_name": self.get_bucket_name(),
             "config_filename": "config_datasets.json",
-            "SESSSIONS" : "sessions",
-            "HITS" : "hits",
-            "PRODUCTS" : "products",
-            "PROMOTIONS" : "promotions",
-            "EXPERIMENTS" : "experiments"
+            "EVENTS": "events",
+            "EVENT_PARAMS": "event_params",
+            "USER_PROPERTIES": "user_properties",
+            "ITEMS": "items"
         }
 
     def get_topic_name(self):

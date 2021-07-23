@@ -28,10 +28,10 @@ class FlattenerDatasetConfig(object):
     LAST_VALUE(schema_name) OVER (PARTITION BY catalog_name ORDER BY schema_name ASC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS last_schema
   FROM
     INFORMATION_SCHEMA.SCHEMATA 
-  where regexp_contains(schema_name,r'^\\d+$')
+  where regexp_contains(schema_name,r'^analytics\\_\\d+$')
 ), static AS (
   SELECT
-    "SELECT dataset_id FROM `%s.__TABLES__` where regexp_contains(table_id,r'^ga_sessions.*\\\\d{8}$') and ((UNIX_MILLIS(current_timestamp()) - creation_time)/1000)/86400 < 30 group by 1" AS sql,
+    "SELECT dataset_id FROM `%s.__TABLES__` where regexp_contains(table_id,r'^events.*\\\\d{8}$') and ((UNIX_MILLIS(current_timestamp()) - creation_time)/1000)/86400 < 30 group by 1" AS sql,
     " union all " AS cmd_u,
     " order by 1 " AS cmd_f 
 )
@@ -56,13 +56,12 @@ FROM (
         ret_val = {}
         client = bigquery.Client()
         query_job = client.query(self.query)
-        query_results = query_job.result()  # Waits for job to complete.
+        query_results = query_job.result()  # Waits for job to complete. #TODO: this is breaking for me in ga4
         for row in query_results:
-            ret_val[(row.dataset_id)]=[os.environ["SESSSIONS"]
-                ,os.environ["HITS"]
-                ,os.environ["PRODUCTS"]
-                ,os.environ["PROMOTIONS"]
-                ,os.environ["EXPERIMENTS"]
+            ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
+                ,os.environ["EVENT_PARAMS"]
+                ,os.environ["USER_PROPERTIES"]
+                ,os.environ["ITEMS"]
                 ]
         return ret_val
 

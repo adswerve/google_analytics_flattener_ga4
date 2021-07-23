@@ -59,11 +59,10 @@ FROM (
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
         for row in query_results:
-            ret_val[(row.dataset_id)]=[os.environ["SESSSIONS"]
-                ,os.environ["HITS"]
-                ,os.environ["PRODUCTS"]
-                ,os.environ["PROMOTIONS"]
-                ,os.environ["EXPERIMENTS"]
+            ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
+                ,os.environ["EVENT_PARAMS"]
+                ,os.environ["USER_PROPERTIES"]
+                ,os.environ["ITEMS"]
                 ]
         return ret_val
 
