@@ -4,6 +4,7 @@ import tempfile
 import json
 import os
 
+
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         self.bucket_name = os.environ["config_bucket_name"]
@@ -17,7 +18,7 @@ class FlattenerDatasetConfigStorage(object):
             f.write(json.dumps(config))
         blob.upload_from_filename(filepath)
 
-#TODO: ga4 - update
+
 class FlattenerDatasetConfig(object):
     def __init__(self):
         self.query = """

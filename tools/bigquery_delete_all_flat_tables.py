@@ -25,8 +25,9 @@ dataset_ref = client.dataset(my_dataset_id)
 tables = list(client.list_tables(dataset_ref))  # API request(s), now you have the list of tables in this dataset
 tables_to_delete=[]
 for table in tables:
-    if table.table_id.startswith("ga_flat"): #will perform the action only if the table has the desired prefix
+    if table.table_id.startswith("flat_"): #will perform the action only if the table has the desired prefix
         tables_to_delete.append(table.table_id)
+        print(str(table.full_table_id))
 
 print(tables_to_delete) #the list of the desired tables names, now you can use your script to delete them all
 
