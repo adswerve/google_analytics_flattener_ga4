@@ -24,5 +24,6 @@ if __name__ == '__main__':
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethods))
     test_suite.addTest(unittest.makeSuite(TestGenerateQuery))
 
-    runner = unittest.TextTestRunner()
+    # verbosity: 0 (quiet), 1 (default), 2 (verbose)
+    runner = unittest.TextTestRunner(verbosity=2)
     runner.run(test_suite)
