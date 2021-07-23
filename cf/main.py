@@ -17,7 +17,7 @@ class InputValidator(object):
             self.gcp_project = bq_destination_table['projectId']
             self.dataset = bq_destination_table['datasetId']
             self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
-            self.table_name = re.search('(ga_.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
+            self.table_name = re.search('(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
         except AttributeError:
             print(f'invalid message: {message_payload}')
         try:
@@ -46,11 +46,11 @@ class GaExportedNestedDataStorage(object):
         self.date_shard = date_shard
         self.table_name = table_name
         self.type = type
-        self.ALIAS_HITS = "hit" #TODO: update alias for ga4
-        self.alias = {"hits": self.ALIAS_HITS
-            , "product": "%sProduct" % self.ALIAS_HITS
-            , "promotion": "%sPromotion" % self.ALIAS_HITS
-            , "experiment": "%sExperiment" % self.ALIAS_HITS}
+        # self.ALIAS_HITS = "hit" #TODO: update alias for ga4
+        # self.alias = {"hits": self.ALIAS_HITS
+        #     , "product": "%sProduct" % self.ALIAS_HITS
+        #     , "promotion": "%sPromotion" % self.ALIAS_HITS
+        #     , "experiment": "%sExperiment" % self.ALIAS_HITS}
 
         # column names to be used in select statement - source from GA Export Schema documentation
 
@@ -182,8 +182,6 @@ class GaExportedNestedDataStorage(object):
             "ecommerce.transaction_id"
         ]
 
-    def get_unnest_alias(self, key):
-        return self.alias[key]
 
     def get_unique_event_id(self, unique_event_id_fields):
         return 'CONCAT(%s, "_", %s, "_", %s, "_", %s) as event_id' % (unique_event_id_fields[0],
