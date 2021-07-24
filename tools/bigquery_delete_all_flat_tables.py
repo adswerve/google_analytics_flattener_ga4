@@ -24,12 +24,12 @@ dataset_ref = client.dataset(my_dataset_id)
 
 tables = list(client.list_tables(dataset_ref))  # API request(s), now you have the list of tables in this dataset
 tables_to_delete=[]
+print("discovered flat tables:")
 for table in tables:
     if table.table_id.startswith("flat_"): #will perform the action only if the table has the desired prefix
         tables_to_delete.append(table.table_id)
-        print("discovered flat tables:")
         print(table.full_table_id)
-
+print("\n")
 if delete:
     for table_id in tables_to_delete:
         table_ref = client.dataset(my_dataset_id).table(table_id)

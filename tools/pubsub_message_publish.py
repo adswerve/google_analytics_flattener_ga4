@@ -15,7 +15,7 @@ project_id = "as-dev-ga4-flattener-320623"  # GCP project ID, example:  [PROJECT
 dry_run = False   # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
 backfill_range_start = datetime.datetime(2021, 7, 1)
-backfill_range_end = datetime.datetime(2021, 7, 19)  # datetime.datetime.today()
+backfill_range_end = datetime.datetime(2021, 7, 20)  # datetime.datetime.today()
 datasets_to_backfill = ["analytics_222460912"]     #GA Views to backfill, "analytics_222460912"
 '''*****************************'''
 '''  Configuration Section End  '''
