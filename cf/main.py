@@ -305,28 +305,28 @@ def flatten_ga_data(event, context):
 
         # EVENT_PARAMS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
-            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="ga_flat_event_params")
+            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params")
             print(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
         else:
             print(f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
 
         # USER_PROPERTIES
         if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
-            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="ga_flat_user_properties")
+            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
             print(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
         else:
             print(f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
 
         # ITEMS
         if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
-            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="ga_flat_items")
+            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
             print(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
         else:
             print(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
 
         # EVENTS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
-            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="ga_flat_events")
+            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
             print(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
         else:
             print(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
