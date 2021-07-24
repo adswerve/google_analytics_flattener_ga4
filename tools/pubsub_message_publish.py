@@ -14,8 +14,8 @@ topic_id =  "ga-flattener-deployment-topic"  # pubsub topic your cloud function 
 project_id = "as-dev-ga4-flattener-320623"  # GCP project ID, example:  [PROJECT_ID]
 dry_run = False   # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
-backfill_range_start = datetime.datetime(2021, 7, 13)
-backfill_range_end = datetime.datetime(2021, 7, 14)  # datetime.datetime.today()
+backfill_range_start = datetime.datetime(2021, 7, 1)
+backfill_range_end = datetime.datetime(2021, 7, 19)  # datetime.datetime.today()
 datasets_to_backfill = ["analytics_222460912"]     #GA Views to backfill, "analytics_222460912"
 '''*****************************'''
 '''  Configuration Section End  '''
@@ -47,10 +47,10 @@ for db in range(0, num_days_in_backfill_range):
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
                 , "projectId": project_id
-                , "tableId": "ga_sessions_%s" % date_shard
+                , "tableId": "events_%s" % date_shard
             }}}}}}}}
 
-        print('Publishing backfill message to topic %s for %s.%s.ga_sessions_%s' % (topic_id, project_id, dataset_id, date_shard))
+        print('Publishing backfill message to topic %s for %s.%s.events_%s' % (topic_id, project_id, dataset_id, date_shard))
         if not dry_run:
             publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
                                           , username='gcp')
