@@ -20,7 +20,7 @@ class Context(object):
 class BaseUnitTest(unittest.TestCase):
     # TODO: ga4 - update
     DATASET = 'analytics_222460912'       #specific to your project
-    TABLE_TYPE = 'events'  #or ga_sessions_intra or ga_sessions_realtime
+    TABLE_TYPE = 'events'  #or events_intraday
     DATE = '20210720'           #any historical date will suffice if that date shard exists in GA_SESSIONS_YYYYMMDD
 
     def setUp(self):

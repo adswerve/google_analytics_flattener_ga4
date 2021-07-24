@@ -55,7 +55,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         protoPayload.methodName="jobservice.jobcompleted" 
         protoPayload.serviceData.jobCompletedEvent.eventName="load_job_completed" 
         protoPayload.authenticationInfo.principalEmail="analytics-processing-dev@system.gserviceaccount.com" 
-        NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"ga_sessions_intraday"
+        NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"events_intraday"
         '''
         # TODO: ga4 - update
         self.user_environment_variables = {
