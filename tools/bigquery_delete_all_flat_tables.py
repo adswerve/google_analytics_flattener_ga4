@@ -34,4 +34,4 @@ if delete:
     for table_id in tables_to_delete:
         table_ref = client.dataset(my_dataset_id).table(table_id)
         client.delete_table(table_ref)
-        print("deleted table", table.full_table_id)
+        print("deleted table", str(table_ref))
