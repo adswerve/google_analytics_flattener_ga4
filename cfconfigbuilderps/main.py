@@ -53,7 +53,6 @@ FROM (
 );  --end of dynamic SQL statement
 """
 
-    # TODO: ga4 - update
     def get_ga_datasets(self):
         ret_val = {}
         client = bigquery.Client()

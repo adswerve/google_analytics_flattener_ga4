@@ -1,4 +1,3 @@
-# TODO: ga4 - update pub/sub message
 from google.cloud import pubsub_v1
 import json
 import datetime, time

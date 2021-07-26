@@ -38,7 +38,6 @@ class InputValidator(object):
         return nested_table in self.config[self.dataset]
 
 
-# TODO: ga4 - update
 class GaExportedNestedDataStorage(object):
     def __init__(self, gcp_project, dataset, table_name, date_shard, type='DAILY'):
         self.gcp_project = gcp_project
@@ -46,13 +45,6 @@ class GaExportedNestedDataStorage(object):
         self.date_shard = date_shard
         self.table_name = table_name
         self.type = type
-        # self.ALIAS_HITS = "hit" #TODO: update alias for ga4
-        # self.alias = {"hits": self.ALIAS_HITS
-        #     , "product": "%sProduct" % self.ALIAS_HITS
-        #     , "promotion": "%sPromotion" % self.ALIAS_HITS
-        #     , "experiment": "%sExperiment" % self.ALIAS_HITS}
-
-        # column names to be used in select statement - source from GA Export Schema documentation
 
         self.unique_event_id_fields = [
             "stream_id",

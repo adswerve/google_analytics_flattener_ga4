@@ -57,7 +57,7 @@ FROM (
         ret_val = {}
         client = bigquery.Client()
         query_job = client.query(self.query)
-        query_results = query_job.result()  # Waits for job to complete. #TODO: this is breaking for me in ga4
+        query_results = query_job.result()  # Waits for job to complete.
         for row in query_results:
             ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
                 ,os.environ["EVENT_PARAMS"]
