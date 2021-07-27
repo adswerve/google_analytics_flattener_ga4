@@ -1,5 +1,5 @@
 # README #
-Google Analytics 360 Flattener.  A Google Cloud Platform (GCP) solution that unnests (flattens) Google Analytics Data stored in Bigquery.  
+Google Analytics 4 Flattener. A Google Cloud Platform (GCP) solution that unnests (flattens) Google Analytics Data 4 stored in Bigquery.  
 The GCP resources for the solutions are installed via Deployment Manager.
 
 ## Local dependencies ##
@@ -61,21 +61,20 @@ _**The following steps are only required if you plan to backfill historical tabl
     * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid values of **[Deployment Name]** 
 
 ## Verification steps ##
-1. After installation, a configuration file named config_datasets.json exists in **gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).  This file contains all the datasets that have "ga_sessions_yyyymmdd" tables and which tables to unnest.  This configuration is required for this GA flattener solution to run daily or to backfill historical data.  Edit this file accordingly to include or exclude certain datasets or tables to unnest.  For example:
- * { "123456789": ["sessions","hits","products"] }   will only flatten those 3 nested tables for GA view 123456789
- * { "123456789": ["sessions","hits","products", "promotions", "experiments"], "987654321": ["sessions","hits"] } will flatten all possible nested tables for GA view 123456789 but only _sessions_ and _hits_ for GA View 987654321.
+1. After installation, a configuration file named config_datasets.json exists in **gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).  This file contains all the datasets that have "events_yyyymmdd" tables and which tables to unnest.  This configuration is required for this GA4 flattener solution to run daily or to backfill historical data.  Edit this file accordingly to include or exclude certain datasets or tables to unnest.  For example:
+ * { "analytics_123456789": ["events", "event_params"] }   will only flatten those 2 nested tables for GA4 property 123456789
+ * { "analytics_123456789": ["events", "event_params", "user_properties", "items"], "987654321": ["events", "event_params"] } will flatten all possible nested tables for GA4 property 123456789 but only events_ and event_params_ for GA4 property 987654321.
 
 _**The following steps are only required if you plan to backfill historical tables._**   
 2. Modify values in the configuration section of tools/pubsub_message_publish.py accordingly.  **Suggestion:** Use a small date range to start, like yesterday only.
 3. From a gcloud command prompt, authenticate the installing user using command:
    _gcloud auth application-default login_
 4. Run tools/pubsub_message_publish.py locally, which will publish a
-   simulated logging event of GA data being ingested into BigQuery.  Check dataset(s) that are configured for new date sharded tables such as (depending on what is configured):
-    * ga_flat_experiments_(x)
-    * ga_flat_hits_(x)
-    * ga_flat_products_(x)
-    * ga_flat_promotions_(x)
-    * ga_flat_sessions_(x)
+   simulated logging event of GA4 data being ingested into BigQuery.  Check dataset(s) that are configured for new date sharded tables such as (depending on what is configured):
+    * flat_event_params_(x)
+    * flat_events_(x)
+    * flat_items_(x)
+    * flat_user_properties_(x)
    
 ## Un-install steps ##
 1. Delete the config_datasets.json file from gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/ (Cloud Storage Bucket within [PROJECT_ID])
@@ -92,13 +91,12 @@ _**The following steps are only required if you plan to backfill historical tabl
     
 ## Repository directories ##
 * cf : pub/sub triggered cloud function that executes a destination
-  query to unnest(flatten) the <GA View ID>.ga_sessions_yyyymmdd table
+  query to unnest(flatten) the **analytics_{ga4_property_id}.ga_sessions_yyyymmdd** table
   immediately upon arrival in BigQuery into these tables, depending on the configuration:
-  * ga_flat_sessions_yyyymmdd
-  * ga_flat_hits_yyyymmdd
-  * ga_flat_products_yyyymmdd
-  * ga_flat_experiments_yyyymmdd
-  * ga_flat_promotions_yyyymmdd
+  * flat_event_params_yyyymmdd
+  * flat_events_yyyymmdd
+  * flat_items_yyyymmdd
+  * flat_user_properties_yyyymmdd
 * tests : units test for both cloud functions and deployment manager
   templates
 * cfconfigbuilder(ps) : cloud function that finds all
