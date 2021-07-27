@@ -35,13 +35,20 @@ If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@clouds
 7. Edit the _ga_flattener.yaml_ and _ga_flattener_colon.yaml_ files, specifically all occurrences of _properties-->codeBucket_ value . Set the value to **[BUCKET_NAME]** (see step above)
 
 _**The following steps are only required if you plan to backfill historical tables._**   
+
 8. Install python 3.7 or higher
+
 9. From a command prompt, upgrade pip (Command:  py -m pip install --upgrade pip)
+
 10. Navigate to the root directory of the source code that was downloaded or cloned in step 6 above.   
-10. From a command prompt, install python virtual environments (Command: py -m pip install --user virtualenv)
-11. Create a virtual environment for the source code in step 6  (Command: py -m venv venv)
-12. Active the virtual environment in the step above.
-13. Install the python dependent packages into the virtual environment.  (Command: pip install -r cf\requirements.txt)
+
+11. From a command prompt, install python virtual environments (Command: py -m pip install --user virtualenv)
+    
+12. Create a virtual environment for the source code in step 6  (Command: py -m venv venv)
+    
+12. Activate the virtual environment in the step above.
+    
+13. Install the python dependent packages into the virtual environment.  (Command: ```pip install -r cf\requirements.txt```)
 
 ## Installation steps ##
 1. Execute command in Google Cloud SDK Shell: gcloud config set project **[PROJECT_ID]**
