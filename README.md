@@ -2,6 +2,17 @@
 Google Analytics 4 Flattener. A Google Cloud Platform (GCP) solution that unnests (flattens) [Google Analytics Data 4 stored in Bigquery](https://support.google.com/analytics/answer/7029846?hl=en).  
 The GCP resources for the solutions are installed via Deployment Manager.
 
+  * [Local dependencies](#local-dependencies)
+  * [Prerequisites](#prerequisites)
+  * [Installation steps](#installation-steps)
+  * [Verification steps](#verification-steps)
+  * [Un-install steps](#un-install-steps)
+  * [Common errors](#common-errors)
+    + [Install](#install)
+    + [Verification](#verification)
+  * [Repository directories](#repository-directories)
+  * [Repository files](#repository-files)
+
 ## Local dependencies ##
 * Google Cloud Platform SDK.  Download and install from these instructions: https://cloud.google.com/sdk/docs/install
 * Python >= 3.7.  Download and install from https://python.org.
