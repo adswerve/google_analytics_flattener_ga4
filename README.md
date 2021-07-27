@@ -12,11 +12,14 @@ The GCP resources for the solutions are installed via Deployment Manager.
 1. Browse to https://cloud.console.google.com to create Google GCP project or use 
    an existing project that has Google Analytics data flowing to it. 
    Referred to as **[PROJECT_ID]**.
+   
 2. Grant the installing user (you most likely) the pre-defined IAM role of "Owner".
+   
 3. As the installing user for **[PROJECT_ID]**, enable the following APIs
      * Cloud Build API
      * Cloud Functions API.
      * Identity and Access Management (IAM) API
+    
 4. As the installing user for **[PROJECT_ID]**, grant the following pre-defined IAM roles to 
    **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com (built in service
    account) otherwise deployment will fail with permission errors. See
@@ -30,8 +33,10 @@ If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@clouds
 
 5. As the installing user for **[PROJECT_ID]**, create bucket for staging code during deployment, for example:
    **[PROJECT_NUMBER]**-function-code-staging.  Referred to as **[BUCKET_NAME]**.
+   
 6. Clone this github repo or download the source code from the releases section to your local machine or 
    cloud shell.   
+   
 7. Edit the _ga_flattener.yaml_ and _ga_flattener_colon.yaml_ files, specifically all occurrences of _properties-->codeBucket_ value . Set the value to **[BUCKET_NAME]** (see step above)
 
 _**The following steps are only required if you plan to backfill historical tables._**   
