@@ -54,7 +54,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         resource.type="bigquery_resource" 
         protoPayload.methodName="jobservice.jobcompleted" 
         protoPayload.serviceData.jobCompletedEvent.eventName="load_job_completed" 
-        protoPayload.authenticationInfo.principalEmail="analytics-processing-dev@system.gserviceaccount.com" 
+        protoPayload.authenticationInfo.principalEmail="firebase-measurement@system.gserviceaccount.com" 
         NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"events_intraday"
         '''
         self.user_environment_variables = {
