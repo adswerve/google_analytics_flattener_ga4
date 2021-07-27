@@ -43,13 +43,13 @@ _**The following steps are only required if you plan to backfill historical tabl
 
 8. Install python 3.7 or higher
 
-9. From a command prompt, upgrade pip (Command:  py -m pip install --upgrade pip)
+9. From a command prompt, upgrade pip (Command:  ```py -m pip install --upgrade pip```)
 
 10. Navigate to the root directory of the source code that was downloaded or cloned in step 6 above.   
 
-11. From a command prompt, install python virtual environments (Command: py -m pip install --user virtualenv)
+11. From a command prompt, install python virtual environments (Command: ```py -m pip install --user virtualenv```)
     
-12. Create a virtual environment for the source code in step 6  (Command: py -m venv venv)
+12. Create a virtual environment for the source code in step 6  (Command: ```py -m venv venv```)
     
 12. Activate the virtual environment in the step above.
     
@@ -64,23 +64,23 @@ _**The following steps are only required if you plan to backfill historical tabl
   
    otherwise follow these steps:
      1. execute command: 
-      * gcloud deployment-manager deployments create **[Deployment Name]** --config ga_flattener_colon.yaml
+      * ```gcloud deployment-manager deployments create **[Deployment Name]** --config ga_flattener_colon.yaml```
      2. Trigger function (with a blank message) named **[Deployment Name]**-cfconfigbuilderps.  It will create the necessary configuration file in the applications Google Coud Storage bucket.  An easy method to do this is to browse to https://console.cloud.google.com/functions and click the cloud function named **[Deployment Name]**-cfconfigbuilderps and go to the testing section and click "TEST THIS FUNCTION".
      
     ### **[Deployment Name]** naming convention 
     * Note that **[Deployment Name]** cannot have underscores in its name, but can have hyphens. 
-    * Example of a valid name: gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml
+    * Example of a valid name: ```gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml```
     * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid values of **[Deployment Name]** 
 
 ## Verification steps ##
-1. After installation, a configuration file named config_datasets.json exists in **gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).  This file contains all the datasets that have "events_yyyymmdd" tables and which tables to unnest.  This configuration is required for this GA4 flattener solution to run daily or to backfill historical data.  Edit this file accordingly to include or exclude certain datasets or tables to unnest.  For example:
- * { "analytics_123456789": ["events", "event_params"] }   will only flatten those 2 nested tables for GA4 property 123456789
- * { "analytics_123456789": ["events", "event_params", "user_properties", "items"], "987654321": ["events", "event_params"] } will flatten all possible nested tables for GA4 property 123456789 but only events_ and event_params_ for GA4 property 987654321.
+1. After installation, a configuration file named config_datasets.json exists in **gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).  This file contains all the datasets that have ```events_yyyymmdd``` tables and which tables to unnest.  This configuration is required for this GA4 flattener solution to run daily or to backfill historical data.  Edit this file accordingly to include or exclude certain datasets or tables to unnest.  For example:
+ * ```{"analytics_123456789": ["events", "event_params"]}```   will only flatten those 2 nested tables for GA4 property 123456789
+ * ```{"analytics_123456789": ["events", "event_params", "user_properties", "items"], "987654321": ["events", "event_params"]}``` will flatten all possible nested tables for GA4 property 123456789 but only events_ and event_params_ for GA4 property 987654321.
 
 _**The following steps are only required if you plan to backfill historical tables._**   
 2. Modify values in the configuration section of tools/pubsub_message_publish.py accordingly.  **Suggestion:** Use a small date range to start, like yesterday only.
 3. From a gcloud command prompt, authenticate the installing user using command:
-   _gcloud auth application-default login_
+   ```gcloud auth application-default login```
 4. Run tools/pubsub_message_publish.py locally, which will publish a
    simulated logging event of GA4 data being ingested into BigQuery.  Check dataset(s) that are configured for new date sharded tables such as (depending on what is configured):
     * flat_event_params_(x)
@@ -91,7 +91,7 @@ _**The following steps are only required if you plan to backfill historical tabl
 ## Un-install steps ##
 1. Delete the config_datasets.json file from gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/ (Cloud Storage Bucket within [PROJECT_ID])
 2. Optional command to remove solution: 
-   * gcloud deployment-manager deployments delete **[Deployment Name]** -q
+   * ```gcloud deployment-manager deployments delete **[Deployment Name]** -q```
 
 ## Common errors ##
 ### Install ###
@@ -99,11 +99,11 @@ _**The following steps are only required if you plan to backfill historical tabl
   * **Resolution:** Ensure the value (Cloud Storage bucket name) configured in "codeBucket" setting of ga_flattener*.yaml is correct. **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com only requires GCP predefined role of _Cloud Build Service Account_
 ### Verification ###
 * * **Message:**   google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials. Please set GOOGLE_APPLICATION_CREDENTIALS or explicitly create credentials and re-run the application. For more information, please see https://cloud.google.com/docs/authentication/getting-started
-   * **Resolution:** Ensure you run the gcloud command _gcloud auth application-default login_ as this sets up the required authentication and it'll just work.   
+   * **Resolution:** Ensure you run the gcloud command ```gcloud auth application-default login``` as this sets up the required authentication and it'll just work.   
     
 ## Repository directories ##
 * cf : pub/sub triggered cloud function that executes a destination
-  query to unnest(flatten) the **analytics_{ga4_property_id}.ga_sessions_yyyymmdd** table
+  query to unnest(flatten) the ```analytics_{ga4_property_id}.ga_sessions_yyyymmdd``` table
   immediately upon arrival in BigQuery into these tables, depending on the configuration:
   * flat_event_params_yyyymmdd
   * flat_events_yyyymmdd
