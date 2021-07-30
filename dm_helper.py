@@ -1,5 +1,3 @@
-import os
-
 class DeploymentConfiguration(object):
     def __init__(self,context_environment_vars):
         '''
@@ -66,8 +64,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "EVENT_PARAMS": "event_params",
             "USER_PROPERTIES": "user_properties",
             "ITEMS": "items",
-            "GOOGLE_APPLICATION_CREDENTIALS": os.path.normpath(
-                os.path.join(os.path.dirname(__file__), ".", "sandbox", "sa.json"))
+            "GOOGLE_APPLICATION_CREDENTIALS": "sandbox/sa.json"
         }
 
     def get_topic_name(self):
