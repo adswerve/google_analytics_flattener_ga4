@@ -15,7 +15,7 @@ dry_run = False   # set to False to Backfill.  Setting to True will not pubish a
 # Desired dates to backfill, both start and end are inclusive
 backfill_range_start = datetime.datetime(2021, 7, 1)
 backfill_range_end = datetime.datetime(2021, 7, 28)  # datetime.datetime.today()
-datasets_to_backfill = ["analytics_222460912", "analytics_251817041"]     #GA properties to backfill, "analytics_222460912"
+datasets_to_backfill = ["analytics_222460912"]     #GA properties to backfill, "analytics_222460912"
 '''*****************************'''
 '''  Configuration Section End  '''
 '''*****************************'''
