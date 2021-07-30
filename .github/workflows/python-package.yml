@@ -40,5 +40,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-
+        echo "$GOOGLE_APPLICATION_CREDENTIALS" > "sandbox/sa.json"
         pytest --verbose
+        shred --iterations=7 "sandbox/sa.json"
+        rm --recursive --force "sandbox/sa.json"

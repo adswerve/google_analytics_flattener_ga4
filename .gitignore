@@ -17,9 +17,6 @@ local/
 #python compiled files
 *.pyc
 
-#sandbox files
-sandbox/
-
 #Google App Engine Standard
 lib/
 
