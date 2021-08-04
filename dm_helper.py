@@ -63,8 +63,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "EVENTS": "events",
             "EVENT_PARAMS": "event_params",
             "USER_PROPERTIES": "user_properties",
-            "ITEMS": "items",
-            "GOOGLE_APPLICATION_CREDENTIALS": "sandbox/sa.json"
+            "ITEMS": "items"
         }
 
     def get_topic_name(self):
