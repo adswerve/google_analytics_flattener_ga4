@@ -8,7 +8,7 @@ env:
 
 on:
   push:
-    branches: [ development-ci-cd-workflow, master, development-ga4 ]
+    branches: [ master, development-ga4 ]
   pull_request:
     branches: [ master ]
 

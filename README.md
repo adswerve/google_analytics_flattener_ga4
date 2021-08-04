@@ -15,7 +15,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
     + [Verification](#verification)
   * [Repository directories](#repository-directories)
   * [Repository files](#repository-files)
-  * [Running unit tests on your local machine](#running-unit-tests-on-your-local-machine)
+  * [Running unit tests](#running-unit-tests)
 
 ## Local dependencies ##
 * Google Cloud Platform SDK.  Download and install from these instructions: https://cloud.google.com/sdk/docs/install
@@ -145,6 +145,7 @@ _**The following steps are only required if you plan to backfill historical tabl
   Useful for smoke testing and back-filling data historically.
 * LICENSE: BSD 3-Clause open source license
 
-## Running unit tests on your local machine ##
+## Running unit tests ##
 * To run unit tests on your local machine, save an **sa.json** with GCP account credentials in the **sandbox** directory.
+* Unit tests run locally or via GitHub CI/CD workflow assume that GA4 flattener is installed into your GCP project.
 
