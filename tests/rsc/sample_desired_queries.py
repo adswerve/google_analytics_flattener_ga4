@@ -1,3 +1,15 @@
+# TODO: maybe store them .sql files and read them as string
+# example: https://cloud.google.com/blog/products/application-development/how-to-schedule-a-recurring-python-script-on-gcp
+# def file_to_string(sql_path):
+#     """Converts a SQL file holding a SQL query to a string.
+#     Args:
+#         sql_path: String containing a file path
+#     Returns:
+#         String representation of a file's contents
+#     """
+#     with open(sql_path, 'r') as sql_file:
+#         return sql_file.read()
+
 sample_events_query = """
 SELECT 
 CONCAT(stream_id, "_" , user_pseudo_id, "_" ,  event_name,  "_" , event_timestamp) AS event_id,
