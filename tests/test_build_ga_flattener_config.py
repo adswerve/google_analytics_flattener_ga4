@@ -12,6 +12,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
+        json_config = config.add_intraday_info_into_config(json_config)
         store.upload_config(config=json_config)
         self.assertIsInstance(json_config,dict)
         if json_config.keys():
@@ -24,6 +25,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         config = FlattenerDatasetConfigPS()
         store = FlattenerDatasetConfigStoragePS()
         json_config = config.get_ga_datasets()
+        json_config = config.add_intraday_info_into_config(json_config)
         store.upload_config(config=json_config)
         self.assertIsInstance(json_config,dict)
         if json_config.keys():

@@ -66,6 +66,45 @@ FROM (
                 ]
         return ret_val
 
+    def add_intraday_info_into_config(self, json_config):
+        """
+        Adds intraday config params to config files.
+
+        Args:
+            json_config:
+                {"analytics_222460912": ["events", "event_params", "user_properties", "items"],
+                "analytics_251817041": ["events", "event_params", "user_properties", "items"]}
+
+        Returns:
+            json_config:
+                {"analytics_222460912": ["events", "event_params", "user_properties", "items"],
+                "analytics_251817041": ["events", "event_params", "user_properties", "items"],
+                "intraday":
+                    [{"analytics_222460912": null}, {"analytics_251817041": null}]}
+
+        In what datasets do we want to flatten intraday data?
+
+        How often do we update flat intraday data (e.g., every X hours).
+            Default frequency is null (meaning we won't be flattening intraday data)
+
+        Example:
+            Config file contains this:
+                "intraday": [{"analytics_222460912": 3}]
+
+                It means we will be flattening intraday data for "analytics_222460912" every 3 hours.
+
+            Config file contains this:
+                "intraday": [{"analytics_222460912": null}]
+
+                We won't be flattening intraday data in "analytics_222460912"
+
+        """
+        intraday_configuration = {"intraday":[]}
+        for key, value in json_config.items():
+            intraday_configuration["intraday"].append({key:None})
+        json_config.update(intraday_configuration)
+        return json_config
+
 
 def build_ga_flattener_config(request):
     """HTTP Cloud Function.
@@ -80,5 +119,6 @@ def build_ga_flattener_config(request):
     config = FlattenerDatasetConfig()
     store = FlattenerDatasetConfigStorage()
     json_config = config.get_ga_datasets()
+    json_config = config.add_intraday_info_into_config(json_config)
     store.upload_config(config=json_config)
     print("build_ga_flattener_config: {}".format(json.dumps(json_config)))
