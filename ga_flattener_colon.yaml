@@ -26,6 +26,8 @@ imports:
 - path: cfconfigbuilder/requirements.txt
 - path: cfconfigbuilderps/main.py
 - path: cfconfigbuilderps/requirements.txt
+- path: intraday/main.py
+- path: intraday/requirements.txt
 
 resources:
 - name: y_resource_bucket_name
@@ -60,3 +62,16 @@ resources:
     runtime: python37
     availableMemoryMb: 128
     entryPoint: build_ga_flattener_config
+
+- name: function_intraday
+  type: dmt_cloud_function.py
+  properties:
+    # All the files that start with this prefix will be packed in the Cloud Function that builds the intraday schedule
+    codeLocation: intraday/
+    codeBucket: 464892960897-function-code-staging
+    triggerType: gcs
+    location: us-east1
+    timeout: 60s
+    runtime: python37
+    availableMemoryMb: 128
+    entryPoint: create_intraday_schedule

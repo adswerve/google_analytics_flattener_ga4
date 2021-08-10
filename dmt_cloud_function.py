@@ -123,9 +123,13 @@ def GenerateConfig(ctx):
                   gcp_project=config.get_project(),topic_name=config.get_topic_name()
                   ,config_topic="config" if function_name.__contains__("config") else ""),
               'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
-  else:
-      #future spot for cloud storage bucket listener trigger types
-      pass
+  elif ctx.properties['triggerType'] == 'gcs':
+      cloud_function['properties']['eventTrigger'] = {
+          'resource': 'projects/{gcp_project}/buckets/{bucket_name}'.format(
+              gcp_project=config.get_project(), bucket_name=config.get_bucket_name()
+          ),
+          'eventType': 'google.storage.object.finalize'}
+
 
   #add user environment variables to cloud function
   for key, value in config.user_environment_variables.items():
