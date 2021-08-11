@@ -28,6 +28,14 @@ project_id = "as-dev-ga4-flattener-320623"
 location_id = "us-central1"
 service_id = 'my-service'
 
+#TODO: how do I create a cron job?
+
+#TODO: how do I delete a cron job?
+
+# TODO: how do I update a cron job?
+
+# TODO: this function works locally but doesn't run on GCP as a a Cloud Function, fails with permissions error
+
 def create_intraday_schedule(project_id=project_id, location_id=location_id, service_id=service_id):
     """Create a job with an App Engine target via the Cloud Scheduler API"""
     # [START cloud_scheduler_create_job]
@@ -41,14 +49,11 @@ def create_intraday_schedule(project_id=project_id, location_id=location_id, ser
 
     # Construct the request body.
     job = {
-        'app_engine_http_target': {
-            'app_engine_routing': {
-                'service': service_id
-            },
-            'relative_uri': '/log_payload',
-            'http_method': 1,
-            'body': 'Hello World'.encode()
-        },
+        'pubsub_target': {
+            'data': 'Hello World'.encode(),
+            'topic_name': "projects/as-dev-ga4-flattener-320623/topics/ga-flattener-deployment-topic"
+            }
+        ,
         'schedule': '* 1 * * *',
         'time_zone': 'America/Los_Angeles'
     }
@@ -186,11 +191,5 @@ def create_intraday_schedule(project_id=project_id, location_id=location_id, ser
 #
 
 
-#TODO: how do I create a cron job?
 
-#TODO: how do I delete a cron job?
-
-# TODO: how do I update a cron job?
-
-# TODO: this function works locally but doesn't run on GCP as a a Cloud Function, fails with error code 127 "command not found"
 # How do I solve this?

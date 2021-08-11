@@ -13,6 +13,7 @@ class TestBuildIntradayFlatteningSchedule(BaseUnitTest):
         # TODO(developer): Uncomment and set the following variables
         project_id = "as-dev-ga4-flattener-320623"
         location_id = "us-central1"
+        #  google.api_core.exceptions.InvalidArgument: 400 Location must equal us-central1 because the App Engine app that is associated with this project is located in us-central1
         service_id = 'my-service'
 
         create_intraday_schedule(project_id=project_id, location_id=location_id, service_id=service_id)
