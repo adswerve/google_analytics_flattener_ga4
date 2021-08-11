@@ -10,6 +10,11 @@ class TestBuildIntradayFlatteningSchedule(BaseUnitTest):
 
         event_payload = json.loads(event_payload)
 
-        create_intraday_schedule(event=event_payload, context="context")
+        # TODO(developer): Uncomment and set the following variables
+        project_id = "as-dev-ga4-flattener-320623"
+        location_id = "us-central1"
+        service_id = 'my-service'
+
+        create_intraday_schedule(project_id=project_id, location_id=location_id, service_id=service_id)
 
         self.assertTrue(True)
