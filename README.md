@@ -5,7 +5,8 @@ The GCP resources for the solutions are installed via Deployment Manager.
 [![Python package](https://github.com/adswerve/google_analytics_flattener_ga4/actions/workflows/python-package.yml/badge.svg)](https://github.com/adswerve/google_analytics_flattener_ga4/actions/workflows/python-package.yml)
 
 ## Contents
-  * [Background and problem](#background-and-problem)
+  * [Background](#background)
+  * [Problem](#problem)
   * [Purpose](#purpose)
   * [Local dependencies](#local-dependencies)
   * [Prerequisites](#prerequisites)
@@ -19,11 +20,13 @@ The GCP resources for the solutions are installed via Deployment Manager.
   * [Repository files](#repository-files)
   * [Running unit tests](#running-unit-tests)
 
-## Background and problem
+## Background
   * [Google Analytics 4 (GA4)](https://support.google.com/analytics/answer/10089681?hl=en) is the newest generation of Google Analytics.
   * When you export data from GA4 into BigQuery, the schema will have [nested and repeated fields](https://cloud.google.com/bigquery/docs/nested-repeated). 
     * Nested data represents a struct. In BigQuery, it can be described as a column inside of a column.
     * Repeated data represents an array. In BigQuery, it can be described as a row inside of a row.
+    
+  ## Problem
   * Schema with nested and repeated data:
     * Can make it harder to query the data (it takes a learning curve to get used to it).
     * May be incompatible with other data systems. It maybe be impossible to import data into another database system or into a spreadsheet. 
