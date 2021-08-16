@@ -1,10 +1,12 @@
 # README #
-Google Analytics 4 Flattener. A Google Cloud Platform (GCP) solution that unnests (flattens) [Google Analytics Data 4 stored in Bigquery](https://support.google.com/analytics/answer/7029846?hl=en).  
+Google Analytics 4 Flattener. A Google Cloud Platform (GCP) solution that unnests (flattens) [Google Analytics 4 (GA4) Data stored in Bigquery](https://support.google.com/analytics/answer/7029846?hl=en).  
 The GCP resources for the solutions are installed via Deployment Manager.
 
 [![Python package](https://github.com/adswerve/google_analytics_flattener_ga4/actions/workflows/python-package.yml/badge.svg)](https://github.com/adswerve/google_analytics_flattener_ga4/actions/workflows/python-package.yml)
 
 ## Contents
+  * [Background and problem](#background-and-problem)
+  * [Purpose](#purpose)
   * [Local dependencies](#local-dependencies)
   * [Prerequisites](#prerequisites)
   * [Installation steps](#installation-steps)
@@ -16,6 +18,21 @@ The GCP resources for the solutions are installed via Deployment Manager.
   * [Repository directories](#repository-directories)
   * [Repository files](#repository-files)
   * [Running unit tests](#running-unit-tests)
+
+## Background and problem
+  * [Google Analytics 4 (GA4)](https://support.google.com/analytics/answer/10089681?hl=en) is the newest generation of Google Analytics.
+  * When you export data from GA4 into BigQuery, the schema will have [nested and repeated fields](https://cloud.google.com/bigquery/docs/nested-repeated). 
+    * Nested data represents a struct. In BigQuery, it can be described as a column inside of a column.
+    * Repeated data represents an array. In BigQuery, it can be described as a row inside of a row.
+  * Schema with nested and repeated data:
+    * Can make it harder to query the data (it takes a learning curve to get used to).
+    * May be incompatible with other data systems. It maybe be impossible to import data into another system, such as a spreadsheet software or database system. 
+
+
+## Purpose
+  * The purpose of GA4 Flattener is to solve the above problems by flattening/unnesting GA4 data. 
+  * Flattening/unnesting means converting all nested and repeated fields to regular fields, so our data looks like a regular table, compatible with other systems (imagine a Google Spreadsheet / Microsoft Excel table).
+  * When GA4 Flattener runs, it keeps your original GA4 data with nested and repeated data, but it also writes 4 flat tables into the same BigQuery dataset. These 4 flat tables can be queried and imported into other systems more easily.
 
 ## Local dependencies ##
 * Google Cloud Platform SDK.  Download and install from these instructions: https://cloud.google.com/sdk/docs/install
