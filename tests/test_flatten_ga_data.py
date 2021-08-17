@@ -1,7 +1,6 @@
 from tests.test_base import BaseUnitTest
 from tests.test_base import Context
 from cf.main import GaExportedNestedDataStorage
-from tests.rsc import sample_desired_queries
 
 
 class TestCFFlattenMethods(BaseUnitTest):

@@ -19,7 +19,7 @@ from io import BytesIO
 import zipfile
 from dm_helper import GaFlattenerDeploymentConfiguration
 
-def GenerateConfig(ctx):
+def generate_config(ctx):
   config = GaFlattenerDeploymentConfiguration(ctx.env)
   """Generate YAML resource configuration."""
   in_memory_output_file = BytesIO()

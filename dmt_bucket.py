@@ -1,5 +1,5 @@
 from dm_helper import GaFlattenerDeploymentConfiguration
-def GenerateConfig(ctx):
+def generate_config(ctx):
 
     config = GaFlattenerDeploymentConfiguration(ctx.env)
 

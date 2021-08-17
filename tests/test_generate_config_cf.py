@@ -1,6 +1,6 @@
 from tests.test_base import BaseUnitTest
 from tests.test_base import Context
-from dmt_cloud_function import GenerateConfig
+from dmt_cloud_function import generate_config
 
 class ContextCloudFunction(Context):
     def __init__(self):
@@ -22,5 +22,5 @@ class ContextCloudFunction(Context):
 class TestGenerateConfigCf(BaseUnitTest):
     def test_generate_config(self):
         c = ContextCloudFunction()
-        config = GenerateConfig(c)
+        config = generate_config(c)
         self.assertIsInstance(config, dict)

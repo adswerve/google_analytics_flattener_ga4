@@ -34,7 +34,7 @@ class DeploymentConfiguration(object):
         "current_time": 1592015636
         "project_number": "423452468050"
         "username": "first.last@domain.com"
-        NOTE:  Dependent on which template calls generateConfig()
+        NOTE:  Dependent on which template calls generate_config()
         "name": "function"
         "type": "dmt_cloud_function.py"
 
