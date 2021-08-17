@@ -5,6 +5,18 @@ from google.cloud import storage
 import re
 import os
 import tempfile
+import logging
+import sys
+
+# configure logger to add log cal to stdout call (i.e., to print log message to console)
+root = logging.getLogger()
+root.setLevel(logging.INFO) # what log severity are we going to capture?
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.WARNING) # out of the logs we captured above, what log severity are we going to add to stdout (print to console)?
+root.addHandler(handler)
+# https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
+# https://docs.python.org/3/howto/logging.html
 
 
 class InputValidator(object):
@@ -19,7 +31,7 @@ class InputValidator(object):
             self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
             self.table_name = re.search('(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
         except AttributeError:
-            print(f'invalid message: {message_payload}')
+            logging.critical(f'invalid message: {message_payload}')
         try:
             storage_client = storage.Client()
             bucket = storage_client.bucket(os.environ["config_bucket_name"])
@@ -29,7 +41,7 @@ class InputValidator(object):
             with open(downloaded_file, "r") as config_json:
                 self.config = json.load(config_json)
         except Exception as e:
-            print(f'flattener configuration error: {e}')
+            logging.critical(f'flattener configuration error: {e}')
 
     def valid_dataset(self):
         return self.dataset in self.config.keys()
