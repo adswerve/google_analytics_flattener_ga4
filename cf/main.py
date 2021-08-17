@@ -8,6 +8,10 @@ import tempfile
 import logging
 import sys
 
+
+#TODO: refactor logging - reduce duplication
+#TODO: fix logging - remove double-logging on GCP
+
 # configure logger to add log cal to stdout call (i.e., to print log message to console)
 # create logger
 root = logging.getLogger()
