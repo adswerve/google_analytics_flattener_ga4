@@ -3,7 +3,27 @@ from google.cloud import storage
 import tempfile
 import json
 import os
+import logging
+import sys
 
+# configure logger to add log cal to stdout call (i.e., to print log message to console)
+# create logger
+root = logging.getLogger()
+root.setLevel(logging.INFO) # what log severity are we going to capture?
+
+# create console handler and set level
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO) # out of the logs we captured above, what log severity are we going to add to stdout (print to console)?
+
+# create formatter
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+
+# add formatter to ch
+handler.setFormatter(formatter)
+
+root.addHandler(handler)
+# https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
+# https://docs.python.org/3/howto/logging.html
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
@@ -81,4 +101,4 @@ def build_ga_flattener_config(request):
     store = FlattenerDatasetConfigStorage()
     json_config = config.get_ga_datasets()
     store.upload_config(config=json_config)
-    print("build_ga_flattener_config: {}".format(json.dumps(json_config)))
+    logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))

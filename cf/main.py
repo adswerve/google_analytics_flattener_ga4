@@ -9,11 +9,20 @@ import logging
 import sys
 
 # configure logger to add log cal to stdout call (i.e., to print log message to console)
+# create logger
 root = logging.getLogger()
 root.setLevel(logging.INFO) # what log severity are we going to capture?
 
+# create console handler and set level
 handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.WARNING) # out of the logs we captured above, what log severity are we going to add to stdout (print to console)?
+handler.setLevel(logging.INFO) # out of the logs we captured above, what log severity are we going to add to stdout (print to console)?
+
+# create formatter
+formatter = logging.Formatter('%(levelname)s - %(message)s')
+
+# add formatter to ch
+handler.setFormatter(formatter)
+
 root.addHandler(handler)
 # https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
 # https://docs.python.org/3/howto/logging.html
@@ -310,30 +319,30 @@ def flatten_ga_data(event, context):
         # EVENT_PARAMS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
             ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params")
-            print(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
+            logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
 
         # USER_PROPERTIES
         if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
             ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
-            print(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
+            logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
 
         # ITEMS
         if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
             ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
-            print(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
+            logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
 
         # EVENTS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
             ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
-            print(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
+            logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
         else:
-            print(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
 
     else:
-        print(f'Dataset {input_event.dataset} not configured for flattening')
+        logging.info(f'Dataset {input_event.dataset} not configured for flattening')
