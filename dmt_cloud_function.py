@@ -19,6 +19,7 @@ from io import BytesIO
 import zipfile
 from dm_helper import GaFlattenerDeploymentConfiguration
 
+
 def generate_config(ctx):
   config = GaFlattenerDeploymentConfiguration(ctx.env)
   """Generate YAML resource configuration."""
@@ -53,7 +54,6 @@ def generate_config(ctx):
   ]
 
   #cmd = "echo '%s' | base64 -d > /function/function.zip;" % (content.decode('ascii'))
-
 
   volumes = [{'name': 'function-code', 'path': '/function'}]
 

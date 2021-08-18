@@ -8,11 +8,13 @@ import logging
 # configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 
+
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         # get bucket name from env var
         self.bucket_name = os.environ["config_bucket_name"]
-    def upload_config(self,config):
+
+    def upload_config(self, config):
         storage_client = storage.Client()  # initialize the GCS client
         bucket = storage_client.bucket(self.bucket_name)
         blob = bucket.blob(os.environ["config_filename"])  # get config info
@@ -20,7 +22,7 @@ class FlattenerDatasetConfigStorage(object):
         filepath = os.path.join(tempfile.gettempdir(), "tmp.json")  # write config info to file
         with open(filepath, "w") as f:
             f.write(json.dumps(config))
-        blob.upload_from_filename(filepath) # upload config file
+        blob.upload_from_filename(filepath)  # upload config file
 
 
 class FlattenerDatasetConfig(object):
@@ -69,11 +71,11 @@ FROM (
         # add tables information into dictionary
         # by default, all these 4 tables flat tables will be written by the flattener
         for row in query_results:
-            ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
-                ,os.environ["EVENT_PARAMS"]
-                ,os.environ["USER_PROPERTIES"]
-                ,os.environ["ITEMS"]
-                ]
+            ret_val[(row.dataset_id)] = [os.environ["EVENTS"]
+                , os.environ["EVENT_PARAMS"]
+                , os.environ["USER_PROPERTIES"]
+                , os.environ["ITEMS"]
+                                         ]
         return ret_val
 
 

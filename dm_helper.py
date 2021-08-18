@@ -1,5 +1,5 @@
 class DeploymentConfiguration(object):
-    def __init__(self,context_environment_vars):
+    def __init__(self, context_environment_vars):
         '''
         From
         https://cloud.google.com/deployment-manager/docs/configuration/templates/use-environment-variables
@@ -47,8 +47,9 @@ class DeploymentConfiguration(object):
         self.type = context_environment_vars['type']
         self.username = context_environment_vars['username']
 
+
 class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
-    def __init__(self,context_environment_vars):
+    def __init__(self, context_environment_vars):
         super(GaFlattenerDeploymentConfiguration, self).__init__(context_environment_vars)
         self.FILTER = '''
         resource.type="bigquery_resource" 
@@ -87,16 +88,17 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
 
     def get_bucket_name(self):
         return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._create_valid_gcp_resource_name(self.deployment)
-                                                        , n=self._create_valid_gcp_resource_name(self.get_project_number()))[:62]
+                                                        , n=self._create_valid_gcp_resource_name(
+                self.get_project_number()))[:62]
 
     def get_filter(self):
-        #TODO: add feature for 3 options:
+        # TODO: add feature for 3 options:
         #       1. Daily tables only
         #       2. Intra day tables only
         #       3. Both Intra and Daily tables
         return self.FILTER
 
-    def _create_valid_gcp_resource_name(self,p_field):
+    def _create_valid_gcp_resource_name(self, p_field):
         '''
         GCP resources must only contain letters, numbers, undrescores, dots or dashes
         and be between 3 and 63 chars long.  Resources must start with a letter and may not end with a dash
@@ -110,4 +112,3 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             else:
                 r += "-"
         return r
-

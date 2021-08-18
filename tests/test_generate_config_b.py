@@ -4,7 +4,7 @@ from dmt_bucket import generate_config
 
 
 class TestGenerateConfigB(BaseUnitTest):
-    
+
     def test_generate_config(self):
         c = Context()
         config = generate_config(c)

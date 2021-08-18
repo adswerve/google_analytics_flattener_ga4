@@ -14,6 +14,7 @@ import logging
 # TODO: logging can also be implemented with google.cloud.logging https://github.com/googleapis/python-logging/blob/HEAD/samples/snippets/handler.py
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 
+
 class InputValidator(object):
     def __init__(self, event):
         try:
@@ -21,8 +22,8 @@ class InputValidator(object):
             # extract information from message payload
             message_payload = json.loads(base64.b64decode(event['data']).decode('utf-8'))
             bq_destination_table = \
-            message_payload['protoPayload']['serviceData']['jobCompletedEvent']['job']['jobConfiguration']['load'][
-                'destinationTable']
+                message_payload['protoPayload']['serviceData']['jobCompletedEvent']['job']['jobConfiguration']['load'][
+                    'destinationTable']
             self.gcp_project = bq_destination_table['projectId']
             self.dataset = bq_destination_table['datasetId']
             self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
@@ -31,12 +32,12 @@ class InputValidator(object):
             logging.critical(f'invalid message: {message_payload}')
         try:
             # validate flattener configuration, e.g., its environment variables
-            storage_client = storage.Client() # initiate GCS client
+            storage_client = storage.Client()  # initiate GCS client
             bucket = storage_client.bucket(os.environ["config_bucket_name"])
             blob = bucket.blob(os.environ["config_filename"])
             downloaded_file = os.path.join(tempfile.gettempdir(), "tmp.json")
-            blob.download_to_filename(downloaded_file) # download config file to file
-            with open(downloaded_file, "r") as config_json: # open the file
+            blob.download_to_filename(downloaded_file)  # download config file to file
+            with open(downloaded_file, "r") as config_json:  # open the file
                 self.config = json.load(config_json)
         except Exception as e:
             logging.critical(f'flattener configuration error: {e}')
@@ -194,15 +195,14 @@ class GaExportedNestedDataStorage(object):
             "ecommerce.transaction_id"
         ]
 
-
     def get_unique_event_id(self, unique_event_id_fields):
         """
         build unique event id
         """
         return 'CONCAT(%s, "_", %s, "_", %s, "_", %s) as event_id' % (unique_event_id_fields[0],
-                                                                        unique_event_id_fields[1],
-                                                                        unique_event_id_fields[2],
-                                                                        unique_event_id_fields[3])
+                                                                      unique_event_id_fields[1],
+                                                                      unique_event_id_fields[2],
+                                                                      unique_event_id_fields[3])
 
     def get_event_params_query(self):
         qry = "SELECT "
@@ -213,8 +213,8 @@ class GaExportedNestedDataStorage(object):
         qry += ",%s as %s" % (self.event_params_fields[0], self.event_params_fields[0].replace(".", "_"))
 
         qry += ",CONCAT(IFNULL(%s, ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), '')) AS event_params_value" \
-               % (self.event_params_fields[1], self.event_params_fields[2], self.event_params_fields[3], self.event_params_fields[4])
-
+               % (self.event_params_fields[1], self.event_params_fields[2], self.event_params_fields[3],
+                  self.event_params_fields[4])
 
         qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
                                                  d=self.date_shard)
@@ -243,7 +243,6 @@ class GaExportedNestedDataStorage(object):
         qry += ",UNNEST (user_properties) AS user_properties"
 
         return qry
-
 
     def get_items_query(self):
         qry = "SELECT "
@@ -282,7 +281,7 @@ class GaExportedNestedDataStorage(object):
         :param p_field: starting point of the field
         :return: cleaned big query field name
         '''
-        r = "" # initialize emptry string
+        r = ""  # initialize emptry string
         for char in p_field.lower():
             if char.isalnum():
                 # if char is alphanumeric (either letters or numbers), append char to our string
@@ -293,10 +292,10 @@ class GaExportedNestedDataStorage(object):
         # if field starts with digit, prepend it with underscore
         if r[0].isdigit():
             r = "_%s" % r
-        return r[:300] # trim the string to the first x chars
+        return r[:300]  # trim the string to the first x chars
 
     def run_query_job(self, query, table_type='flat'):
-        client = bigquery.Client() # initialize BigQuery client
+        client = bigquery.Client()  # initialize BigQuery client
         # get table name
         table_name = "{p}.{ds}.{t}_{d}" \
             .format(p=self.gcp_project, ds=self.dataset, t=table_type, d=self.date_shard)
@@ -336,14 +335,16 @@ def flatten_ga_data(event, context):
             ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params")
             logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
         else:
-            logging.info(f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(
+                f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
 
         # USER_PROPERTIES
         if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
             ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
             logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
         else:
-            logging.info(f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(
+                f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
 
         # ITEMS
         if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):

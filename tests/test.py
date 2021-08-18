@@ -9,7 +9,6 @@ from tests.test_generate_config_b import TestGenerateConfigB
 from tests.test_build_ga_flattener_config import TestCFBuildFlattenerGaDatasetConfig
 from tests.test_verify_queries import TestGenerateQuery
 
-
 if __name__ == '__main__':
     test_suite = unittest.TestSuite()
 
