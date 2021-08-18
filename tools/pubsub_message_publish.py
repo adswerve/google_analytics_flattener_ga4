@@ -3,26 +3,9 @@ import json
 import datetime, time
 from tests.test_base import BaseUnitTest
 import logging
-import sys
 
-# configure logger to add log cal to stdout call (i.e., to print log message to console)
-# create logger
-root = logging.getLogger()
-root.setLevel(logging.INFO) # what log severity are we going to capture?
-
-# create console handler and set level
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO) # out of the logs we captured above, what log severity are we going to add to stdout (print to console)?
-
-# create formatter
-formatter = logging.Formatter('%(levelname)s - %(message)s')
-
-# add formatter to ch
-handler.setFormatter(formatter)
-
-root.addHandler(handler)
-# https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
-# https://docs.python.org/3/howto/logging.html
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # To authenticate, run the following command.  The account you choose will execute this python script
 # gcloud auth application-default login
@@ -35,7 +18,7 @@ project_id = "as-dev-ga4-flattener-320623"  # GCP project ID, example:  [PROJECT
 dry_run = False   # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
 backfill_range_start = datetime.datetime(2021, 7, 19)
-backfill_range_end = datetime.datetime(2021, 7, 20)  # datetime.datetime.today()
+backfill_range_end = datetime.datetime(2021, 7, 19)  # datetime.datetime.today()
 datasets_to_backfill = ["analytics_222460912"]     #GA properties to backfill, "analytics_222460912"
 '''*****************************'''
 '''  Configuration Section End  '''

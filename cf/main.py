@@ -6,31 +6,9 @@ import re
 import os
 import tempfile
 import logging
-import sys
 
-
-#TODO: refactor logging - reduce duplication
-#TODO: fix logging - remove double-logging on GCP
-
-# configure logger to add log cal to stdout call (i.e., to print log message to console)
-# create logger
-root = logging.getLogger()
-root.setLevel(logging.INFO) # what log severity are we going to capture?
-
-# create console handler and set level
-handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO) # out of the logs we captured above, what log severity are we going to add to stdout (print to console)?
-
-# create formatter
-formatter = logging.Formatter('%(levelname)s - %(message)s')
-
-# add formatter to ch
-handler.setFormatter(formatter)
-
-root.addHandler(handler)
-# https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
-# https://docs.python.org/3/howto/logging.html
-
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class InputValidator(object):
     def __init__(self, event):
@@ -349,4 +327,4 @@ def flatten_ga_data(event, context):
             logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
 
     else:
-        logging.info(f'Dataset {input_event.dataset} not configured for flattening')
+        logging.warning(f'Dataset {input_event.dataset} not configured for flattening')
