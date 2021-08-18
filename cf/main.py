@@ -8,11 +8,11 @@ import tempfile
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
-logger = logging.getLogger(__name__)
 
 class InputValidator(object):
     def __init__(self, event):
         try:
+            # extract information from message payload
             message_payload = json.loads(base64.b64decode(event['data']).decode('utf-8'))
             bq_destination_table = \
             message_payload['protoPayload']['serviceData']['jobCompletedEvent']['job']['jobConfiguration']['load'][

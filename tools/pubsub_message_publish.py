@@ -5,7 +5,6 @@ from tests.test_base import BaseUnitTest
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-logger = logging.getLogger(__name__)
 
 # To authenticate, run the following command.  The account you choose will execute this python script
 # gcloud auth application-default login
