@@ -7,7 +7,7 @@ Credit: https://stackoverflow.com/questions/52151185/bigquery-best-way-to-drop-d
 from google.cloud import bigquery
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 logger = logging.getLogger(__name__)
 
 '''*****************************'''
