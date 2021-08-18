@@ -5,24 +5,29 @@ import json
 import os
 import logging
 
+# configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
+        # get bucket name from env var
         self.bucket_name = os.environ["config_bucket_name"]
     def upload_config(self,config):
-        storage_client = storage.Client()
+        storage_client = storage.Client()  # initialize the GCS client
         bucket = storage_client.bucket(self.bucket_name)
-        blob = bucket.blob(os.environ["config_filename"])
+        blob = bucket.blob(os.environ["config_filename"])  # get config file
 
         filepath = os.path.join(tempfile.gettempdir(), "tmp.json")
-        with open(filepath, "w") as f:
+        with open(filepath, "w") as f:  # write config file to file
             f.write(json.dumps(config))
-        blob.upload_from_filename(filepath)
+        blob.upload_from_filename(filepath)  # upload config file
 
 
 class FlattenerDatasetConfig(object):
     def __init__(self):
+        """
+        find ga4 datasets in project
+        """
         self.query = """
         EXECUTE IMMEDIATE (
  WITH schemas AS (
@@ -56,11 +61,19 @@ FROM (
 """
 
     def get_ga_datasets(self):
+        """
+        Obtain a list of GA4 datasets available in the GCP project.
+        Build a configurations dict which lists GA4 datasets to flatten.
+        It'll be later uploaded to GCS as a JSON file.
+        """
         ret_val = {}
         client = bigquery.Client()
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
-        for row in query_results:
+        # the dictionary will list ga4 datasets
+        # add tables information into dictionary
+        # by default, all these 4 tables flat tables will be written by the flattener
+        for row in query_results: # each row is a ga4 dataset
             ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
                 ,os.environ["EVENT_PARAMS"]
                 ,os.environ["USER_PROPERTIES"]
@@ -79,8 +92,8 @@ def build_ga_flattener_config(request):
         Response object using `make_response`
         <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
     """
-    config = FlattenerDatasetConfig()
-    store = FlattenerDatasetConfigStorage()
-    json_config = config.get_ga_datasets()
-    store.upload_config(config=json_config)
+    config = FlattenerDatasetConfig()  # SQL query
+    store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
+    json_config = config.get_ga_datasets()  # bild a configurations dict which lists GA4 datasets to flatten.
+    store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))
