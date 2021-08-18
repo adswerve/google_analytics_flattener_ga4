@@ -35,6 +35,7 @@ class TestGenerateQuery(BaseUnitTest):
                                                 )
 
         # EVENTS
+        # compare sample hardcoded vs. dynamically generated query. They should be the same
         sample_hardcoded_events_query = sample_desired_queries.sample_events_query
         sample_hardcoded_events_query = self.helper_clean_up_query(sample_hardcoded_events_query)
 

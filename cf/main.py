@@ -8,9 +8,9 @@ import tempfile
 import logging
 
 # configure logging
-# when run locally, it will print level name and message
-# when run on GCP, it will only print message, but will display level as a symbol
-# I noticed that warning is displayed as an error symbol in GCP for some reason
+# when run locally, it will print the level name and the message
+# when run on GCP, it will only print the message, but will display level as a symbol
+# in my tests, logging.warning() is displayed as an error symbol in GCP for some reason
 # TODO: logging can also be implemented with google.cloud.logging https://github.com/googleapis/python-logging/blob/HEAD/samples/snippets/handler.py
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 

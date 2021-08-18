@@ -10,13 +10,14 @@ import os
 
 class TestInputValidator(BaseUnitTest):
     def test_input_validator(self):
+        # context and configuration
         c = Context()
         project_id = c.env["project"]
         dataset_id = BaseUnitTest.DATASET
         date_shard = BaseUnitTest.DATE
         table_type = BaseUnitTest.TABLE_TYPE
 
-        # This message is what is configured in the
+        # inputs
         SAMPLE_LOAD_DATA = {"protoPayload": {
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
@@ -26,8 +27,11 @@ class TestInputValidator(BaseUnitTest):
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'))}
+
+        # validate input
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
+        # checks
         self.assertEqual(iv.table_date_shard, date_shard)
         self.assertEqual(iv.gcp_project, project_id)
         self.assertEqual(iv.dataset, dataset_id)
@@ -37,13 +41,14 @@ class TestInputValidator(BaseUnitTest):
 
     @log_capture()
     def test_input_validator_attribute_error(self, logcapture):
+        # context and configuration
         c = Context()
         project_id = c.env["project"]
         dataset_id = BaseUnitTest.DATASET
         date_shard = BaseUnitTest.DATE
         table_type = BaseUnitTest.TABLE_TYPE
 
-        # This message is what is configured in the
+        # input
         SAMPLE_LOAD_DATA_INVALID_MISSING_DATE_SHARD = {"protoPayload": {
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
@@ -54,6 +59,7 @@ class TestInputValidator(BaseUnitTest):
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(SAMPLE_LOAD_DATA_INVALID_MISSING_DATE_SHARD).encode('utf-8'))}
 
+        # validate input. Error is expected
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
         # check log
@@ -82,12 +88,14 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
 
     @log_capture()
     def test_input_validator_Exception(self, logcapture):
+        # context and configuration
         c = Context()
         project_id = c.env["project"]
         dataset_id = BaseUnitTest.DATASET
         date_shard = BaseUnitTest.DATE
         table_type = BaseUnitTest.TABLE_TYPE
 
+        # input
         SAMPLE_LOAD_DATA = {"protoPayload": {
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
@@ -97,8 +105,11 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'))}
+
+        # validate input. Error is expected
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
+        # check log
         expected_log = ('root', 'CRITICAL',
                         "flattener configuration error: 404 GET https://storage.googleapis.com/download/storage/v1/b/non-existing-bucket/o/config_datasets.json?alt=media: The specified bucket does not exist.: ('Request failed with status code', 404, 'Expected one of', <HTTPStatus.OK: 200>, <HTTPStatus.PARTIAL_CONTENT: 206>)")
 

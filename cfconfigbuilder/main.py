@@ -72,7 +72,7 @@ FROM (
         client = bigquery.Client()
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
-        # the dictionary will list ga4 datasets
+        # the dictionary will list GA4 datasets
         # add tables information into dictionary
         # by default, all these 4 tables flat tables will be written by the flattener
         for row in query_results:  # each row is a ga4 dataset
@@ -94,8 +94,8 @@ def build_ga_flattener_config(request):
         Response object using `make_response`
         <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
     """
-    config = FlattenerDatasetConfig()  # object with a SQL query
-    store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
+    config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
+    store = FlattenerDatasetConfigStorage()  # object with the bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
     store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))

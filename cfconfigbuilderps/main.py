@@ -67,7 +67,7 @@ FROM (
         client = bigquery.Client()
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
-        # the dictionary will list ga4 datasets
+        # the dictionary will list GA4 datasets
         # add tables information into dictionary
         # by default, all these 4 tables flat tables will be written by the flattener
         for row in query_results:
@@ -85,7 +85,7 @@ def build_ga_flattener_config(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
-    config = FlattenerDatasetConfig()  # object with a SQL query
+    config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
     store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
     store.upload_config(config=json_config)  # upload config file to GCS bucket
