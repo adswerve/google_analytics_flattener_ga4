@@ -70,14 +70,14 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         '''
         TODO: make sure returned value meets resource name requirements defined in GCP
         '''
-        return '{d}-topic'.format(d=self._createValidGCPResourceName(self.deployment))
+        return '{d}-topic'.format(d=self._create_valid_gcp_resource_name(self.deployment))
 
     def get_sink_name(self):
         '''
         TODO: make sure returned value meets resource name requirements defined in GCP
         '''
-        return '{d}-sink'.format(d=self._createValidGCPResourceName(self.deployment)
-                                 , n=self._createValidGCPResourceName(self.name))
+        return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment)
+                                 , n=self._create_valid_gcp_resource_name(self.name))
 
     def get_project(self):
         return self.deployment_gcp_project
@@ -86,8 +86,8 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         return self.deployment_gcp_project_number
 
     def get_bucket_name(self):
-        return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._createValidGCPResourceName(self.deployment)
-                                                        , n=self._createValidGCPResourceName(self.get_project_number()))[:62]
+        return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._create_valid_gcp_resource_name(self.deployment)
+                                                        , n=self._create_valid_gcp_resource_name(self.get_project_number()))[:62]
 
     def get_filter(self):
         #TODO: add feature for 3 options:
@@ -96,15 +96,15 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         #       3. Both Intra and Daily tables
         return self.FILTER
 
-    def _createValidGCPResourceName(self,pField):
+    def _create_valid_gcp_resource_name(self,p_field):
         '''
         GCP resources must only contain letters, numbers, undrescores, dots or dashes
         and be between 3 and 63 chars long.  Resources must start with a letter and may not end with a dash
-        :param pField: starting point of the field
+        :param p_field: starting point of the field
         :return: cleaned big query field name
         '''
         r = ""
-        for char in pField.lower():
+        for char in p_field.lower():
             if char.isalnum():
                 r += char
             else:

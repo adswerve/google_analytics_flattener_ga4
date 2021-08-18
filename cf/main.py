@@ -250,15 +250,15 @@ class GaExportedNestedDataStorage(object):
                                                  d=self.date_shard)
         return qry
 
-    def _createValidBigQueryFieldName(self, pField):
+    def _create_valid_bigquery_field_name(self, p_field):
         '''
         BQ Fields must contain only letters, numbers, and underscores, start with a letter or underscore,
         and be at most 128 characters long.
-        :param pField: starting point of the field
+        :param p_field: starting point of the field
         :return: cleaned big query field name
         '''
         r = ""
-        for char in pField.lower():
+        for char in p_field.lower():
             if char.isalnum():
                 r += char
             else:

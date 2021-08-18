@@ -96,20 +96,20 @@ _**The following steps are only required if you plan to backfill historical tabl
 2. Execute command: gcloud config set account <username@domain.com>. **Note** - This must be the installing user from above prerequisites.
 3. Navigate (locally) to root directory of this repository
 4. If **[PROJECT_ID]** does **NOT** contain a colon (:) execute command: 
-    * gcloud deployment-manager deployments create **[Deployment Name]** --config ga_flattener.yaml
+    * gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener.yaml
   
    otherwise follow these steps:
      1. execute command: 
-      * ```gcloud deployment-manager deployments create **[Deployment Name]** --config ga_flattener_colon.yaml```
-     2. Trigger function (with a blank message) named **[Deployment Name]**-cfconfigbuilderps.  It will create the necessary configuration file in the applications Google Coud Storage bucket.  An easy method to do this is to browse to https://console.cloud.google.com/functions and click the cloud function named **[Deployment Name]**-cfconfigbuilderps and go to the testing section and click "TEST THIS FUNCTION".
+      * ```gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener_colon.yaml```
+     2. Trigger function (with a blank message) named **[deployment_name]**-cfconfigbuilderps.  It will create the necessary configuration file in the applications Google Coud Storage bucket.  An easy method to do this is to browse to https://console.cloud.google.com/functions and click the cloud function named **[deployment_name]**-cfconfigbuilderps and go to the testing section and click "TEST THIS FUNCTION".
      
-    ### **[Deployment Name]** naming convention 
-    * Note that **[Deployment Name]** cannot have underscores in its name, but can have hyphens. 
+    ### **[deployment_name]** naming convention 
+    * Note that **[deployment_name]** cannot have underscores in its name, but can have hyphens. 
     * Example of a valid name: ```gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml```
-    * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid values of **[Deployment Name]** 
+    * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid values of **[deployment_name]** 
 
 ## Verification steps ##
-1. After installation, a configuration file named config_datasets.json exists in **gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).  This file contains all the datasets that have ```events_yyyymmdd``` tables and which tables to unnest.  This configuration is required for this GA4 flattener solution to run daily or to backfill historical data.  Edit this file accordingly to include or exclude certain datasets or tables to unnest.  For example:
+1. After installation, a configuration file named config_datasets.json exists in **gs://[deployment_name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).  This file contains all the datasets that have ```events_yyyymmdd``` tables and which tables to unnest.  This configuration is required for this GA4 flattener solution to run daily or to backfill historical data.  Edit this file accordingly to include or exclude certain datasets or tables to unnest.  For example:
  * ```{"analytics_123456789": ["events", "event_params"]}```   will only flatten those 2 nested tables for GA4 property 123456789
  * ```{"analytics_123456789": ["events", "event_params", "user_properties", "items"], "987654321": ["events", "event_params"]}``` will flatten all possible nested tables for GA4 property 123456789 but only events_ and event_params_ for GA4 property 987654321.
 
@@ -125,9 +125,11 @@ _**The following steps are only required if you plan to backfill historical tabl
     * flat_user_properties_(x)
    
 ## Un-install steps ##
-1. Delete the config_datasets.json file from gs://[Deployment Name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/ (Cloud Storage Bucket within [PROJECT_ID])
-2. Optional command to remove solution: 
-   * ```gcloud deployment-manager deployments delete **[Deployment Name]** -q```
+1. Delete the config_datasets.json file from gs://[deployment_name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/ (Cloud Storage Bucket within [PROJECT_ID])
+   * You can do this in GSC (Google Cloud Storage) UI or via command line:
+    ```gsutil rm gs://[deployment_name]-[PROJECT_NUMBER]-adswerve-ga-flat-config/config_datasets.json```
+2. Remove solution: 
+   * ```gcloud deployment-manager deployments delete **[deployment_name]** -q```
 
 ## Common errors ##
 ### Install ###
@@ -151,7 +153,7 @@ _**The following steps are only required if you plan to backfill historical tabl
   BigQuery datasets that have a ga_sessions table and adds them to the
   default configuration on Google's Cloud Storage in the following
   location:
-  [DEPLOYMENT NAME]-[PROJECT_NUMBER]-adswerve-ga-flat-config\config_datasets.json
+  [deployment_name]-[PROJECT_NUMBER]-adswerve-ga-flat-config\config_datasets.json
 
 ## Repository files ##
 * dm_helper.py: provides consistent names for GCP resources accross

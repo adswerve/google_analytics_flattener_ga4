@@ -36,7 +36,7 @@ class TestInputValidator(BaseUnitTest):
         self.assertTrue(True)
 
     @log_capture()
-    def test_input_validator_AttributeError(self, logcapture):
+    def test_input_validator_attribute_error(self, logcapture):
 
         c = Context()
         project_id = c.env["project"]
