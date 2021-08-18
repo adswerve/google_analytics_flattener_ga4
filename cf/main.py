@@ -12,6 +12,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 class InputValidator(object):
     def __init__(self, event):
         try:
+            # validate input message
             # extract information from message payload
             message_payload = json.loads(base64.b64decode(event['data']).decode('utf-8'))
             bq_destination_table = \
@@ -24,12 +25,13 @@ class InputValidator(object):
         except AttributeError:
             logging.critical(f'invalid message: {message_payload}')
         try:
-            storage_client = storage.Client()
+            # validate flattener configuration, e.g., its environment variables
+            storage_client = storage.Client() # initiate GCS client
             bucket = storage_client.bucket(os.environ["config_bucket_name"])
             blob = bucket.blob(os.environ["config_filename"])
             downloaded_file = os.path.join(tempfile.gettempdir(), "tmp.json")
-            blob.download_to_filename(downloaded_file)
-            with open(downloaded_file, "r") as config_json:
+            blob.download_to_filename(downloaded_file) # download config file to file
+            with open(downloaded_file, "r") as config_json: # open the file
                 self.config = json.load(config_json)
         except Exception as e:
             logging.critical(f'flattener configuration error: {e}')
@@ -43,12 +45,18 @@ class InputValidator(object):
 
 class GaExportedNestedDataStorage(object):
     def __init__(self, gcp_project, dataset, table_name, date_shard, type='DAILY'):
+
+        # main configurations
         self.gcp_project = gcp_project
         self.dataset = dataset
         self.date_shard = date_shard
         self.table_name = table_name
         self.type = type
 
+        # The next several properties will correspond to GA4 fields
+
+        # These fields will be used to build a compound id of a unique event
+        # stream_id is added to make sure that there is definitely no id collisions, if you have multiple data streams
         self.unique_event_id_fields = [
             "stream_id",
             "user_pseudo_id",
@@ -56,6 +64,7 @@ class GaExportedNestedDataStorage(object):
             "event_timestamp"
         ]
 
+        # event parameters
         self.event_params_fields = [
             "event_params.key",
 
@@ -65,6 +74,7 @@ class GaExportedNestedDataStorage(object):
             "event_params.value.double_value"
         ]
 
+        # user properties
         self.user_properties_fields = [
             "user_properties.key",
 
@@ -76,6 +86,7 @@ class GaExportedNestedDataStorage(object):
             "user_properties.value.set_timestamp_micros"
         ]
 
+        # items
         self.items_fields = [
             "items.item_id",
             "items.item_name",
@@ -105,6 +116,7 @@ class GaExportedNestedDataStorage(object):
             "items.creative_slot"
         ]
 
+        # events
         self.events_fields = [
             "event_date",
             "event_timestamp",
@@ -179,6 +191,9 @@ class GaExportedNestedDataStorage(object):
 
 
     def get_unique_event_id(self, unique_event_id_fields):
+        """
+        build unique event id
+        """
         return 'CONCAT(%s, "_", %s, "_", %s, "_", %s) as event_id' % (unique_event_id_fields[0],
                                                                         unique_event_id_fields[1],
                                                                         unique_event_id_fields[2],
@@ -187,6 +202,7 @@ class GaExportedNestedDataStorage(object):
     def get_event_params_query(self):
         qry = "SELECT "
 
+        # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
         qry += ",%s as %s" % (self.event_params_fields[0], self.event_params_fields[0].replace(".", "_"))
@@ -205,6 +221,7 @@ class GaExportedNestedDataStorage(object):
     def get_user_properties_query(self):
         qry = "SELECT "
 
+        # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
         qry += ",%s as %s" % (self.user_properties_fields[0], self.user_properties_fields[0].replace(".", "_"))
@@ -226,6 +243,7 @@ class GaExportedNestedDataStorage(object):
     def get_items_query(self):
         qry = "SELECT "
 
+        # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
         for f in self.items_fields:
@@ -241,6 +259,7 @@ class GaExportedNestedDataStorage(object):
     def get_events_query(self):
         qry = "SELECT "
 
+        # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
         for f in self.events_fields:
@@ -252,32 +271,39 @@ class GaExportedNestedDataStorage(object):
 
     def _create_valid_bigquery_field_name(self, p_field):
         '''
+        Creates a valid BigQuery field name
         BQ Fields must contain only letters, numbers, and underscores, start with a letter or underscore,
         and be at most 128 characters long.
         :param p_field: starting point of the field
         :return: cleaned big query field name
         '''
-        r = ""
+        r = "" # initialize emptry string
         for char in p_field.lower():
             if char.isalnum():
+                # if char is alphanumeric (either alphabets or numbers), append char to our string
                 r += char
             else:
+                # otherwise, replace it with underscore
                 r += "_"
+        # if field starts with digit, prepend it with underscore
         if r[0].isdigit():
             r = "_%s" % r
-        return r[:127]
+        return r[:127] # trim the string to the first x chars
 
     def run_query_job(self, query, table_type='flat'):
-        client = bigquery.Client()
+        client = bigquery.Client() # initialize BigQuery client
+        # get table name
         table_name = "{p}.{ds}.{t}_{d}" \
             .format(p=self.gcp_project, ds=self.dataset, t=table_type, d=self.date_shard)
         table_id = bigquery.Table(table_name)
+        # configure query job
         query_job_config = bigquery.QueryJobConfig(
             destination=table_id
             , dry_run=False
             , use_query_cache=False
             , labels={"queryfunction": "flatteningquery"}  # todo: apply proper labels
             , write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE)
+        # run the job
         query_job = client.query(query,
                                  job_config=query_job_config)
         # query_job.result()  # Waits for job to complete.
@@ -285,7 +311,9 @@ class GaExportedNestedDataStorage(object):
 
 
 def flatten_ga_data(event, context):
-    """Triggered from a message on a Cloud Pub/Sub topic.
+    """
+    Flatten GA4 data
+    Triggered from a message on a Cloud Pub/Sub topic.
     Args:
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
