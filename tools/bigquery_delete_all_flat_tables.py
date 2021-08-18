@@ -28,7 +28,7 @@ tables = list(client.list_tables(dataset_ref))  # API request(s), now you have t
 tables_to_delete=[]
 logging.info("discovered flat tables:")
 for table in tables:
-    if table.table_id.startswith("flat_"): #will perform the action only if the table has the desired prefix
+    if table.table_id.startswith("flat_"):  # will perform the action only if the table has the desired prefix
         tables_to_delete.append(table.table_id)
         logging.info(table.full_table_id)
 if delete:

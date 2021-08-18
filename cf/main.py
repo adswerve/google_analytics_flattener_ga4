@@ -278,14 +278,14 @@ class GaExportedNestedDataStorage(object):
         '''
         Creates a valid BigQuery field name
         BQ Fields must contain only letters, numbers, and underscores, start with a letter or underscore,
-        and be at most 128 characters long.
+        and be at most 300 characters long.
         :param p_field: starting point of the field
         :return: cleaned big query field name
         '''
         r = "" # initialize emptry string
         for char in p_field.lower():
             if char.isalnum():
-                # if char is alphanumeric (either alphabets or numbers), append char to our string
+                # if char is alphanumeric (either letters or numbers), append char to our string
                 r += char
             else:
                 # otherwise, replace it with underscore
@@ -293,7 +293,7 @@ class GaExportedNestedDataStorage(object):
         # if field starts with digit, prepend it with underscore
         if r[0].isdigit():
             r = "_%s" % r
-        return r[:127] # trim the string to the first x chars
+        return r[:300] # trim the string to the first x chars
 
     def run_query_job(self, query, table_type='flat'):
         client = bigquery.Client() # initialize BigQuery client
