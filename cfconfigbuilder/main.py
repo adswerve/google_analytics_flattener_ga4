@@ -15,10 +15,10 @@ class FlattenerDatasetConfigStorage(object):
     def upload_config(self,config):
         storage_client = storage.Client()  # initialize the GCS client
         bucket = storage_client.bucket(self.bucket_name)
-        blob = bucket.blob(os.environ["config_filename"])  # get config file
+        blob = bucket.blob(os.environ["config_filename"])  # get config info
 
         filepath = os.path.join(tempfile.gettempdir(), "tmp.json")
-        with open(filepath, "w") as f:  # write config file to file
+        with open(filepath, "w") as f:  # write config info to file
             f.write(json.dumps(config))
         blob.upload_from_filename(filepath)  # upload config file
 
@@ -92,8 +92,8 @@ def build_ga_flattener_config(request):
         Response object using `make_response`
         <http://flask.pocoo.org/docs/1.0/api/#flask.Flask.make_response>.
     """
-    config = FlattenerDatasetConfig()  # SQL query
+    config = FlattenerDatasetConfig()  # object with a SQL query
     store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
-    json_config = config.get_ga_datasets()  # bild a configurations dict which lists GA4 datasets to flatten.
+    json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
     store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))

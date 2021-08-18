@@ -5,24 +5,29 @@ import json
 import os
 import logging
 
+# configure logging
 logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
+        # get bucket name from env var
         self.bucket_name = os.environ["config_bucket_name"]
     def upload_config(self,config):
-        storage_client = storage.Client()
+        storage_client = storage.Client()  # initialize the GCS client
         bucket = storage_client.bucket(self.bucket_name)
-        blob = bucket.blob(os.environ["config_filename"])
+        blob = bucket.blob(os.environ["config_filename"])  # get config info
 
-        filepath = os.path.join(tempfile.gettempdir(), "tmp.json")
+        filepath = os.path.join(tempfile.gettempdir(), "tmp.json")  # write config info to file
         with open(filepath, "w") as f:
             f.write(json.dumps(config))
-        blob.upload_from_filename(filepath)
+        blob.upload_from_filename(filepath) # upload config file
 
 
 class FlattenerDatasetConfig(object):
     def __init__(self):
+        """
+       find ga4 datasets in project
+       """
         self.query = """
         EXECUTE IMMEDIATE (
  WITH schemas AS (
@@ -60,6 +65,9 @@ FROM (
         client = bigquery.Client()
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
+        # the dictionary will list ga4 datasets
+        # add tables information into dictionary
+        # by default, all these 4 tables flat tables will be written by the flattener
         for row in query_results:
             ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
                 ,os.environ["EVENT_PARAMS"]
@@ -75,8 +83,8 @@ def build_ga_flattener_config(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
-    config = FlattenerDatasetConfig()
-    store = FlattenerDatasetConfigStorage()
-    json_config = config.get_ga_datasets()
-    store.upload_config(config=json_config)
+    config = FlattenerDatasetConfig()  # object with a SQL query
+    store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
+    json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
+    store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))
