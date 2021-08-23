@@ -79,7 +79,7 @@ _**The following steps are only required if you plan to backfill historical tabl
 
 8. Install python 3.7 or higher
 
-9. From Mac Terminal or Windows Command Prompt, upgrade pip 
+9. From Mac Terminal or Windows Command Prompt, upgrade pip:
 
     Mac:
 
