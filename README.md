@@ -79,17 +79,57 @@ _**The following steps are only required if you plan to backfill historical tabl
 
 8. Install python 3.7 or higher
 
-9. From a command prompt, upgrade pip (Command:  ```py -m pip install --upgrade pip```)
+9. From Mac Terminal or Windows Command Prompt, upgrade pip 
+
+    Mac:
+
+    ```python3 -m pip install --upgrade pip```
+
+    Windows:
+
+    ```py -m pip install --upgrade pip```
 
 10. Navigate to the root directory of the source code that was downloaded or cloned in step 6 above.   
 
-11. From a command prompt, install python virtual environments (Command: ```py -m pip install --user virtualenv```)
+11. From a command prompt, install python virtual environments:
     
-12. Create a virtual environment for the source code in step 6  (Command: ```py -m venv venv```)
+    Mac:
+
+    ```python3 -m pip install --user virtualenv```
+
+    Windows:
+
+    ```py -m pip install --user virtualenv```
+
+12. Create a virtual environment for the source code in step 6:
+
+    Mac:
+
+    ```python3 -m venv venv_ga_flattener```
+
+    Windows:
+
+    ```py -m venv venv_ga_flattener```
     
-12. Activate the virtual environment in the step above.
+13. Activate the virtual environment in the step above:
+
+    Mac:
+
+    ```source venv_ga_flattener/bin/activate```
+
+    Windows:
+
+    ```.\venv_ga_flattener\Scripts\activate```
     
-13. Install the python dependent packages into the virtual environment.  (Command: ```pip install -r cf\requirements.txt```)
+14. Install the python dependent packages into the virtual environment:
+
+    Mac:
+
+    ```pip install -r cf/requirements.txt```
+
+    Windows:
+
+    ```pip install -r cf/requirements.txt```
 
 ## Installation steps ##
 1. Execute command in Google Cloud SDK Shell: gcloud config set project **[PROJECT_ID]**
