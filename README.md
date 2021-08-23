@@ -11,6 +11,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
   * [Local dependencies](#local-dependencies)
   * [Prerequisites](#prerequisites)
   * [Installation steps](#installation-steps)
+      + [Backfilling](#backfilling)
   * [Verification steps](#verification-steps)
   * [Un-install steps](#un-install-steps)
   * [Common errors](#common-errors)
@@ -75,7 +76,9 @@ If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@clouds
    
 7. Edit the _ga_flattener.yaml_ and _ga_flattener_colon.yaml_ files, specifically all occurrences of _properties-->codeBucket_ value . Set the value to **[BUCKET_NAME]** (see step above)
 
-_**The following steps are only required if you plan to backfill historical tables._**   
+### Backfilling ###
+
+**The following steps are only required if you plan to backfill historical tables.**
 
 8. Install python 3.7 or higher
 
