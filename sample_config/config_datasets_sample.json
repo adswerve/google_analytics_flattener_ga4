@@ -6,7 +6,7 @@
       "user_properties",
       "items"
     ],
-    "intraday_schedule": 2
+    "intraday_schedule": null
   },
   "analytics_251817041": {
     "tables_to_flatten": [
@@ -15,6 +15,6 @@
       "user_properties",
       "items"
     ],
-    "intraday_schedule": 2
+    "intraday_schedule": null
   }
 }
