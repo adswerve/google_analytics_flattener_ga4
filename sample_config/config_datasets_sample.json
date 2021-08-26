@@ -1,20 +1,20 @@
 {
   "analytics_222460912": {
-    "daily": [
+    "tables_to_flatten": [
       "events",
       "event_params",
       "user_properties",
       "items"
     ],
-    "intraday": 2
+    "intraday_schedule": 2
   },
   "analytics_251817041": {
-    "daily": [
+    "tables_to_flatten": [
       "events",
       "event_params",
       "user_properties",
       "items"
     ],
-    "intraday": 2
+    "intraday_schedule": 2
   }
 }
