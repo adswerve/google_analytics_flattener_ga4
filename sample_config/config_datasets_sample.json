@@ -1,1 +1,20 @@
-{"analytics_222460912": ["events", "event_params", "user_properties", "items"], "analytics_251817041": ["events", "event_params", "user_properties", "items"], "intraday": [{"analytics_222460912": 1}, {"analytics_251817041": null}]}
+{
+  "analytics_222460912": {
+    "daily": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ],
+    "intraday": 2
+  },
+  "analytics_251817041": {
+    "daily": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ],
+    "intraday": 2
+  }
+}
