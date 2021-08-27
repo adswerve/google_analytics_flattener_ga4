@@ -184,7 +184,7 @@ _**The following steps are only required if you plan to backfill historical tabl
     
 ## Repository directories ##
 * cf : pub/sub triggered cloud function that executes a destination
-  query to unnest(flatten) the ```analytics_{ga4_property_id}.ga_sessions_yyyymmdd``` table
+  query to unnest(flatten) the ```analytics_{ga4_property_id}.events_yyyymmdd``` table
   immediately upon arrival in BigQuery into these tables, depending on the configuration:
   * flat_event_params_yyyymmdd
   * flat_events_yyyymmdd
@@ -193,7 +193,7 @@ _**The following steps are only required if you plan to backfill historical tabl
 * tests : units test for both cloud functions and deployment manager
   templates
 * cfconfigbuilder(ps) : cloud function that finds all
-  BigQuery datasets that have a ga_sessions table and adds them to the
+  BigQuery datasets that have an events table and adds them to the
   default configuration on Google's Cloud Storage in the following
   location:
   [deployment_name]-[PROJECT_NUMBER]-adswerve-ga-flat-config\config_datasets.json
