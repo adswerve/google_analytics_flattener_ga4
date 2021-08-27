@@ -8,6 +8,7 @@ from tests.test_generate_config_pst import TestGenerateConfigPst
 from tests.test_generate_config_b import TestGenerateConfigB
 from tests.test_build_ga_flattener_config import TestCFBuildFlattenerGaDatasetConfig
 from tests.test_verify_queries import TestGenerateQuery
+from tests.test_create_intraday_schedule import TestBuildIntradayFlatteningSchedule
 
 
 if __name__ == '__main__':
@@ -23,6 +24,7 @@ if __name__ == '__main__':
     test_suite.addTest(unittest.makeSuite(TestInputValidator))
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethods))
     test_suite.addTest(unittest.makeSuite(TestGenerateQuery))
+    test_suite.addTest(unittest.makeSuite(TestBuildIntradayFlatteningSchedule))
 
     # verbosity: 0 (quiet), 1 (default), 2 (verbose)
     runner = unittest.TextTestRunner(verbosity=2)

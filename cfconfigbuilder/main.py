@@ -77,24 +77,50 @@ FROM (
 
         Returns:
             json_config:
-                {"analytics_222460912": ["events", "event_params", "user_properties", "items"],
-                "analytics_251817041": ["events", "event_params", "user_properties", "items"],
-                "intraday":
-                    [{"analytics_222460912": null}, {"analytics_251817041": null}]}
+                {
+                  "analytics_222460912": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ],
+                    "intraday_schedule": null
+                  },
+                  "analytics_251817041": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ],
+                    "intraday_schedule": null
+                  }
+                }
+        Config file, after being transformed by this function, answers the following questions:
+            In what datasets do we want to flatten intraday data?
 
-        In what datasets do we want to flatten intraday data?
-
-        How often do we update flat intraday data (e.g., every X hours).
-            Default frequency is null (meaning we won't be flattening intraday data)
+            How often do we update flat intraday data (e.g., every X hours).
+                Default frequency is null (meaning we won't be flattening intraday data)
 
         Example:
             Config file contains this:
-                "intraday": [{"analytics_222460912": 3}]
+                "analytics_222460912": {
+                    "tables_to_flatten": [
+                      ...
+                    ],
+                    "intraday_schedule": 3
+                  }
 
                 It means we will be flattening intraday data for "analytics_222460912" every 3 hours.
 
             Config file contains this:
-                "intraday": [{"analytics_222460912": null}]
+                "analytics_222460912": {
+                    "tables_to_flatten": [
+                      ...
+                    ],
+                    "intraday_schedule": null
+                  }
 
                 We won't be flattening intraday data in "analytics_222460912"
 
