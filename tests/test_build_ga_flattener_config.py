@@ -18,7 +18,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         if json_config.keys():
             for key, value in json_config.items():
                 self.assertIsInstance(key,str)
-                self.assertIsInstance(value,list)
+                self.assertIsInstance(value,dict)
         self.assertTrue(True)
 
     def test_build_flattener_ga_dataset_config_ps(self):
@@ -31,5 +31,5 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         if json_config.keys():
             for key, value in json_config.items():
                 self.assertIsInstance(key,str)
-                self.assertIsInstance(value,list)
+                self.assertIsInstance(value,dict)
         self.assertTrue(True)

@@ -125,11 +125,11 @@ FROM (
                 We won't be flattening intraday data in "analytics_222460912"
 
         """
-        intraday_configuration = {"intraday":[]}
-        for key, value in json_config.items():
-            intraday_configuration["intraday"].append({key:None})
-        json_config.update(intraday_configuration)
-        return json_config
+        json_config_updated = {}
+
+        for dataset, list_of_tables in json_config.items():
+            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": None}})
+        return json_config_updated
 
 
 def build_ga_flattener_config(request):

@@ -66,6 +66,16 @@ FROM (
                 ]
         return ret_val
 
+    def add_intraday_info_into_config(self, json_config):
+        """
+        Adds intraday config params to config files.
+        """
+        json_config_updated = {}
+
+        for dataset, list_of_tables in json_config.items():
+            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": None}})
+        return json_config_updated
+
 
 def build_ga_flattener_config(event, context):
     """Triggered from a message on a Cloud Pub/Sub topic.
@@ -76,5 +86,6 @@ def build_ga_flattener_config(event, context):
     config = FlattenerDatasetConfig()
     store = FlattenerDatasetConfigStorage()
     json_config = config.get_ga_datasets()
+    json_config = config.add_intraday_info_into_config(json_config)
     store.upload_config(config=json_config)
     print("build_ga_flattener_config: {}".format(json.dumps(json_config)))
