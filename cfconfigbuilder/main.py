@@ -8,7 +8,8 @@ import os
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         self.bucket_name = os.environ["config_bucket_name"]
-    def upload_config(self,config):
+
+    def upload_config(self, config):
         storage_client = storage.Client()
         bucket = storage_client.bucket(self.bucket_name)
         blob = bucket.blob(os.environ["config_filename"])
@@ -59,11 +60,11 @@ FROM (
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
         for row in query_results:
-            ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
-                ,os.environ["EVENT_PARAMS"]
-                ,os.environ["USER_PROPERTIES"]
-                ,os.environ["ITEMS"]
-                ]
+            ret_val[(row.dataset_id)] = [os.environ["EVENTS"]
+                , os.environ["EVENT_PARAMS"]
+                , os.environ["USER_PROPERTIES"]
+                , os.environ["ITEMS"]
+                                         ]
         return ret_val
 
     def add_intraday_info_into_config(self, json_config):
