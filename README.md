@@ -1,5 +1,7 @@
 # README #
 
+#TODO: add info about 522429634784-function-code-staging
+
 Google Analytics 4 Flattener. A Google Cloud Platform (GCP) solution that unnests (
 flattens) [Google Analytics 4 (GA4) Data stored in Bigquery](https://support.google.com/analytics/answer/7029846?hl=en)
 .  
@@ -14,8 +16,8 @@ The GCP resources for the solutions are installed via Deployment Manager.
 * [Purpose](#purpose)
 * [Local dependencies](#local-dependencies)
 * [Prerequisites](#prerequisites)
+  + [Backfilling prerequisites](#backfilling-prerequisites)
 * [Installation steps](#installation-steps)
-    + [Backfilling](#backfilling)
 * [Verification steps](#verification-steps)
 * [Un-install steps](#un-install-steps)
 * [Common errors](#common-errors)
@@ -77,6 +79,9 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * Logs Configuration Writer
     * Cloud Functions Developer
     * Pub/Sub Admin
+    
+5. As the installing user for **[PROJECT_ID]**, create a bucket or use an existing bucket for staging code, for example:
+   **[PROJECT_NUMBER]**-function-code-staging.  Referred to as **[BUCKET_NAME]**.
 
 If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com yet. To fix
 this, enable Compute Engine API and then disable it. The service account **[PROJECT_NUMBER]**
@@ -85,9 +90,9 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 6. Clone this github repo or download the source code from the releases section to your local machine or cloud shell.
 
 7. Edit the _ga_flattener.yaml_ and _ga_flattener_colon.yaml_ files, specifically all occurrences of _properties-->
-   codeBucket_ value.
+   codeBucket_ value. Set the value to **[BUCKET_NAME]** (see step above)
 
-### Backfilling ###
+### Backfilling prerequisites ###
 
 **The following steps are only required if you plan to backfill historical tables.**
 
@@ -186,6 +191,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
   will flatten all possible nested tables for GA4 property 123456789 but only events_ and event_params_ for GA4 property
   987654321.
 
+### Backfilling steps
 _**The following steps are only required if you plan to backfill historical tables._**
 
 2. Modify values in the configuration section of tools/pubsub_message_publish.py accordingly.  **Suggestion:** Use a
