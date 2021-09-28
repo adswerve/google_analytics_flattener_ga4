@@ -214,21 +214,21 @@ _**The following steps are only required if you plan to backfill historical tabl
 ### Install ###
 
 
-    Message: AccessDeniedException: 403 **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com does not have
+- **Message**: AccessDeniedException: 403 **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com does not have
       storage.objects.list access to the Google Cloud Storage bucket.
     
-    Resolution: Ensure the value (Cloud Storage bucket name) configured in "codeBucket" setting of ga_flattener*
+- **Resolution**: Ensure the value (Cloud Storage bucket name) configured in "codeBucket" setting of ga_flattener*
       .yaml is correct. **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com only requires GCP predefined role of _Cloud
       Build Service Account_
 
 ### Verification ###
 
 
-    Message: google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials.
+- **Message**: google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials.
       Please set GOOGLE_APPLICATION_CREDENTIALS or explicitly create credentials and re-run the application. For more
       information, please see https://cloud.google.com/docs/authentication/getting-started
     
-    Resolution: Ensure you run the gcloud command ```gcloud auth application-default login``` as this sets up the
+- **Resolution**: Ensure you run the gcloud command ```gcloud auth application-default login``` as this sets up the
       required authentication and it'll just work.
 
 ## Repository directories ##
