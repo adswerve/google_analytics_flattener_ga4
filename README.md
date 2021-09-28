@@ -152,12 +152,13 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
    above prerequisites.
 3. Navigate (locally) to root directory of this repository
 4. If **[PROJECT_ID]** does **NOT** contain a colon (:) execute command:
-    * gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener.yaml
+
+     ```gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener.yaml```
 
    otherwise follow these steps:
     1. execute command:
 
-    * ```gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener_colon.yaml```
+       ```gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener_colon.yaml```
 
     2. Trigger function (with a blank message) named **[deployment_name]**-cfconfigbuilderps. It will create the
        necessary configuration file in the applications Google Coud Storage bucket. An easy method to do this is to
@@ -212,20 +213,22 @@ _**The following steps are only required if you plan to backfill historical tabl
 
 ### Install ###
 
-*
-    * **Message:** AccessDeniedException: 403 **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com does not have
+
+    Message: AccessDeniedException: 403 **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com does not have
       storage.objects.list access to the Google Cloud Storage bucket.
-    * **Resolution:** Ensure the value (Cloud Storage bucket name) configured in "codeBucket" setting of ga_flattener*
+    
+    Resolution: Ensure the value (Cloud Storage bucket name) configured in "codeBucket" setting of ga_flattener*
       .yaml is correct. **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com only requires GCP predefined role of _Cloud
       Build Service Account_
 
 ### Verification ###
 
-*
-    * **Message:**   google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials.
+
+    Message: google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials.
       Please set GOOGLE_APPLICATION_CREDENTIALS or explicitly create credentials and re-run the application. For more
       information, please see https://cloud.google.com/docs/authentication/getting-started
-    * **Resolution:** Ensure you run the gcloud command ```gcloud auth application-default login``` as this sets up the
+    
+    Resolution: Ensure you run the gcloud command ```gcloud auth application-default login``` as this sets up the
       required authentication and it'll just work.
 
 ## Repository directories ##
