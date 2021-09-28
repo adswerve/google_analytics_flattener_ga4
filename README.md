@@ -19,6 +19,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
   + [Backfilling prerequisites](#backfilling-prerequisites)
 * [Installation steps](#installation-steps)
 * [Verification steps](#verification-steps)
+  + [Backfilling steps](#backfilling-steps)
 * [Un-install steps](#un-install-steps)
 * [Common errors](#common-errors)
     + [Install](#install)
@@ -192,7 +193,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
   987654321.
 
 ### Backfilling steps
-_**The following steps are only required if you plan to backfill historical tables._**
+**The following steps are only required if you plan to backfill historical tables.**
 
 2. Modify values in the configuration section of tools/pubsub_message_publish.py accordingly.  **Suggestion:** Use a
    small date range to start, like yesterday only.
