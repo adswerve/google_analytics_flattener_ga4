@@ -202,10 +202,10 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 4. Run tools/pubsub_message_publish.py locally, which will publish a simulated logging event of GA4 data being ingested
    into BigQuery. Check dataset(s) that are configured for new date sharded tables such as (depending on what is
    configured):
-    * flat_event_params_(x)
-    * flat_events_(x)
-    * flat_items_(x)
-    * flat_user_properties_(x)
+    * flat_event_params_yyyymmdd
+    * flat_events_yyyymmdd
+    * flat_items_yyyymmdd
+    * flat_user_properties_yyyymmdd
 
 ## Un-install steps ##
 
