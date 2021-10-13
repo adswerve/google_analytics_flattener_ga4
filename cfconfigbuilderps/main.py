@@ -5,9 +5,6 @@ import json
 import os
 import logging
 
-# configure logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
-
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
