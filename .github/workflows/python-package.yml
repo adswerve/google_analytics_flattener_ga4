@@ -8,7 +8,7 @@ env:
 
 on:
   push:
-    branches: [ master, feature/ga4-intraday ]
+    branches: [ master, feature/ga4-cfintraday ]
   pull_request:
     branches: [ master ]
 

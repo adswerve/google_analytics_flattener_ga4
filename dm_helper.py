@@ -58,12 +58,14 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"events_intraday"
         '''
         self.user_environment_variables = {
-            "config_bucket_name": self.get_bucket_name(),
-            "config_filename": "config_datasets.json",
+            "CONFIG_BUCKET_NAME": self.get_bucket_name(),
+            "CONFIG_FILENAME": "config_datasets.json",
             "EVENTS": "events",
             "EVENT_PARAMS": "event_params",
             "USER_PROPERTIES": "user_properties",
-            "ITEMS": "items"
+            "ITEMS": "items",
+            "LOCATION_ID": "us-central1",
+            "TOPIC_NAME": self.get_topic_name()
         }
 
     def get_topic_name(self):

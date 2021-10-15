@@ -22,8 +22,8 @@ class InputValidator(object):
             print(f'invalid message: {message_payload}')
         try:
             storage_client = storage.Client()
-            bucket = storage_client.bucket(os.environ["config_bucket_name"])
-            blob = bucket.blob(os.environ["config_filename"])
+            bucket = storage_client.bucket(os.environ["CONFIG_BUCKET_NAME"])
+            blob = bucket.blob(os.environ["CONFIG_FILENAME"])
             downloaded_file = os.path.join(tempfile.gettempdir(), "tmp.json")
             blob.download_to_filename(downloaded_file)
             with open(downloaded_file, "r") as config_json:
@@ -32,6 +32,8 @@ class InputValidator(object):
             print(f'flattener configuration error: {e}')
 
     def valid_dataset(self):
+        print(self.dataset)
+        print(self.config.keys())
         return self.dataset in self.config.keys()
 
     def flatten_nested_table(self, nested_table):

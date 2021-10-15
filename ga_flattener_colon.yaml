@@ -26,8 +26,8 @@ imports:
 - path: cfconfigbuilder/requirements.txt
 - path: cfconfigbuilderps/main.py
 - path: cfconfigbuilderps/requirements.txt
-- path: intraday/main.py
-- path: intraday/requirements.txt
+- path: cfintraday/main.py
+- path: cfintraday/requirements.txt
 
 resources:
 - name: y_resource_bucket_name
@@ -66,8 +66,8 @@ resources:
 - name: function_intraday
   type: dmt_cloud_function.py
   properties:
-    # All the files that start with this prefix will be packed in the Cloud Function that builds the intraday schedule
-    codeLocation: intraday/
+    # All the files that start with this prefix will be packed in the Cloud Function that builds the cfintraday schedule
+    codeLocation: cfintraday/
     codeBucket: 464892960897-function-code-staging
     triggerType: gcs
     location: us-east1

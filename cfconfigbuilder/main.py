@@ -7,12 +7,12 @@ import os
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
-        self.bucket_name = os.environ["config_bucket_name"]
+        self.bucket_name = os.environ["CONFIG_BUCKET_NAME"]
 
     def upload_config(self, config):
         storage_client = storage.Client()
         bucket = storage_client.bucket(self.bucket_name)
-        blob = bucket.blob(os.environ["config_filename"])
+        blob = bucket.blob(os.environ["CONFIG_FILENAME"])
 
         filepath = os.path.join(tempfile.gettempdir(), "tmp.json")
         with open(filepath, "w") as f:
@@ -67,9 +67,9 @@ FROM (
                                          ]
         return ret_val
 
-    def add_intraday_info_into_config(self, json_config):
+    def add_intraday_info_into_config(self, json_config, intraday_schedule=None):
         """
-        Adds intraday config params to config files.
+        Adds cfintraday config params to config files.
 
         Args:
             json_config:
@@ -99,10 +99,10 @@ FROM (
                   }
                 }
         Config file, after being transformed by this function, answers the following questions:
-            In what datasets do we want to flatten intraday data?
+            In what datasets do we want to flatten cfintraday data?
 
-            How often do we update flat intraday data (e.g., every X hours).
-                Default frequency is null (meaning we won't be flattening intraday data)
+            How often do we update flat cfintraday data (e.g., every X hours).
+                Default frequency is null (meaning we won't be flattening cfintraday data)
 
         Example:
             Config file contains this:
@@ -113,7 +113,7 @@ FROM (
                     "intraday_schedule": 3
                   }
 
-                It means we will be flattening intraday data for "analytics_222460912" every 3 hours.
+                It means we will be flattening cfintraday data for "analytics_222460912" every 3 hours.
 
             Config file contains this:
                 "analytics_222460912": {
@@ -123,13 +123,13 @@ FROM (
                     "intraday_schedule": null
                   }
 
-                We won't be flattening intraday data in "analytics_222460912"
+                We won't be flattening cfintraday data in "analytics_222460912"
 
         """
         json_config_updated = {}
 
         for dataset, list_of_tables in json_config.items():
-            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": None}})
+            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
         return json_config_updated
 
 

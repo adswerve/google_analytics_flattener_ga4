@@ -7,11 +7,11 @@ import os
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
-        self.bucket_name = os.environ["config_bucket_name"]
+        self.bucket_name = os.environ["CONFIG_BUCKET_NAME"]
     def upload_config(self,config):
         storage_client = storage.Client()
         bucket = storage_client.bucket(self.bucket_name)
-        blob = bucket.blob(os.environ["config_filename"])
+        blob = bucket.blob(os.environ["CONFIG_FILENAME"])
 
         filepath = os.path.join(tempfile.gettempdir(), "tmp.json")
         with open(filepath, "w") as f:
@@ -68,7 +68,7 @@ FROM (
 
     def add_intraday_info_into_config(self, json_config):
         """
-        Adds intraday config params to config files.
+        Adds cfintraday config params to config files.
         """
         json_config_updated = {}
 
