@@ -139,13 +139,13 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         self.assertTrue(True)
         self.assertTrue(True)
 
-    # def test_create_intraday_flattening_schedule_trigger_with_log(self):
-    #     # https://medium.com/google-cloud/python-and-stackdriver-logging-2ade460c90e3
-    #     client = google.cloud.logging.Client()
-    #     logger = client.logger('unit_test')
-    #     logger.log_text('unit test starts')
-    #     logger.log_proto(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED))
-    #     # logger.log_proto(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED) #not working google.protobuf.json_format.ParseError: @type is missing when parsing any message.
-    #     logger.log_struct(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED)
-    #     logger.log_text(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED))
-    #     logger.log_text('unit test ends')
+    def test_create_intraday_flattening_schedule_trigger_with_log(self):
+        # https://medium.com/google-cloud/python-and-stackdriver-logging-2ade460c90e3
+        client = google.cloud.logging.Client()
+        logger = client.logger('unit_test')
+        logger.log_text('unit test starts')
+        # logger.log_proto(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED)) # not working , empty log
+        # logger.log_proto(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED) #not working google.protobuf.json_format.ParseError: @type is missing when parsing any message.
+        logger.log_struct(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED) # most promising test
+        # logger.log_text(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED)) # not formatted correctly
+        logger.log_text('unit test ends')
