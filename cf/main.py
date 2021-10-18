@@ -12,8 +12,8 @@ class InputValidator(object):
         try:
             message_payload = json.loads(base64.b64decode(event['data']).decode('utf-8'))
             bq_destination_table = \
-            message_payload['protoPayload']['serviceData']['jobCompletedEvent']['job']['jobConfiguration']['load'][
-                'destinationTable']
+                message_payload['protoPayload']['serviceData']['jobCompletedEvent']['job']['jobConfiguration']['load'][
+                    'destinationTable']
             self.gcp_project = bq_destination_table['projectId']
             self.dataset = bq_destination_table['datasetId']
             self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
@@ -32,12 +32,10 @@ class InputValidator(object):
             print(f'flattener configuration error: {e}')
 
     def valid_dataset(self):
-        print(self.dataset)
-        print(self.config.keys())
         return self.dataset in self.config.keys()
 
     def flatten_nested_table(self, nested_table):
-        return nested_table in self.config[self.dataset]
+        return nested_table in self.config[self.dataset]["tables_to_flatten"]
 
 
 class GaExportedNestedDataStorage(object):
@@ -176,12 +174,11 @@ class GaExportedNestedDataStorage(object):
             "ecommerce.transaction_id"
         ]
 
-
     def get_unique_event_id(self, unique_event_id_fields):
         return 'CONCAT(%s, "_", %s, "_", %s, "_", %s) as event_id' % (unique_event_id_fields[0],
-                                                                        unique_event_id_fields[1],
-                                                                        unique_event_id_fields[2],
-                                                                        unique_event_id_fields[3])
+                                                                      unique_event_id_fields[1],
+                                                                      unique_event_id_fields[2],
+                                                                      unique_event_id_fields[3])
 
     def get_event_params_query(self):
         qry = "SELECT "
@@ -191,8 +188,8 @@ class GaExportedNestedDataStorage(object):
         qry += ",%s as %s" % (self.event_params_fields[0], self.event_params_fields[0].replace(".", "_"))
 
         qry += ",CONCAT(IFNULL(%s, ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), '')) AS event_params_value" \
-               % (self.event_params_fields[1], self.event_params_fields[2], self.event_params_fields[3], self.event_params_fields[4])
-
+               % (self.event_params_fields[1], self.event_params_fields[2], self.event_params_fields[3],
+                  self.event_params_fields[4])
 
         qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
                                                  d=self.date_shard)
@@ -220,7 +217,6 @@ class GaExportedNestedDataStorage(object):
         qry += ",UNNEST (user_properties) AS user_properties"
 
         return qry
-
 
     def get_items_query(self):
         qry = "SELECT "
