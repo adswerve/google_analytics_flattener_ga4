@@ -158,38 +158,38 @@ def manage_intraday_schedule(event, context="context"):
 # TODO: Install into a diff project and test with a live daily table
 
 # TODO: warning
-"""
-cfintraday\main.py:36
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:36: DeprecationWarning: invalid escape sequence \d
-    self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
-
-cfintraday\main.py:37
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:37: DeprecationWarning: invalid escape sequence \d
-    self.table_name = re.search('(events_intraday)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(
-
-cfintraday\main.py:46
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:46: DeprecationWarning: invalid escape sequence \/
-    'projects\/(.*?)\/datasets\/analytics_\d\d\d\d\d\d\d\d\d\/tables\/events_intraday_20\d\d\d\d\d\d$',
-
-cfintraday\main.py:49
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:49: DeprecationWarning: invalid escape sequence \d
-    self.dataset = re.search('(analytics_\d\d\d\d\d\d\d\d\d)', bq_destination_table).group(1)
-
-cfintraday\main.py:50
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:50: DeprecationWarning: invalid escape sequence \d
-    self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table).group(1)
-
-cfintraday\main.py:51
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:51: DeprecationWarning: invalid escape sequence \d
-    self.table_name = re.search('(events_intraday)_20\d\d\d\d\d\d$', bq_destination_table).group(1)
-
-cf\main.py:19
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cf\main.py:19: DeprecationWarning: invalid escape sequence \d
-    self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
-
-cf\main.py:20
-  C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cf\main.py:20: DeprecationWarning: invalid escape sequence \d
-    self.table_name = re.search('(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
-
--- Docs: https://docs.pytest.org/en/stable/warnings.html
-"""
+# """
+# cfintraday\main.py:36
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:36: DeprecationWarning: invalid escape sequence \d
+#     self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
+#
+# cfintraday\main.py:37
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:37: DeprecationWarning: invalid escape sequence \d
+#     self.table_name = re.search('(events_intraday)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(
+#
+# cfintraday\main.py:46
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:46: DeprecationWarning: invalid escape sequence \/
+#     'projects\/(.*?)\/datasets\/analytics_\d\d\d\d\d\d\d\d\d\/tables\/events_intraday_20\d\d\d\d\d\d$',
+#
+# cfintraday\main.py:49
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:49: DeprecationWarning: invalid escape sequence \d
+#     self.dataset = re.search('(analytics_\d\d\d\d\d\d\d\d\d)', bq_destination_table).group(1)
+#
+# cfintraday\main.py:50
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:50: DeprecationWarning: invalid escape sequence \d
+#     self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table).group(1)
+#
+# cfintraday\main.py:51
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cfintraday\main.py:51: DeprecationWarning: invalid escape sequence \d
+#     self.table_name = re.search('(events_intraday)_20\d\d\d\d\d\d$', bq_destination_table).group(1)
+#
+# cf\main.py:19
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cf\main.py:19: DeprecationWarning: invalid escape sequence \d
+#     self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
+#
+# cf\main.py:20
+#   C:\Users\Ruslan Bergenov\dev\flattener\GA4F_development_ga4\cf\main.py:20: DeprecationWarning: invalid escape sequence \d
+#     self.table_name = re.search('(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
+#
+# -- Docs: https://docs.pytest.org/en/stable/warnings.html
+# """
