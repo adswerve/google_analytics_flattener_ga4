@@ -69,7 +69,7 @@ resources:
     # All the files that start with this prefix will be packed in the Cloud Function that builds the cfintraday schedule
     codeLocation: cfintraday/
     codeBucket: 464892960897-function-code-staging
-    triggerType: gcs
+    triggerType: pubsub
     location: us-east1
     timeout: 60s
     runtime: python37

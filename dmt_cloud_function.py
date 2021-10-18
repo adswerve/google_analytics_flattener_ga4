@@ -118,11 +118,18 @@ def GenerateConfig(ctx):
   if ctx.properties['triggerType'] == 'http':
       cloud_function['properties']['httpsTrigger']= {}
   elif ctx.properties['triggerType'] == 'pubsub':
-      cloud_function['properties']['eventTrigger']= {
+      if ctx.properties['codeLocation'] == "cfintraday/":
+          cloud_function['properties']['eventTrigger'] = {
               'resource': 'projects/{gcp_project}/topics/{topic_name}{config_topic}'.format(
-                  gcp_project=config.get_project(),topic_name=config.get_topic_name()
-                  ,config_topic="config" if function_name.__contains__("config") else ""),
+                  gcp_project=config.get_project(), topic_name=config.get_topic_name(intraday=True)
+                  , config_topic="config" if function_name.__contains__("config") else ""),
               'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
+      else:
+          cloud_function['properties']['eventTrigger']= {
+                  'resource': 'projects/{gcp_project}/topics/{topic_name}{config_topic}'.format(
+                      gcp_project=config.get_project(),topic_name=config.get_topic_name()
+                      ,config_topic="config" if function_name.__contains__("config") else ""),
+                  'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
   elif ctx.properties['triggerType'] == 'gcs':
       cloud_function['properties']['eventTrigger'] = {
           'resource': 'projects/{gcp_project}/buckets/{bucket_name}'.format(

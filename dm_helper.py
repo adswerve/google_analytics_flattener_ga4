@@ -57,6 +57,11 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         protoPayload.authenticationInfo.principalEmail="firebase-measurement@system.gserviceaccount.com" 
         NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"events_intraday"
         '''
+        self.FILTER_INTRADAY = '''
+        resource.type="bigquery_resource" 
+        protoPayload.methodName="tableservice.insert" OR protoPayload.methodName="tableservice.delete"
+        "events_intraday_"
+        '''
         self.user_environment_variables = {
             "CONFIG_BUCKET_NAME": self.get_bucket_name(),
             "CONFIG_FILENAME": "config_datasets.json",
@@ -68,17 +73,24 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "TOPIC_NAME": self.get_topic_name()
         }
 
-    def get_topic_name(self):
+    def get_topic_name(self, intraday=False):
         '''
         TODO: make sure returned value meets resource name requirements defined in GCP
         '''
-        return '{d}-topic'.format(d=self._createValidGCPResourceName(self.deployment))
+        if intraday:
+            return '{d}-topic-intraday'.format(d=self._createValidGCPResourceName(self.deployment))
+        else:
+            return '{d}-topic'.format(d=self._createValidGCPResourceName(self.deployment))
 
-    def get_sink_name(self):
+    def get_sink_name(self, intraday=False):
         '''
         TODO: make sure returned value meets resource name requirements defined in GCP
         '''
-        return '{d}-sink'.format(d=self._createValidGCPResourceName(self.deployment)
+        if intraday:
+            return '{d}-sink-intraday'.format(d=self._createValidGCPResourceName(self.deployment)
+                                     , n=self._createValidGCPResourceName(self.name))
+        else:
+            return '{d}-sink'.format(d=self._createValidGCPResourceName(self.deployment)
                                  , n=self._createValidGCPResourceName(self.name))
 
     def get_project(self):
@@ -91,12 +103,15 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._createValidGCPResourceName(self.deployment)
                                                         , n=self._createValidGCPResourceName(self.get_project_number()))[:62]
 
-    def get_filter(self):
+    def get_filter(self, intraday=False):
         #TODO: add feature for 3 options:
         #       1. Daily tables only
         #       2. Intra day tables only
         #       3. Both Intra and Daily tables
-        return self.FILTER
+        if intraday:
+            return self.FILTER_INTRADAY
+        else:
+            return self.FILTER
 
     def _createValidGCPResourceName(self,pField):
         '''
