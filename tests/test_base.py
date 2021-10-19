@@ -30,5 +30,6 @@ class BaseUnitTest(unittest.TestCase):
         for key, value in configuration.user_environment_variables.items():
             os.environ[key] = value
         # this is needed for GitHub CI/CD
+        # you can comment this out for local unit testing and auth with gcloud auth application-default login
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
                 os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
