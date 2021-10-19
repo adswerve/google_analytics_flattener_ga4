@@ -8,7 +8,7 @@ from tests.test_generate_config_pst import TestGenerateConfigPst
 from tests.test_generate_config_b import TestGenerateConfigB
 from tests.test_build_ga_flattener_config import TestCFBuildFlattenerGaDatasetConfig
 from tests.test_verify_queries import TestGenerateQuery
-from tests.test_create_intraday_schedule import TestManageIntradayFlatteningSchedule
+from tests.test_manage_intraday_schedule import TestManageIntradayFlatteningSchedule
 
 
 if __name__ == '__main__':
