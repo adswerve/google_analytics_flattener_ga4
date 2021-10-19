@@ -150,7 +150,6 @@ def manage_intraday_schedule(event, context="context"):
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for intraday flattening')
 
-
 # TODO: link the Cloud Function directly to logs
 
 # TODO: nice-to-have: refactor f strings, so we use the same format (?)

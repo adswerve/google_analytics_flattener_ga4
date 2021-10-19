@@ -74,4 +74,4 @@ resources:
     timeout: 60s
     runtime: python37
     availableMemoryMb: 128
-    entryPoint: create_intraday_schedule
+    entryPoint: manage_intraday_schedule
