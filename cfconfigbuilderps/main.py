@@ -66,14 +66,14 @@ FROM (
                 ]
         return ret_val
 
-    def add_intraday_info_into_config(self, json_config):
+    def add_intraday_info_into_config(self, json_config , intraday_schedule=None):
         """
         Adds cfintraday config params to config files.
         """
         json_config_updated = {}
 
         for dataset, list_of_tables in json_config.items():
-            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": None}})
+            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
         return json_config_updated
 
 
