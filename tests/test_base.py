@@ -29,5 +29,6 @@ class BaseUnitTest(unittest.TestCase):
         #Set user environment variables
         for key, value in configuration.user_environment_variables.items():
             os.environ[key] = value
-        # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
-        #         os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
+        # this is needed for GitHub CI/CD
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
+                os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
