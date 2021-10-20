@@ -166,7 +166,7 @@ def manage_intraday_schedule(event, context="context"):
             # if it already exists
             # 409 already exists
             except GoogleAPICallError as e:
-                logging.critical("Error: %s" % e)
+                logging.critical(f"Error creating a scheduler job {job_id_full_path}: {e}")
 
 
 
@@ -180,13 +180,11 @@ def manage_intraday_schedule(event, context="context"):
             # if it doesn't exist
             # 404 job not found
             except GoogleAPICallError as e:
-                logging.critical("Error: %s" % e)
+                logging.critical(f"Error creating a scheduler job {job_id_full_path}: {e}")
 
 
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for intraday flattening')
-
-# TODO: error handling while creating and deleting the schedule. use a warning and provide more info
 
 # TODO: link the Cloud Function directly to logs
 
