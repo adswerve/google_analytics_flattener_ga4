@@ -10,7 +10,6 @@ from tests.test_build_ga_flattener_config import TestCFBuildFlattenerGaDatasetCo
 from tests.test_verify_queries import TestGenerateQuery
 from tests.test_manage_intraday_schedule import TestManageIntradayFlatteningSchedule
 
-
 if __name__ == '__main__':
     test_suite = unittest.TestSuite()
 

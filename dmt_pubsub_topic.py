@@ -35,4 +35,5 @@ def GenerateConfig(ctx):
             }
         ]
     }
+
     return resources

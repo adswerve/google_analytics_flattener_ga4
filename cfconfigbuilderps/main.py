@@ -3,12 +3,14 @@ from google.cloud import storage
 import tempfile
 import json
 import os
+import logging
 
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         self.bucket_name = os.environ["CONFIG_BUCKET_NAME"]
-    def upload_config(self,config):
+
+    def upload_config(self, config):
         storage_client = storage.Client()
         bucket = storage_client.bucket(self.bucket_name)
         blob = bucket.blob(os.environ["CONFIG_FILENAME"])
@@ -21,6 +23,9 @@ class FlattenerDatasetConfigStorage(object):
 
 class FlattenerDatasetConfig(object):
     def __init__(self):
+        """
+       find ga4 datasets in project
+       """
         self.query = """
         EXECUTE IMMEDIATE (
  WITH schemas AS (
@@ -58,12 +63,15 @@ FROM (
         client = bigquery.Client()
         query_job = client.query(self.query)
         query_results = query_job.result()  # Waits for job to complete.
+        # the dictionary will list GA4 datasets
+        # add tables information into dictionary
+        # by default, all these 4 tables flat tables will be written by the flattener
         for row in query_results:
-            ret_val[(row.dataset_id)]=[os.environ["EVENTS"]
-                ,os.environ["EVENT_PARAMS"]
-                ,os.environ["USER_PROPERTIES"]
-                ,os.environ["ITEMS"]
-                ]
+            ret_val[(row.dataset_id)] = [os.environ["EVENTS"]
+                , os.environ["EVENT_PARAMS"]
+                , os.environ["USER_PROPERTIES"]
+                , os.environ["ITEMS"]
+                                         ]
         return ret_val
 
     def add_intraday_info_into_config(self, json_config, intraday_schedule=None):
@@ -73,7 +81,8 @@ FROM (
         json_config_updated = {}
 
         for dataset, list_of_tables in json_config.items():
-            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
+            json_config_updated.update(
+                {dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
         return json_config_updated
 
 
@@ -83,9 +92,10 @@ def build_ga_flattener_config(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
-    config = FlattenerDatasetConfig()
-    store = FlattenerDatasetConfigStorage()
-    json_config = config.get_ga_datasets()
+
+    config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
+    store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
+    json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
     json_config = config.add_intraday_info_into_config(json_config)
-    store.upload_config(config=json_config)
-    print("build_ga_flattener_config: {}".format(json.dumps(json_config)))
+    store.upload_config(config=json_config)  # upload config file to GCS bucket
+    logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))

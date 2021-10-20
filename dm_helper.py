@@ -1,5 +1,5 @@
 class DeploymentConfiguration(object):
-    def __init__(self,context_environment_vars):
+    def __init__(self, context_environment_vars):
         '''
         From
         https://cloud.google.com/deployment-manager/docs/configuration/templates/use-environment-variables
@@ -34,7 +34,7 @@ class DeploymentConfiguration(object):
         "current_time": 1592015636
         "project_number": "423452468050"
         "username": "first.last@domain.com"
-        NOTE:  Dependent on which template calls generateConfig()
+        NOTE:  Dependent on which template calls generate_config()
         "name": "function"
         "type": "dmt_cloud_function.py"
 
@@ -47,8 +47,9 @@ class DeploymentConfiguration(object):
         self.type = context_environment_vars['type']
         self.username = context_environment_vars['username']
 
+
 class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
-    def __init__(self,context_environment_vars):
+    def __init__(self, context_environment_vars):
         super(GaFlattenerDeploymentConfiguration, self).__init__(context_environment_vars)
         self.FILTER = '''
         resource.type="bigquery_resource" 
@@ -100,8 +101,9 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         return self.deployment_gcp_project_number
 
     def get_bucket_name(self):
-        return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._createValidGCPResourceName(self.deployment)
-                                                        , n=self._createValidGCPResourceName(self.get_project_number()))[:62]
+        return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._create_valid_gcp_resource_name(self.deployment)
+                                                        , n=self._create_valid_gcp_resource_name(
+                self.get_project_number()))[:62]
 
     def get_filter(self, intraday=False):
         #TODO: add feature for 3 options:
@@ -113,18 +115,17 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         else:
             return self.FILTER
 
-    def _createValidGCPResourceName(self,pField):
+    def _create_valid_gcp_resource_name(self, p_field):
         '''
         GCP resources must only contain letters, numbers, undrescores, dots or dashes
         and be between 3 and 63 chars long.  Resources must start with a letter and may not end with a dash
-        :param pField: starting point of the field
+        :param p_field: starting point of the field
         :return: cleaned big query field name
         '''
         r = ""
-        for char in pField.lower():
+        for char in p_field.lower():
             if char.isalnum():
                 r += char
             else:
                 r += "-"
         return r
-
