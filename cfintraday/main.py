@@ -139,7 +139,7 @@ def manage_intraday_schedule(event, context="context"):
             # Use the client to send the job deletion request.
             try:
                 client.delete_job(name=job_id_full_path)
-                logging.info(f"Scheduler job {job_id_full_path} deleted.")
+                logging.info(f"Deleted Scheduler job: {job_id_full_path}")
 
             # if it doesn't exist
             # 404 job not found
