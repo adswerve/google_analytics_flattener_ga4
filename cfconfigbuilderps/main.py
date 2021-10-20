@@ -66,7 +66,7 @@ FROM (
                 ]
         return ret_val
 
-    def add_intraday_info_into_config(self, json_config , intraday_schedule=None):
+    def add_intraday_info_into_config(self, json_config, intraday_schedule=None):
         """
         Adds cfintraday config params to config files.
         """

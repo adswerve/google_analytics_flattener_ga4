@@ -147,5 +147,7 @@ _**The following steps are only required if you plan to backfill historical tabl
 
 ## Running unit tests ##
 * To run unit tests on your local machine, save an **sa.json** with GCP account credentials in the **sandbox** directory.
+* However, it's not necessary, you can also auth locally with ```gcloud auth application-default login```.
+* GitHub CI/CD pipeline uses automatically saves **sa.json** into the **sandbox** directory and sets ```GOOGLE_APPLICATION_CREDENTIALS``` to the filepath.
 * Unit tests run locally or via GitHub CI/CD workflow assume that GA4 flattener is installed into your GCP project.
 

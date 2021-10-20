@@ -8,9 +8,9 @@ class Context(object):
         self.properties = {}
         self.env = {
             "deployment": "ga-flattener-deployment"
-            , "project": "analyticspros.com:spotted-cinnamon-834"
+            , "project": "as-dev-ga4-flattener-320623"
             , "current_time": 1626736965
-            , "project_number": "843904533364"
+            , "project_number": "464892960897"
             , "username": "ruslan.bergenov@adswerve.com"
             , "name": "resource_name"
             , "type": "dmt_resource_type.py"}
@@ -19,9 +19,9 @@ class Context(object):
 
 
 class BaseUnitTest(unittest.TestCase):
-    DATASET = 'analytics_206551716'       #specific to your project
+    DATASET = 'analytics_222460912'       #specific to your project
     TABLE_TYPE = 'events'  #or events_intraday
-    DATE = '20211015'           #any historical date will suffice if that date shard exists in GA_SESSIONS_YYYYMMDD
+    DATE = '20210720'           #any historical date will suffice if that date shard exists in GA_SESSIONS_YYYYMMDD
 
     def setUp(self):
         context = Context()
@@ -29,5 +29,7 @@ class BaseUnitTest(unittest.TestCase):
         #Set user environment variables
         for key, value in configuration.user_environment_variables.items():
             os.environ[key] = value
-        # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
-        #         os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
+        # this is needed for GitHub CI/CD
+        # you can comment this out for local unit testing and auth with gcloud auth application-default login
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
+                os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))

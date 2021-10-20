@@ -6,6 +6,8 @@ from datetime import datetime
 from pytz import timezone
 from cfintraday.main import manage_intraday_schedule
 import google.cloud.logging
+from cfconfigbuilder.main import FlattenerDatasetConfig
+from cfconfigbuilder.main import FlattenerDatasetConfigStorage
 
 
 class TestManageIntradayFlatteningSchedule(BaseUnitTest):
@@ -122,7 +124,13 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
     }
 
     def test_create_intraday_flattening_schedule(self):
-        # This message is what is configured in the
+        # generate config again
+        # this dataset need to be configured for flattening
+        config = FlattenerDatasetConfig()
+        store = FlattenerDatasetConfigStorage()
+        json_config = config.get_ga_datasets()
+        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule=1)
+        store.upload_config(config=json_config)
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
@@ -132,9 +140,24 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         self.assertTrue(True)
 
     def test_delete_intraday_flattening_schedule(self):
+        # generate config again
+        # this dataset need to be configured for flattening
+        config = FlattenerDatasetConfig()
+        store = FlattenerDatasetConfigStorage()
+        json_config = config.get_ga_datasets()
+        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule=1)
+        store.upload_config(config=json_config)
+
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOAD_DATA_INTRADAY_TABLE_DELETED).encode('utf-8'))}
         manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
-        self.assertTrue(True)
+
+        # generate config again. restore default: no intraday flatterning
+        config = FlattenerDatasetConfig()
+        store = FlattenerDatasetConfigStorage()
+        json_config = config.get_ga_datasets()
+        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule=None)
+        store.upload_config(config=json_config)
+
         self.assertTrue(True)

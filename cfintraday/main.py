@@ -77,7 +77,7 @@ def manage_intraday_schedule(event, context="context"):
         parent = f"projects/{input_event.gcp_project}/locations/{location_id}"
 
         # Construct the fully qualified job path.
-        job_id_full_path = f"{parent}/jobs/flattening_msg_events_intraday_{input_event.table_date_shard}"
+        job_id_full_path = f"{parent}/jobs/flattening_msg_{input_event.dataset}_events_intraday_{input_event.table_date_shard}"
 
         if input_event.method_name == "tableservice.insert" and input_event.schedule():
 
@@ -115,7 +115,7 @@ def manage_intraday_schedule(event, context="context"):
                     }
                 )
 
-                logging.info('Created job: {}'.format(response.name))
+                logging.info('Created Scheduler job: {}'.format(response.name))
                 # [END cloud_scheduler_create_job]
 
                 # verify that we have created a job
@@ -139,7 +139,7 @@ def manage_intraday_schedule(event, context="context"):
             # Use the client to send the job deletion request.
             try:
                 client.delete_job(name=job_id_full_path)
-                logging.info(f"Job {job_id_full_path} deleted.")
+                logging.info(f"Deleted Scheduler job: {job_id_full_path}")
 
             # if it doesn't exist
             # 404 job not found
@@ -149,7 +149,6 @@ def manage_intraday_schedule(event, context="context"):
 
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for intraday flattening')
-
 
 # TODO: link the Cloud Function directly to logs
 
