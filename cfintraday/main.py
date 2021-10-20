@@ -7,6 +7,7 @@ import re
 import os
 import tempfile
 import logging
+import googleapiclient.discovery
 
 
 class InputValidatorScheduler(object):
@@ -60,6 +61,39 @@ class InputValidatorScheduler(object):
         schedule = self.config[self.dataset]["intraday_schedule"]
         return schedule
 
+    def determine_location_of_app_engine(self, project):
+        """
+        Purpose: get app engine location
+        https://stackoverflow.com/questions/63300303/how-to-get-locationid-in-google-app-engine-not-using-terminal
+
+        We will need to build a Scheduler job.
+        To do that, we need to know location of App Engine application, if it exists.
+
+        project: GCP project
+        Returns: app engine location
+
+        """
+        try:
+            # start discovery service and use appengine admin API
+            service = googleapiclient.discovery.build('appengine', 'v1', cache_discovery=False)
+
+            # get App engine application details
+            req = service.apps().get(appsId=project)
+
+            response = req.execute()
+
+            # this is the application location id
+            location_id = (response["locationId"])
+
+            return location_id
+
+        except Exception as e:
+            # if App Engine application doesn't exist, then we will just return the default CF location id
+            # googleapiclient.errors.HttpError: <HttpError 404 when requesting
+            # https://appengine.googleapis.com/v1/apps/{project-id}?alt=json returned "App does not exist.". Details: "App does not exist.">
+
+            return os.environ["LOCATION_ID"]
+
 
 def manage_intraday_schedule(event, context="context"):
     """Create a job with an App Engine target via the Cloud Scheduler API"""
@@ -73,7 +107,9 @@ def manage_intraday_schedule(event, context="context"):
         client = scheduler.CloudSchedulerClient()
 
         # Construct the fully qualified location path.
-        location_id = os.environ["LOCATION_ID"]
+        # if there is App Engine alread in the project,
+        # location id should match App Engine region
+        location_id = input_event.determine_location_of_app_engine(project=input_event.gcp_project)
         parent = f"projects/{input_event.gcp_project}/locations/{location_id}"
 
         # Construct the fully qualified job path.
@@ -149,6 +185,8 @@ def manage_intraday_schedule(event, context="context"):
 
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for intraday flattening')
+
+# TODO: error handling while creating and deleting the schedule. use a warning and provide more info
 
 # TODO: link the Cloud Function directly to logs
 

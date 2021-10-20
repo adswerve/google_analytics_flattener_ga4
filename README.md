@@ -32,7 +32,8 @@ The GCP resources for the solutions are installed via Deployment Manager.
    
 3. As the installing user for **[PROJECT_ID]**, enable the following APIs
      * Cloud Build API
-     * Cloud Functions API.
+     * Cloud Deployment Manager V2 API
+     * Cloud Functions API
      * Identity and Access Management (IAM) API
     
 4. As the installing user for **[PROJECT_ID]**, grant the following pre-defined IAM roles to 
