@@ -53,10 +53,14 @@ class InputValidatorScheduler(object):
             logging.critical(f'flattener configuration error: {e}')
 
     def valid_dataset(self):
+        """is the BQ dataset (representing GA4 property) configured for flattening?"""
         valid = self.dataset in self.config.keys()
         return valid
 
     def intraday_schedule(self):
+        """is the BQ dataset (representing GA4 property) configured for intraday flattening?
+        If yes, how often do we want to update the flattened intraday table (integer means minutes)
+        """
         schedule = self.config[self.dataset]["intraday_schedule"]
         return schedule
 
@@ -122,7 +126,7 @@ def manage_intraday_schedule(event, context="context"):
             if input_event.intraday_schedule():
 
                 # Construct the request body.
-                every_x_hour = input_event.intraday_schedule()
+                every_x_minutes = input_event.intraday_schedule()
 
                 MESSAGE_DATA = {"protoPayload": {
                     "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
@@ -142,7 +146,7 @@ def manage_intraday_schedule(event, context="context"):
                         'data': MESSAGE_DATA.encode('utf-8'),
                         'topic_name': f"projects/{input_event.gcp_project}/topics/{topic_name}"
                     },
-                    'schedule': f'0 */{every_x_hour} * * *',
+                    'schedule': f'*/{every_x_minutes} * * * *',
                     'time_zone': 'America/Los_Angeles'
                 }
 
@@ -155,7 +159,6 @@ def manage_intraday_schedule(event, context="context"):
                         }
                     )
 
-                    logging.info('Created Scheduler job: {}'.format(response.name))
                     # [END cloud_scheduler_create_job]
 
                     # verify that we have created a job
@@ -164,7 +167,7 @@ def manage_intraday_schedule(event, context="context"):
                             "name": job_id_full_path
                         }
                     )
-
+                    logging.info('Created Scheduler job: {}'.format(response.name))
                     return job_id_full_path, response
 
                 # if it already exists, it doesn't need to be created
@@ -194,9 +197,7 @@ def manage_intraday_schedule(event, context="context"):
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for flattening')
 
-# TODO: test CF - unit tests
-
-# TODO: test CF - manual invocation on GCP
+# TODO: test CF - do we need more unit tests?
 
 # TODO: test CF - automated run on GCP
 

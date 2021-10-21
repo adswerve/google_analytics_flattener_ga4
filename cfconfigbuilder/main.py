@@ -113,7 +113,7 @@ FROM (
         Config file, after being transformed by this function, answers the following questions:
             In what datasets do we want to flatten cfintraday data?
 
-            How often do we update flat cfintraday data (e.g., every X hours).
+            How often do we update flat cfintraday data (e.g., every X minutes).
                 Default frequency is null (meaning we won't be flattening cfintraday data)
 
         Example:
@@ -122,10 +122,10 @@ FROM (
                     "tables_to_flatten": [
                       ...
                     ],
-                    "intraday_schedule": 3
+                    "intraday_schedule": 90
                   }
 
-                It means we will be flattening cfintraday data for "analytics_222460912" every 3 hours.
+                It means we will be flattening cfintraday data for "analytics_222460912" every 90 minutes.
 
             Config file contains this:
                 "analytics_222460912": {
