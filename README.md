@@ -235,6 +235,8 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 2. Remove solution:
     * ```gcloud deployment-manager deployments delete **[deployment_name]** -q```
 
+3. If you were doing intraday flattening, manually delete a Cloud Scheduler job(s) in the UI
+
 ## Common errors ##
 
 ### Install ###

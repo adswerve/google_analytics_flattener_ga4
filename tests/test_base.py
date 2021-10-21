@@ -7,6 +7,7 @@ import sys
 class Context(object):
     def __init__(self):
         self.properties = {}
+        #TODO: I put dataset , table_type and date under context env var, but probably they don't really belong here(?)
         if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
             self.env = {
                 "deployment": "ga-flattener-deployment"
@@ -18,7 +19,7 @@ class Context(object):
                 , "type": "dmt_resource_type.py"
                 , "dataset": 'analytics_222460912'
                 , "table_type": 'events'
-                , "date": '20210710'
+                , "date": '20211013'
                 # We need to also set GOOGLE_APPLICATION_CREDENTIALS on a Linux VM,
                 # but it needs to be done under user env vars
             }
