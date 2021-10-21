@@ -18,8 +18,8 @@ class Context(object):
                 , "type": "dmt_resource_type.py"
                 , "dataset": 'analytics_222460912'
                 , "table_type": 'events'
-                , "date": '20210710',
-                "GOOGLE_APPLICATION_CREDENTIALS": os.path.normpath(
+                , "date": '20210710'
+                , "GOOGLE_APPLICATION_CREDENTIALS": os.path.normpath(
                     os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
             }
         else:  # if we are testing locally
@@ -49,3 +49,6 @@ class BaseUnitTest(unittest.TestCase):
         # Set user environment variables
         for key, value in configuration.user_environment_variables.items():
             os.environ[key] = value
+        if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
+                os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
