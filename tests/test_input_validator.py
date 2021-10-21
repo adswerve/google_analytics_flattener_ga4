@@ -13,9 +13,9 @@ class TestInputValidator(BaseUnitTest):
         # context and configuration
         c = Context()
         project_id = c.env["project"]
-        dataset_id = BaseUnitTest.DATASET
-        date_shard = BaseUnitTest.DATE
-        table_type = BaseUnitTest.TABLE_TYPE
+        dataset_id = c.env["dataset"]
+        date_shard = c.env["date"]
+        table_type = c.env["table_type"]
 
         # inputs
         SAMPLE_LOAD_DATA = {"protoPayload": {
@@ -44,9 +44,9 @@ class TestInputValidator(BaseUnitTest):
         # context and configuration
         c = Context()
         project_id = c.env["project"]
-        dataset_id = BaseUnitTest.DATASET
-        date_shard = BaseUnitTest.DATE
-        table_type = BaseUnitTest.TABLE_TYPE
+        dataset_id = c.env["dataset"]
+        date_shard = c.env["date"]
+        table_type = c.env["table_type"]
 
         # input
         SAMPLE_LOAD_DATA_INVALID_MISSING_DATE_SHARD = {"protoPayload": {
@@ -92,9 +92,9 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
         # context and configuration
         c = Context()
         project_id = c.env["project"]
-        dataset_id = BaseUnitTest.DATASET
-        date_shard = BaseUnitTest.DATE
-        table_type = BaseUnitTest.TABLE_TYPE
+        dataset_id = c.env["dataset"]
+        date_shard = c.env["date"]
+        table_type = c.env["table_type"]
 
         # input
         SAMPLE_LOAD_DATA = {"protoPayload": {

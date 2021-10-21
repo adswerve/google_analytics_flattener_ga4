@@ -15,7 +15,13 @@ class Context(object):
                 , "project_number": "464892960897"
                 , "username": "ruslan.bergenov@adswerve.com"
                 , "name": "resource_name"
-                , "type": "dmt_resource_type.py"}
+                , "type": "dmt_resource_type.py"
+                , "dataset": 'analytics_222460912'
+                , "table_type": 'events'
+                , "date": '20210710',
+                "GOOGLE_APPLICATION_CREDENTIALS": os.path.normpath(
+                    os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
+            }
         else:  # if we are testing locally
             self.env = {
                 "deployment": "ga-flattener-deployment"
@@ -24,14 +30,18 @@ class Context(object):
                 , "project_number": "86260628829"
                 , "username": "ruslan.bergenov@adswerve.com"
                 , "name": "resource_name"
-                , "type": "dmt_resource_type.py"}
+                , "type": "dmt_resource_type.py"
+                , "dataset": 'analytics_222460912'  # specific to your project
+                , "table_type": 'events'
+                , "date": '20211018'  # any historical date will suffice if that date shard exists in GA_EVENTS_YYYYMMDD
+                # we are not explicitly setting GOOGLE_APPLICATION_CREDENTIALS env var
+                # for local testing, it will use a local path to application_default_credentials.json
+                # you'll get when you run gcloud auth application-default login
+            }
         self.imports = {}
 
 
 class BaseUnitTest(unittest.TestCase):
-    DATASET = 'analytics_222460912'  # specific to your project
-    TABLE_TYPE = 'events'  # or events_intraday
-    DATE = '20211018'  # any historical date will suffice if that date shard exists in GA_SESSIONS_YYYYMMDD
 
     def setUp(self):
         context = Context()
@@ -39,10 +49,3 @@ class BaseUnitTest(unittest.TestCase):
         # Set user environment variables
         for key, value in configuration.user_environment_variables.items():
             os.environ[key] = value
-        # this is needed for GitHub CI/CD
-        # you can comment this out for local unit testing and auth with gcloud auth application-default login
-        if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
-                os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
-            # otherwise, it will use a local path to application_default_credentials.json
-

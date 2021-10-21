@@ -13,7 +13,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
     c = Context()
     project_id = c.env["project"]
     project_number = c.env["project_number"]
-    dataset_id = BaseUnitTest.DATASET
+    dataset_id = c.env["dataset"]
 
     now = datetime.now(timezone("America/Denver"))
     today = now.date()

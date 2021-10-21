@@ -1,10 +1,11 @@
 from google.cloud import pubsub_v1
 import json
 import datetime, time
-from tests.test_base import BaseUnitTest
+from tests.test_base import Context
 import logging
 
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+c = Context()
 
 # To authenticate, run the following command.  The account you choose will execute this python script
 # gcloud auth application-default login
@@ -29,10 +30,10 @@ SLEEP_TIME = 5  # throttling
 IS_TEST = False  # set to False to backfill, True for unit testing
 
 if IS_TEST:
-    datasets_to_backfill = [BaseUnitTest.DATASET]
-    y = int(BaseUnitTest.DATE[0:4])
-    m = int(BaseUnitTest.DATE[4:6])
-    d = int(BaseUnitTest.DATE[6:8])
+    datasets_to_backfill = [c.env["dataset"]]
+    y = int(c.env["date"][0:4])
+    m = int(c.env["date"][4:6])
+    d = int(c.env["date"][6:8])
     backfill_range_start = datetime.datetime(y, m, d)
     backfill_range_end = datetime.datetime(y, m, d)
 
@@ -51,7 +52,7 @@ for db in range(0, num_days_in_backfill_range):
             }}}}}}}}
 
         logging.info('Publishing backfill message to topic %s for %s.%s.events_%s' % (
-        topic_id, project_id, dataset_id, date_shard))
+            topic_id, project_id, dataset_id, date_shard))
         if not dry_run:
             publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
                               , username='gcp')

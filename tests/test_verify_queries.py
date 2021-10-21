@@ -29,9 +29,9 @@ class TestGenerateQuery(BaseUnitTest):
         """Compares dynamically generated queries to hardcoded expected baseline examples"""
         c = Context()
         ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
-                                                dataset=BaseUnitTest.DATASET,
-                                                table_name=BaseUnitTest.TABLE_TYPE,
-                                                date_shard=BaseUnitTest.DATE,
+                                                dataset=c.env["dataset"],
+                                                table_name=c.env["table_type"],
+                                                date_shard=c.env["date"],
                                                 )
 
         # EVENTS
