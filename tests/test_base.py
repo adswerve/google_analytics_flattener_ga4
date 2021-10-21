@@ -9,6 +9,7 @@ class Context(object):
         self.properties = {}
         self.path = os.path.normpath(
             os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
+        print("RB_UNIT_TEST", self.path)
         if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
             self.env = {
                 "deployment": "ga-flattener-deployment"
