@@ -11,11 +11,6 @@ class FlattenerDatasetConfigStorage(object):
         self.bucket_name = os.environ["CONFIG_BUCKET_NAME"]
 
     def upload_config(self, config):
-        storage_client = storage.Client()
-        # get bucket name from env var
-        self.bucket_name = os.environ["config_bucket_name"]
-
-    def upload_config(self, config):
         storage_client = storage.Client()  # initialize the GCS client
         bucket = storage_client.bucket(self.bucket_name)
         blob = bucket.blob(os.environ["CONFIG_FILENAME"])
@@ -146,7 +141,8 @@ FROM (
         json_config_updated = {}
 
         for dataset, list_of_tables in json_config.items():
-            json_config_updated.update({dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
+            json_config_updated.update(
+                {dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
         return json_config_updated
 
 

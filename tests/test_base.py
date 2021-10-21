@@ -7,15 +7,24 @@ import sys
 class Context(object):
     def __init__(self):
         self.properties = {}
-        self.env = {
-            "deployment": "ga-flattener-deployment"
-            , "project": "as-dev-ga4-flattener-320623"
-            , "current_time": 1626736965
-            , "project_number": "464892960897"
-            , "username": "ruslan.bergenov@adswerve.com"
-            , "name": "resource_name"
-            , "type": "dmt_resource_type.py"}
-
+        if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
+            self.env = {
+                "deployment": "ga-flattener-deployment"
+                , "project": "as-dev-ga4-flattener-320623"
+                , "current_time": 1626736965
+                , "project_number": "464892960897"
+                , "username": "ruslan.bergenov@adswerve.com"
+                , "name": "resource_name"
+                , "type": "dmt_resource_type.py"}
+        else:  # if we are testing locally
+            self.env = {
+                "deployment": "ga-flattener-deployment"
+                , "project": "adswerve-mobile-qa"
+                , "current_time": 1626736965
+                , "project_number": "86260628829"
+                , "username": "ruslan.bergenov@adswerve.com"
+                , "name": "resource_name"
+                , "type": "dmt_resource_type.py"}
         self.imports = {}
 
 
@@ -36,3 +45,4 @@ class BaseUnitTest(unittest.TestCase):
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
                 os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
             # otherwise, it will use a local path to application_default_credentials.json
+

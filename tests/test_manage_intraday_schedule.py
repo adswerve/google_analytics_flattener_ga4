@@ -5,7 +5,6 @@ import base64
 from datetime import datetime
 from pytz import timezone
 from cfintraday.main import manage_intraday_schedule
-import google.cloud.logging
 from cfconfigbuilder.main import FlattenerDatasetConfig
 from cfconfigbuilder.main import FlattenerDatasetConfigStorage
 
@@ -125,7 +124,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
     def test_create_intraday_flattening_schedule(self):
         # generate config again
-        # this dataset need to be configured for flattening
+        # this dataset need to be configured for intraday flattening
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
@@ -141,7 +140,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
     def test_delete_intraday_flattening_schedule(self):
         # generate config again
-        # this dataset need to be configured for flattening
+        # this dataset need to be configured for intraday flattening
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()

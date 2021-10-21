@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 ''' Configuration Section Start '''
 '''*****************************'''
 topic_id = "ga-flattener-deployment-topic"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
-project_id = "as-dev-ga4-flattener-320623"  # GCP project ID, example:  [PROJECT_ID]
+project_id = "adswerve-mobile-qa"  # GCP project ID, example:  [PROJECT_ID]
 dry_run = False  # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
 backfill_range_start = datetime.datetime(2021, 10, 1)

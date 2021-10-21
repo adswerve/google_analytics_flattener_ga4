@@ -79,20 +79,20 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         TODO: make sure returned value meets resource name requirements defined in GCP
         '''
         if intraday:
-            return '{d}-topic-intraday'.format(d=self._createValidGCPResourceName(self.deployment))
+            return '{d}-topic-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
         else:
-            return '{d}-topic'.format(d=self._createValidGCPResourceName(self.deployment))
+            return '{d}-topic'.format(d=self._create_valid_gcp_resource_name(self.deployment))
 
     def get_sink_name(self, intraday=False):
         '''
         TODO: make sure returned value meets resource name requirements defined in GCP
         '''
         if intraday:
-            return '{d}-sink-intraday'.format(d=self._createValidGCPResourceName(self.deployment)
-                                     , n=self._createValidGCPResourceName(self.name))
+            return '{d}-sink-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment)
+                                     , n=self._create_valid_gcp_resource_name(self.name))
         else:
-            return '{d}-sink'.format(d=self._createValidGCPResourceName(self.deployment)
-                                 , n=self._createValidGCPResourceName(self.name))
+            return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment)
+                                 , n=self._create_valid_gcp_resource_name(self.name))
 
     def get_project(self):
         return self.deployment_gcp_project

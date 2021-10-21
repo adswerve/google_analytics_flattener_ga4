@@ -62,10 +62,13 @@ class TestInputValidator(BaseUnitTest):
         # validate input. Error is expected
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
+        message = "invalid message: {'protoPayload': {'serviceData': {'jobCompletedEvent': {'job': {'jobConfiguration': {'load': {'destinationTable': {'datasetId': '%s', 'projectId': '%s', 'tableId': 'events'}}}}}}}}" % (
+        dataset_id, project_id)
+
         # check log
         # https://testfixtures.readthedocs.io/en/latest/logging.html
-        expected_log = ('root', 'CRITICAL',
-                        "invalid message: {'protoPayload': {'serviceData': {'jobCompletedEvent': {'job': {'jobConfiguration': {'load': {'destinationTable': {'datasetId': 'analytics_222460912', 'projectId': 'as-dev-ga4-flattener-320623', 'tableId': 'events'}}}}}}}}")
+        expected_log = ('root', 'CRITICAL', message
+                        )
 
         logcapture.check_present(expected_log, )  # check that our expected_log message is present in InputValidator log
         # check_present means "contains"
@@ -79,12 +82,10 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
         configuration = GaFlattenerDeploymentConfiguration(context.env)
         # Set user environment variables
         for key, value in configuration.user_environment_variables.items():
-            if key == "config_bucket_name":
+            if key == "CONFIG_BUCKET_NAME":
                 os.environ[key] = "non-existing-bucket"  # set incorrect bucket name
             else:
                 os.environ[key] = value
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
-            os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
 
     @log_capture()
     def test_input_validator_Exception(self, logcapture):
