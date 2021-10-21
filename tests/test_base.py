@@ -7,6 +7,8 @@ import sys
 class Context(object):
     def __init__(self):
         self.properties = {}
+        self.path = os.path.normpath(
+            os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
         if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
             self.env = {
                 "deployment": "ga-flattener-deployment"
@@ -19,8 +21,7 @@ class Context(object):
                 , "dataset": 'analytics_222460912'
                 , "table_type": 'events'
                 , "date": '20210710'
-                , "GOOGLE_APPLICATION_CREDENTIALS": os.path.normpath(
-                    os.path.join(os.path.dirname(__file__), ".", "sandbox", "sa.json"))
+                , "GOOGLE_APPLICATION_CREDENTIALS": self.path
             }
         else:  # if we are testing locally
             self.env = {
