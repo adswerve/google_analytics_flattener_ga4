@@ -206,7 +206,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
 
 * ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": 90},"analytics_987654321": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": 15}}```
-  - this config file will create al 5 flat tables for each fo the 2 GA4 properties. In both properties, we will also do
+  - this config file will create all 4 flat tables for each of the 2 GA4 properties. In both properties, we will also do
   intraday flattening. The flattened intraday tables will refresh every 90 mins for the 1st dataset and every 15 mins
   for the 2nd dataset.
 
