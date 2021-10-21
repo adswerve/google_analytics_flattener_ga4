@@ -1,5 +1,7 @@
 # README #
-Google Analytics 4 Flattener. A Google Cloud Platform (GCP) solution that unnests (flattens) [Google Analytics Data 4 stored in Bigquery](https://support.google.com/analytics/answer/7029846?hl=en).  
+
+Google Analytics 4 Flattener. A Google Cloud Platform (GCP) solution that unnests (
+flattens) [Google Analytics Data 4 stored in Bigquery](https://support.google.com/analytics/answer/7029846?hl=en).  
 The GCP resources for the solutions are installed via Deployment Manager.
 
 [![Python package](https://github.com/adswerve/google_analytics_flattener_ga4/actions/workflows/python-package.yml/badge.svg)](https://github.com/adswerve/google_analytics_flattener_ga4/actions/workflows/python-package.yml)
@@ -11,10 +13,13 @@ The GCP resources for the solutions are installed via Deployment Manager.
 * [Purpose](#purpose)
 * [Local dependencies](#local-dependencies)
 * [Prerequisites](#prerequisites)
-  + [Backfilling prerequisites](#backfilling-prerequisites)
+    + [Backfilling prerequisites](#backfilling-prerequisites)
 * [Installation steps](#installation-steps)
 * [Verification steps](#verification-steps)
-  + [Backfilling steps](#backfilling-steps)
+    + [Config file](#config-file)
+      + [Enabling intraday flattening via the config file](#enabling-intraday-flattening-via-the-config-file)
+      + [Examples of config files](#examples-of-config-files)
+    + [Backfilling steps](#backfilling-steps)
 * [Un-install steps](#un-install-steps)
 * [Common errors](#common-errors)
     + [Install](#install)
@@ -76,9 +81,9 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * Logs Configuration Writer
     * Cloud Functions Developer
     * Pub/Sub Admin
-    
+
 5. As the installing user for **[PROJECT_ID]**, create a bucket or use an existing bucket for staging code, for example:
-   **[PROJECT_NUMBER]**-function-code-staging.  Referred to as **[BUCKET_NAME]**.
+   **[PROJECT_NUMBER]**-function-code-staging. Referred to as **[BUCKET_NAME]**.
 
 If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com yet. To fix
 this, enable Compute Engine API and then disable it. The service account **[PROJECT_NUMBER]**
@@ -155,7 +160,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 3. Navigate (locally) to root directory of this repository
 4. If **[PROJECT_ID]** does **NOT** contain a colon (:) execute command:
 
-     ```gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener.yaml```
+   ```gcloud deployment-manager deployments create **[deployment_name]** --config ga_flattener.yaml```
 
    otherwise follow these steps:
     1. execute command:
@@ -176,19 +181,37 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
 ## Verification steps ##
 
-1. After installation, a configuration file named config_datasets.json exists in **gs://[deployment_name]
-   -[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**). This file contains all
-   the datasets that have ```events_yyyymmdd``` tables and which tables to unnest. This configuration is required for
-   this GA4 flattener solution to run daily or to backfill historical data. Edit this file accordingly to include or
-   exclude certain datasets or tables to unnest. For example:
+### Config file
 
-* ```{"analytics_123456789": ["events", "event_params"]}```   will only flatten those 2 nested tables for GA4 property
-  123456789
-* ```{"analytics_123456789": ["events", "event_params", "user_properties", "items"], "987654321": ["events", "event_params"]}```
-  will flatten all possible nested tables for GA4 property 123456789 but only events_ and event_params_ for GA4 property
-  987654321.
+1. After installation, a configuration file named ```config_datasets.json``` exists in **gs://[deployment_name]
+   -[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).
+
+- This file contains all the datasets that have ```events_yyyymmdd``` tables and which tables to unnest.
+
+- This configuration is required for this GA4 flattener solution to run daily or to backfill historical data.
+
+- Edit this file accordingly to include or exclude certain datasets or tables to unnest.
+
+- You can also enable intraday flattening via this config file and specify its frequency in minutes.
+
+#### Enabling intraday flattening via the config file
+
+- In addition to daily tables ```events_yyyymmdd```, you may also have the table ```events_intraday_yyyymmdd```, which refreshes every few minutes.
+- By default, the flattener does not flatten the intraday table.
+
+#### Examples of config files
+
+* ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params"], "intraday_schedule": null}}``` - this
+  config file will only create 2 flat tables for one GA4 property. There will be no intraday flattening
+
+
+* ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": 90},"analytics_987654321": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": 15}}```
+  - this config file will create al 5 flat tables for each fo the 2 GA4 properties. In both properties, we will also do
+  intraday flattening. The flattened intraday tables will refresh every 90 mins for the 1st dataset and every 15 mins
+  for the 2nd dataset.
 
 ### Backfilling steps
+
 **The following steps are only required if you plan to backfill historical tables.**
 
 2. Modify values in the configuration section of tools/pubsub_message_publish.py accordingly.  **Suggestion:** Use a
@@ -216,23 +239,21 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
 ### Install ###
 
-
 - **Message**: AccessDeniedException: 403 **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com does not have
-      storage.objects.list access to the Google Cloud Storage bucket.
-    
+  storage.objects.list access to the Google Cloud Storage bucket.
+
 - **Resolution**: Ensure the value (Cloud Storage bucket name) configured in "codeBucket" setting of ga_flattener*
-      .yaml is correct. **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com only requires GCP predefined role of _Cloud
-      Build Service Account_
+  .yaml is correct. **[PROJECT_NUMBER]**@cloudbuild.gserviceaccount.com only requires GCP predefined role of _Cloud
+  Build Service Account_
 
 ### Verification ###
 
+- **Message**: google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials. Please set
+  GOOGLE_APPLICATION_CREDENTIALS or explicitly create credentials and re-run the application. For more information,
+  please see https://cloud.google.com/docs/authentication/getting-started
 
-- **Message**: google.auth.exceptions.DefaultCredentialsError: Could not automatically determine credentials.
-      Please set GOOGLE_APPLICATION_CREDENTIALS or explicitly create credentials and re-run the application. For more
-      information, please see https://cloud.google.com/docs/authentication/getting-started
-    
 - **Resolution**: Ensure you run the gcloud command ```gcloud auth application-default login``` as this sets up the
-      required authentication and it'll just work.
+  required authentication and it'll just work.
 
 ## Repository directories ##
 
@@ -260,9 +281,12 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 * LICENSE: BSD 3-Clause open source license
 
 ## Running unit tests ##
-* To run unit tests on your local machine, save an **sa.json** with GCP account credentials in the **sandbox** directory.
+
+* To run unit tests on your local machine, save an **sa.json** with GCP account credentials in the **sandbox**
+  directory.
 * However, it's not necessary, you can also auth locally with ```gcloud auth application-default login```.
-* GitHub CI/CD pipeline uses automatically saves **sa.json** into the **sandbox** directory and sets ```GOOGLE_APPLICATION_CREDENTIALS``` to the filepath.
-* Set the environment variables in `test_base.py`: `"deployment"`, `"project"` and `"username"`. 
+* GitHub CI/CD pipeline uses automatically saves **sa.json** into the **sandbox** directory and
+  sets ```GOOGLE_APPLICATION_CREDENTIALS``` to the filepath.
+* Set the environment variables in `test_base.py`: `"deployment"`, `"project"` and `"username"`.
 * Unit tests run locally or via GitHub CI/CD workflow assume that GA4 flattener is installed into your GCP project.
 

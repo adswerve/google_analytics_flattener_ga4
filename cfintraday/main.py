@@ -99,7 +99,32 @@ class InputValidatorScheduler(object):
 
 
 def manage_intraday_schedule(event, context="context"):
-    """Create a job with an App Engine target via the Cloud Scheduler API"""
+    """
+    creates or deletes a Scheduler Job. This scheduler job is used to flatten intraday table at a desired frequency
+    if dataset is configured for flattening:
+        if a new intraday tbl got created:
+            if dataset is configured for intraday flattening:
+                try:
+                    create a schedule
+                    # Created Scheduler job: projects/adswerve-mobile-qa/locations/us-west2/jobs/flattening_msg_analytics_222460912_events_intraday_20211021
+                except:
+                    critical: already exists
+                    # Error creating a scheduler job projects/adswerve-mobile-qa/locations/us-west2/jobs/flattening_msg_analytics_222460912_events_intraday_20211021: 409 Job projects/adswerve-mobile-qa/locations/us-west2/jobs/flattening_msg_analytics_222460912_events_intraday_20211021 already exists.
+            else:
+                warning: not configured for intraday flattening
+
+        elif if an intraday table got deleted:
+            try:
+                delete the schedule
+            except:
+                warning: doesn't exist
+                # Error deleting a scheduler job projects/adswerve-mobile-qa/locations/us-west2/jobs/flattening_msg_analytics_222460912_events_intraday_20211021: 404 Job not found.
+
+    else:
+        warning: not configured for any flattening at all
+
+
+    """
 
     # [START cloud_scheduler_create_job]
 
@@ -193,15 +218,12 @@ def manage_intraday_schedule(event, context="context"):
             except GoogleAPICallError as e:
                 logging.warning(f"Error deleting a scheduler job {job_id_full_path}: {e}")
 
-
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for flattening')
 
 # TODO: test CF - do we need more unit tests?
 
 # TODO: test CF - automated run on GCP
-
-# TODO: readme update
 
 # TODO: nice-to-have: link the Cloud Function directly to logs
 
