@@ -59,10 +59,29 @@ class InputValidatorScheduler(object):
 
     def intraday_schedule(self):
         """is the BQ dataset (representing GA4 property) configured for intraday flattening?
-        If yes, how often do we want to update the flattened intraday table (integer means minutes)
+        If yes, how often do we want to update the flattened intraday tables?
+        Every X hours OR every Y minutes
         """
-        schedule = self.config[self.dataset]["intraday_schedule"]
-        return schedule
+
+        config_intraday_schedule = self.config[self.dataset].get("intraday_schedule", {
+            "frequency": None,
+            "units": "hours"})
+
+        config_intraday_schedule_frequency = config_intraday_schedule.get("frequency", None)
+        config_intraday_schedule_units = config_intraday_schedule.get("units", 'hours')
+
+        assert config_intraday_schedule_units in ["hours",
+                                                  "minutes"], "Config file error: intraday schedule units should be minutes or hours"
+
+        if type(config_intraday_schedule_frequency) == int:
+            if config_intraday_schedule_units == "minutes":
+                assert config_intraday_schedule_frequency >= 1 and config_intraday_schedule_frequency <= 59, "Config file error: if intraday schedule units are minutes, then the frequency should be between 1 and 59"
+                cron_schedule = f'*/{config_intraday_schedule_frequency} * * * *'
+
+            elif config_intraday_schedule_units == "hours":
+                cron_schedule = f'0 */{config_intraday_schedule_frequency} * * *'
+
+        return cron_schedule
 
     def determine_location_of_app_engine(self, project):
         """
@@ -151,7 +170,7 @@ def manage_intraday_schedule(event, context="context"):
             if input_event.intraday_schedule():
 
                 # Construct the request body.
-                every_x_minutes = input_event.intraday_schedule()
+                cron_schedule = input_event.intraday_schedule()
 
                 MESSAGE_DATA = {"protoPayload": {
                     "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
@@ -171,7 +190,7 @@ def manage_intraday_schedule(event, context="context"):
                         'data': MESSAGE_DATA.encode('utf-8'),
                         'topic_name': f"projects/{input_event.gcp_project}/topics/{topic_name}"
                     },
-                    'schedule': f'*/{every_x_minutes} * * * *',
+                    'schedule': cron_schedule,
                     'time_zone': 'America/Los_Angeles'
                 }
 
@@ -208,8 +227,9 @@ def manage_intraday_schedule(event, context="context"):
 
             # Use the client to send the job deletion request.
             try:
-                # TODO: design flaw: it'll keep running daily,
+                # TODO: design flaw: it'll keep running daily
                 # if you have an intraday table, even if you don't have intraday flattening configured
+                # however, it does need to listen to intraday table creations
                 client.delete_job(name=job_id_full_path)
                 logging.info(f"Deleted Scheduler job: {job_id_full_path}")
 
@@ -228,3 +248,11 @@ def manage_intraday_schedule(event, context="context"):
 # TODO: nice-to-have: link the Cloud Function directly to logs
 
 # TODO: nice-to-have: refactor f strings, so we use the same format (?)
+
+# TODO: Risk: there are two nested tables with yesterday's date shard: events_ and events_intraday_.
+# We need to ensure that the flattened tbls are based on daily tbls, not intraday.
+# Yesterday's intraday table flattening process might overwrite yesterday's daily flat table. How do we solve this?
+# in the main flattening CF. If it gets a message: flatten intraday table  with data shard 20211023.
+# Make an API call to BQ. Does a DAILY  nested table exist with this date shard?
+# If yes, log a warning and exit the function. We shouldn't flatten the intraday table in this case.
+# look thru logs - can it actually happen?
