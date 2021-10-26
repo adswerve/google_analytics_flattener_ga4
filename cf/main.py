@@ -19,8 +19,8 @@ class InputValidator(object):
                     'destinationTable']
             self.gcp_project = bq_destination_table['projectId']
             self.dataset = bq_destination_table['datasetId']
-            self.table_date_shard = re.search('_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
-            self.table_name = re.search('(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
+            self.table_date_shard = re.search(r'_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
+            self.table_name = re.search(r'(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
         except AttributeError:
             logging.critical(f'invalid message: {message_payload}')
         try:
