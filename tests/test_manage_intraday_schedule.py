@@ -169,7 +169,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=15,
+        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=30,
                                                            intraday_schedule_units="minutes")
         store.upload_config(config=json_config)
 
@@ -195,7 +195,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
                 "name": job_id_full_path
             })
         self.assertEqual(response_get_job.name, job_id_full_path)
-        self.assertEqual(response_get_job.schedule, '*/15 * * * *')
+        self.assertEqual(response_get_job.schedule, '*/30 * * * *')
 
         # check log
         expected_log = ('root', 'INFO',
