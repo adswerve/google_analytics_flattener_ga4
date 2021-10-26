@@ -1,20 +1,38 @@
 {
-  "analytics_222460912": {
+  "analytics_012345678": {
     "tables_to_flatten": [
       "events",
       "event_params",
       "user_properties",
       "items"
     ],
-    "intraday_schedule": null
+    "intraday_schedule": {
+      "frequency": null,
+      "units": "hours"
+    }
   },
-  "analytics_251817041": {
+  "analytics_123456789": {
     "tables_to_flatten": [
       "events",
       "event_params",
       "user_properties",
       "items"
     ],
-    "intraday_schedule": null
+    "intraday_schedule": {
+      "frequency": 15,
+      "units": "minutes"
+    }
+  },
+  "analytics_987654321": {
+    "tables_to_flatten": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ],
+    "intraday_schedule": {
+      "frequency": 1,
+      "units": "hours"
+    }
   }
 }

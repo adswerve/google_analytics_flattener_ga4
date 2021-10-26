@@ -128,7 +128,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule=15)
+        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule=59)
         store.upload_config(config=json_config)
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':

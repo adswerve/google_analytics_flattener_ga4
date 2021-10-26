@@ -79,7 +79,8 @@ FROM (
                                          ]
         return ret_val
 
-    def add_intraday_info_into_config(self, json_config, intraday_schedule=None):
+    def add_intraday_info_into_config(self, json_config, intraday_schedule_frequency=None,
+                                      intraday_schedule_units="hours"):
         """
         Adds cfintraday config params to config files.
 
@@ -98,7 +99,9 @@ FROM (
                       "user_properties",
                       "items"
                     ],
-                    "intraday_schedule": null
+                        "frequency": null,
+                        "units": "hours"
+                        }
                   },
                   "analytics_251817041": {
                     "tables_to_flatten": [
@@ -107,14 +110,18 @@ FROM (
                       "user_properties",
                       "items"
                     ],
-                    "intraday_schedule": null
+                    "frequency": null,
+                    "units": "hours"
+                        }
                   }
                 }
+
         Config file, after being transformed by this function, answers the following questions:
             In what datasets do we want to flatten cfintraday data?
 
-            How often do we update flat cfintraday data (e.g., every X minutes).
+            How often do we update flat cfintraday data (e.g., every X minutes/hours).
                 Default frequency is null (meaning we won't be flattening cfintraday data)
+                Default schedule unit is hours, but can be changed to minutes.
 
         Example:
             Config file contains this:
@@ -122,27 +129,25 @@ FROM (
                     "tables_to_flatten": [
                       ...
                     ],
-                    "intraday_schedule": 90
+                    "frequency": 15,
+                    "units": "minutes"
                   }
 
-                It means we will be flattening cfintraday data for "analytics_222460912" every 90 minutes.
+                It means we will be flattening cfintraday data for "analytics_222460912" every 15 minutes.
 
-            Config file contains this:
-                "analytics_222460912": {
-                    "tables_to_flatten": [
-                      ...
-                    ],
-                    "intraday_schedule": null
-                  }
+                If the intraday schedule units is minutes, then intraday schedule frequency can only be a number between 1 and 59. It can't be 60+ (or else GCP with throw an invalid schedule error
 
-                We won't be flattening cfintraday data in "analytics_222460912"
+
 
         """
         json_config_updated = {}
 
         for dataset, list_of_tables in json_config.items():
             json_config_updated.update(
-                {dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
+                {dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": {
+                    "frequency": intraday_schedule_frequency,
+                    "units": intraday_schedule_units
+                }}})
         return json_config_updated
 
 

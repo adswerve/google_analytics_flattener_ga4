@@ -74,7 +74,8 @@ FROM (
                                          ]
         return ret_val
 
-    def add_intraday_info_into_config(self, json_config, intraday_schedule=None):
+    def add_intraday_info_into_config(self, json_config, intraday_schedule_frequency=None,
+                                      intraday_schedule_units="hours"):
         """
         Adds cfintraday config params to config files.
         """
@@ -82,7 +83,10 @@ FROM (
 
         for dataset, list_of_tables in json_config.items():
             json_config_updated.update(
-                {dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": intraday_schedule}})
+                {dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": {
+                    "frequency": intraday_schedule_frequency,
+                    "units": intraday_schedule_units
+                }}})
         return json_config_updated
 
 
