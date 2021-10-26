@@ -18,7 +18,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
 * [Verification steps](#verification-steps)
     + [Config file](#config-file)
       + [Enabling intraday flattening via the config file](#enabling-intraday-flattening-via-the-config-file)
-      + [Examples of config files](#examples-of-config-files)
+      + [Examples of a config file](#examples-of-a-config-file)
     + [Backfilling steps](#backfilling-steps)
 * [Un-install steps](#un-install-steps)
 * [Common errors](#common-errors)
@@ -200,7 +200,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 - By default, the flattener does not flatten the intraday table.
 - You can enable intraday flattening by editing the config file - see the next section.
 
-#### Examples of config files
+#### Examples of a config file
 
 * ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": null, "units": "hours"}}}``` - this is the default config file. 4 flat tables will be created. There will be no flattening of the intraday table. You may notice that "intraday_schedule" is not necessary, but it provides a template in case you do want intraday flattening.
 
