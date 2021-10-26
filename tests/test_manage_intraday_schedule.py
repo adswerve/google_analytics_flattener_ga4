@@ -5,9 +5,13 @@ import base64
 from datetime import datetime
 from pytz import timezone
 import pytest
+from google.cloud import scheduler
+from testfixtures import log_capture
+
 from cfintraday.main import manage_intraday_schedule
 from cfconfigbuilder.main import FlattenerDatasetConfig
 from cfconfigbuilder.main import FlattenerDatasetConfigStorage
+from cfintraday.main import InputValidatorIntraday
 
 
 class TestManageIntradayFlatteningSchedule(BaseUnitTest):
@@ -123,7 +127,43 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         "receiveTimestamp": "2021-10-11T16:55:00.433230860Z"
     }
 
-    def test_create_intraday_flattening_schedule_minutes(self):
+    def test_intraday_input_validator_table_created(self):
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+
+        self.assertEqual(iv.table_date_shard, self.date_shard)
+        self.assertEqual(iv.gcp_project, self.project_id)
+        self.assertEqual(iv.dataset, self.dataset_id)
+        self.assertEqual(iv.table_name, self.table_type)
+        assert isinstance(iv.valid_dataset(), bool)
+        self.assertTrue(True)
+
+    def test_intraday_input_validator_table_deleted(self):
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOAD_DATA_INTRADAY_TABLE_DELETED).encode('utf-8'))}
+
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+
+        self.assertEqual(iv.table_date_shard, self.date_shard)
+        self.assertEqual(iv.gcp_project, self.project_id)
+        self.assertEqual(iv.dataset, self.dataset_id)
+        self.assertEqual(iv.table_name, self.table_type)
+        assert isinstance(iv.valid_dataset(), bool)
+        self.assertTrue(True)
+
+    @log_capture()
+    def test_create_intraday_flattening_schedule_minutes(self, logcapture):
+        """
+        - generate config file which says we want to flatten intraday table every X mins
+        - make sure the schedule job doesn't exist
+        - create scheduler job
+        - check cron string
+        - check logs - should say scheduler job has been created
+        """
         # generate config again
         # this dataset needs to be configured for intraday flattening
         config = FlattenerDatasetConfig()
@@ -136,11 +176,92 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+
+        # make sure the scheduler job doesn't exist
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+
+        job_id_full_path, _ = iv.contruct_scheduler_job_id_full_path()
+        client = scheduler.CloudSchedulerClient()
+        try:
+            client.delete_job(name=job_id_full_path)
+        except Exception as e:  # it already doesn't exist
+            print(e)
+
+        # create scheduler job
         manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
 
-        self.assertTrue(True)
+        response_get_job = client.get_job(
+            request={
+                "name": job_id_full_path
+            })
+        self.assertEqual(response_get_job.name, job_id_full_path)
+        self.assertEqual(response_get_job.schedule, '*/15 * * * *')
 
-    def test_create_intraday_flattening_schedule_hours(self):
+        # check log
+        expected_log = ('root', 'INFO',
+                        f"Created Scheduler job: {job_id_full_path}")
+
+        logcapture.check_present(expected_log, )
+
+        # try creating the job again
+        manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
+
+        # check log
+        expected_log = ('root', 'ERROR',
+                        f"Error creating a scheduler job {job_id_full_path}: 409 Job {job_id_full_path} already exists.")
+
+        logcapture.check_present(expected_log, )
+
+    @log_capture()
+    def test_try_creating_intraday_flattening_schedule_with_default_config(self, logcapture):
+        """
+        - generate DEFAULT config file. No flattening should happen
+        - make sure the schedule job doesn't exist
+        - try creating scheduler job
+        - check logs - should say that intraday table in this dataset is not configured for flattening
+        - scheduler job wouldn't be created in this case
+        """
+        # generate config again
+        # this dataset will NOT be configured for intraday flattening
+        config = FlattenerDatasetConfig()
+        store = FlattenerDatasetConfigStorage()
+        json_config = config.get_ga_datasets()
+        json_config = config.add_intraday_info_into_config(json_config)
+        store.upload_config(config=json_config)
+
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+
+        # make sure the scheduler job doesn't exist
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+
+        job_id_full_path, _ = iv.contruct_scheduler_job_id_full_path()
+        client = scheduler.CloudSchedulerClient()
+        try:
+            client.delete_job(name=job_id_full_path)
+        except Exception as e:  # it already doesn't exist
+            print(e)
+
+        # try creating scheduler job
+        manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
+
+        # check log
+        expected_log = ('root', 'WARNING',
+                        f'Dataset {self.dataset_id} is not configured for intraday flattening')
+
+        logcapture.check_present(expected_log, )
+
+
+    @log_capture()
+    def test_create_intraday_flattening_schedule_hours(self, logcapture):
+        """
+        - generate config file which says we want to flatten intraday table every Y hours
+        - make sure the schedule job doesn't exist
+        - create scheduler job
+        - check cron string
+        - check logs - should say scheduler job has been created
+        """
         # generate config again
         # this dataset needs to be configured for intraday flattening
         config = FlattenerDatasetConfig()
@@ -153,11 +274,39 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+
+        # make sure the scheduler job doesn't exist
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+
+        job_id_full_path, _ = iv.contruct_scheduler_job_id_full_path()
+        client = scheduler.CloudSchedulerClient()
+        try:
+            client.delete_job(name=job_id_full_path)
+        except Exception as e:  # it already doesn't exist
+            print(e)
+
+        # create scheduler job
         manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
 
-        self.assertTrue(True)
+        response_get_job = client.get_job(
+            request={
+                "name": job_id_full_path
+            })
+        self.assertEqual(response_get_job.name, job_id_full_path)
+        self.assertEqual(response_get_job.schedule, '0 */1 * * *')
+
+        # check log
+        expected_log = ('root', 'INFO',
+                        f"Created Scheduler job: {job_id_full_path}")
+
+        logcapture.check_present(expected_log, )
 
     def test_create_intraday_flattening_schedule_invalid(self):
+        """
+        - generate config file with a schedule which GCP won't accept
+        - check that assertion error is raised
+        """
+
         # generate config again
         # this dataset needs to be configured for intraday flattening
         config = FlattenerDatasetConfig()
@@ -175,16 +324,67 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         with pytest.raises(AssertionError,
                            match="Config file error: if intraday schedule units are minutes, then the frequency should be between 1 and 59"):
-
             manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
 
-        self.assertTrue(True)
+    @log_capture()
+    def test_delete_intraday_flattening_schedule(self, logcapture):
+        """
+        - check if scheduler job exists
+            - if it doesn't exist, create scheduler job
+                - before you do it, rebuild a config file which would allow us to create a scheduler job
+        - delete job
+        - check logs - should say job has been deleted
+        - try deleting it again
+        - check logs - should have a warning that it doesn't exist
+        - revert config file to default
+        """
 
-    def test_delete_intraday_flattening_schedule(self):
+        # does scheduler job exist?
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+        job_id_full_path, _ = iv.contruct_scheduler_job_id_full_path()
+
+        client = scheduler.CloudSchedulerClient()
+        try:
+            # check if job exists
+            response_get_job = client.get_job(
+                request={
+                    "name": job_id_full_path
+                })
+        except Exception as e:
+
+            # generate config again
+            # this dataset needs to be configured for intraday flattening
+            config = FlattenerDatasetConfig()
+            store = FlattenerDatasetConfigStorage()
+            json_config = config.get_ga_datasets()
+            json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=1,
+                                                               intraday_schedule_units="hours")
+            store.upload_config(config=json_config)
+
+            # create scheduler job
+            manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
+
+        # delete the job
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOAD_DATA_INTRADAY_TABLE_DELETED).encode('utf-8'))}
         manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
+
+        # check log
+        expected_log = ('root', 'INFO',
+                        f"Deleted Scheduler job: {job_id_full_path}")
+
+        logcapture.check_present(expected_log, )
+
+        # try deleting the job again
+        manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
+        expected_log = ('root', 'WARNING',
+                        f"Error deleting a scheduler job {job_id_full_path}: 404 Job not found.")
+
+        logcapture.check_present(expected_log, )
 
         # generate config again. restore default: no intraday flattening
         config = FlattenerDatasetConfig()
@@ -193,4 +393,4 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         json_config = config.add_intraday_info_into_config(json_config)
         store.upload_config(config=json_config)
 
-        self.assertTrue(True)
+#TODO: split large tests into multiple small tests

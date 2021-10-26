@@ -10,7 +10,7 @@ import logging
 import googleapiclient.discovery
 
 
-class InputValidatorScheduler(object):
+class InputValidatorIntraday(object):
     def __init__(self, event):
         try:
             message_payload = json.loads(base64.b64decode(event['data']).decode('utf-8'))
@@ -81,7 +81,7 @@ class InputValidatorScheduler(object):
             elif config_intraday_schedule_units == "hours":
                 cron_schedule = f'0 */{config_intraday_schedule_frequency} * * *'
 
-        return cron_schedule
+            return cron_schedule
 
     def determine_location_of_app_engine(self, project):
         """
@@ -116,6 +116,17 @@ class InputValidatorScheduler(object):
 
             return os.environ["LOCATION_ID"]
 
+    def contruct_scheduler_job_id_full_path(self):
+        # Construct the fully qualified location path.
+        # if there is App Engine alread in the project,
+        # location id should match App Engine region
+        location_id = self.determine_location_of_app_engine(project=self.gcp_project)
+        parent = f"projects/{self.gcp_project}/locations/{location_id}"
+
+        # Construct the fully qualified job path.
+        job_id_full_path = f"{parent}/jobs/flattening_msg_{self.dataset}_events_intraday_{self.table_date_shard}"
+
+        return job_id_full_path, parent
 
 def manage_intraday_schedule(event, context="context"):
     """
@@ -147,21 +158,14 @@ def manage_intraday_schedule(event, context="context"):
 
     # [START cloud_scheduler_create_job]
 
-    input_event = InputValidatorScheduler(event)
+    input_event = InputValidatorIntraday(event)
 
     if input_event.valid_dataset():
 
         # Create a client.
         client = scheduler.CloudSchedulerClient()
 
-        # Construct the fully qualified location path.
-        # if there is App Engine alread in the project,
-        # location id should match App Engine region
-        location_id = input_event.determine_location_of_app_engine(project=input_event.gcp_project)
-        parent = f"projects/{input_event.gcp_project}/locations/{location_id}"
-
-        # Construct the fully qualified job path.
-        job_id_full_path = f"{parent}/jobs/flattening_msg_{input_event.dataset}_events_intraday_{input_event.table_date_shard}"
+        job_id_full_path, parent = input_event.contruct_scheduler_job_id_full_path()
 
         # did a new intraday table get created?
         if input_event.method_name == "tableservice.insert":
@@ -209,15 +213,15 @@ def manage_intraday_schedule(event, context="context"):
                     response_get_job = client.get_job(
                         request={
                             "name": job_id_full_path
-                        }
-                    )
+                        })
+
                     logging.info('Created Scheduler job: {}'.format(response.name))
-                    return job_id_full_path, response
+                    return response
 
                 # if it already exists, it doesn't need to be created
                 # 409 already exists
                 except GoogleAPICallError as e:
-                    logging.critical(f"Error creating a scheduler job {job_id_full_path}: {e}")
+                    logging.error(f"Error creating a scheduler job {job_id_full_path}: {e}")
 
             else:
                 logging.warning(f'Dataset {input_event.dataset} is not configured for intraday flattening')
@@ -227,7 +231,7 @@ def manage_intraday_schedule(event, context="context"):
 
             # Use the client to send the job deletion request.
             try:
-                # TODO: design flaw: it'll keep running daily
+                # TODO: design flaw(??): it'll keep running daily
                 # if you have an intraday table, even if you don't have intraday flattening configured
                 # however, it does need to listen to intraday table creations
                 client.delete_job(name=job_id_full_path)
@@ -240,8 +244,6 @@ def manage_intraday_schedule(event, context="context"):
 
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for flattening')
-
-# TODO: test CF - do we need more unit tests?
 
 # TODO: test CF - automated run on GCP
 
