@@ -197,8 +197,15 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 #### Enabling intraday flattening via the config file
 
 - In addition to daily tables ```events_yyyymmdd```, you may also have the table ```events_intraday_yyyymmdd```, which refreshes every few minutes.
+
 - By default, the flattener does not flatten the intraday table.
-- You can enable intraday flattening by editing the config file - see the next section.
+
+- You can enable intraday flattening by editing the config file and supplying ```"intraday_schedule": {"frequency": "your_frequency", "units": "your_units"}```. 
+
+  - ```"your_units"``` can be ```"hours"``` or ```"minutes"```
+  - ```"your_frequency"``` is an integer.
+  - if your units are minutes, then the frequency should be between 1 and 59.
+  
 
 #### Examples of a config file
 
