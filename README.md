@@ -209,14 +209,23 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
 #### Examples of a config file
 
-* ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": null, "units": "hours"}}}``` - this is the default config file. 4 flat tables will be created. There will be no flattening of the intraday table. You may notice that "intraday_schedule" is not necessary, but it provides a template in case you do want intraday flattening.
+- ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": null, "units": "hours"}}}``` 
+  - this is the default config file. 
+  - 4 flat tables will be created. 
+  - There will be no flattening of the intraday table. 
+  - You may notice that "intraday_schedule" is not necessary, but it provides a template in case you do want intraday flattening.
 
-* ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params"], "intraday_schedule": {"frequency": null, "units": "hours"}}}``` - this
-  config file will only create 2 flat tables for one GA4 property. There will be no intraday flattening
+- ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params"], "intraday_schedule": {"frequency": null, "units": "hours"}}}``` 
+  - this config file will only create 2 flat tables for one GA4 property. 
+  - There will be no intraday flattening
 
-* ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": 15, "units": "minutes"}},"analytics_987654321": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": 1, "units": "hours"}}}```- this config file will create all 4 flat tables for each of the 2 GA4 properties. In both properties, we will also do
-  intraday flattening. The flattened intraday tables will refresh every 15 minutes for the 1st dataset and every 1 hour
+- ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": 15, "units": "minutes"}},"analytics_987654321": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": 1, "units": "hours"}}}```
+  - this config file will create all 4 flat tables for each of the 2 GA4 properties. 
+  - In both properties, we will also do
+  intraday flattening. 
+  - The flattened intraday tables will refresh every 15 minutes for the 1st dataset and every hour
   for the 2nd dataset.
+
 - See another example in ```./sample_config/config_datasets_sample.json``` in this repo.
 
 ### Backfilling steps
