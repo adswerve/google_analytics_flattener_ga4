@@ -93,7 +93,6 @@ class InputValidatorIntraday(object):
 
         project: GCP project
         Returns: app engine location
-
         """
         try:
             # start discovery service and use appengine admin API
@@ -117,9 +116,10 @@ class InputValidatorIntraday(object):
             return os.environ["LOCATION_ID"]
 
     def contruct_scheduler_job_id_full_path(self):
-        # Construct the fully qualified location path.
-        # if there is App Engine alread in the project,
-        # location id should match App Engine region
+        """
+        # Construct the fully qualified location path for the Scheduler Job.
+        # if there is App Engine already in the project, location id should match App Engine region
+        """
         location_id = self.determine_location_of_app_engine(project=self.gcp_project)
         parent = f"projects/{self.gcp_project}/locations/{location_id}"
 
@@ -127,6 +127,7 @@ class InputValidatorIntraday(object):
         job_id_full_path = f"{parent}/jobs/flattening_msg_{self.dataset}_events_intraday_{self.table_date_shard}"
 
         return job_id_full_path, parent
+
 
 def manage_intraday_schedule(event, context="context"):
     """
@@ -152,8 +153,6 @@ def manage_intraday_schedule(event, context="context"):
 
     else:
         warning: not configured for any flattening at all
-
-
     """
 
     # [START cloud_scheduler_create_job]
@@ -245,16 +244,14 @@ def manage_intraday_schedule(event, context="context"):
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for flattening')
 
-# TODO: test CF - automated run on GCP
-
 # TODO: nice-to-have: link the Cloud Function directly to logs
 
 # TODO: nice-to-have: refactor f strings, so we use the same format (?)
 
-# TODO: Risk: there are two nested tables with yesterday's date shard: events_ and events_intraday_.
+#TODO: Risk: there are two nested tables with yesterday's date shard: events_ and events_intraday_.
 # We need to ensure that the flattened tbls are based on daily tbls, not intraday.
 # Yesterday's intraday table flattening process might overwrite yesterday's daily flat table. How do we solve this?
-# in the main flattening CF. If it gets a message: flatten intraday table  with data shard 20211023.
-# Make an API call to BQ. Does a DAILY  nested table exist with this date shard?
+# The main flattening CF: if it gets a message: flatten intraday table  with data shard 20211023.
+# Make an API call to BQ. Does a DAILY nested table exist with this date shard?
 # If yes, log a warning and exit the function. We shouldn't flatten the intraday table in this case.
-# look thru logs - can it actually happen?
+# look thru logs - can it actually happen? So far I haven't seen many examples of that, normally, this risk isn't high
