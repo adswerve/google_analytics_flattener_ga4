@@ -245,8 +245,9 @@ def manage_intraday_schedule(event, context="context"):
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for flattening')
 
-#TODO: when running on GCP, this error mean that job already exists (can't create) or doesn’t exist yet (can't delete)
+#TODO: when running on GCP, this error means that job already exists (can't create it) or doesn’t exist yet (can't delete it)
 # "NoneType" object has no attribute "Call"
+# this is a strange error
 # when unit testing locally, I get good errors : 404 job not found (trying to delete) or 409 already exists(trying to create)
 
 
