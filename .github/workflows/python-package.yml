@@ -33,6 +33,7 @@ jobs:
         python -m pip install flake8 pytest
         pip install -r cf/requirements.txt
         pip install -r cfintraday/requirements.txt
+        pip install -r tests/requirements-test.txt
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
