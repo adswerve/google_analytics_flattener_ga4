@@ -2,7 +2,7 @@ import base64
 import json
 from google.cloud import storage
 from google.cloud import scheduler
-from google.api_core.exceptions import GoogleAPICallError
+# from google.api_core.exceptions import GoogleAPICallError
 import re
 import os
 import tempfile
@@ -219,8 +219,10 @@ def manage_intraday_schedule(event, context="context"):
 
                 # if it already exists, it doesn't need to be created
                 # 409 already exists
-                except GoogleAPICallError as e:
-                    logging.error(f"Error creating a scheduler job {job_id_full_path}: {e}")
+                # except GoogleAPICallError as e: # this sometimes doesn't catch the error
+                except Exception as e:
+                    logging.error(
+                        f"Error creating a Scheduler job {job_id_full_path} (the job probably already exists): {e}")
 
             else:
                 logging.warning(f'Dataset {input_event.dataset} is not configured for intraday flattening')
@@ -238,11 +240,18 @@ def manage_intraday_schedule(event, context="context"):
 
             # if it doesn't exist, so it doesn't need to be deleted
             # 404 job not found
-            except GoogleAPICallError as e:
-                logging.warning(f"Error deleting a scheduler job {job_id_full_path}: {e}")
+            # except GoogleAPICallError as e: # this sometimes doesn't catch the error
+            except Exception as e:
+                logging.warning(
+                    f"Error deleting a Scheduler job {job_id_full_path} (the job probably doesn't exist): {e}")
 
     else:
         logging.warning(f'Dataset {input_event.dataset} is not configured for flattening')
+
+#TODO: when running on GCP, this error mean that job already exists (can't create) or doesn’t exist yet (can't delete)
+# "NoneType" object has no attribute "Call"
+# when unit testing locally, I get good errors : 404 job not found (trying to delete) or 409 already exists(trying to create)
+
 
 # TODO: nice-to-have: link the Cloud Function directly to logs
 

@@ -208,7 +208,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         # check log
         expected_log = ('root', 'ERROR',
-                        f"Error creating a scheduler job {job_id_full_path}: 409 Job {job_id_full_path} already exists.")
+                        f"Error creating a Scheduler job {job_id_full_path} (the job probably already exists): 409 Job {job_id_full_path} already exists.")
 
         logcapture.check_present(expected_log, )
 
@@ -251,7 +251,6 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
                         f'Dataset {self.dataset_id} is not configured for intraday flattening')
 
         logcapture.check_present(expected_log, )
-
 
     @log_capture()
     def test_create_intraday_flattening_schedule_hours(self, logcapture):
@@ -382,7 +381,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         # try deleting the job again
         manage_intraday_schedule(SAMPLE_PUBSUB_MESSAGE)
         expected_log = ('root', 'WARNING',
-                        f"Error deleting a scheduler job {job_id_full_path}: 404 Job not found.")
+                        f"Error deleting a Scheduler job {job_id_full_path} (the job probably doesn't exist): 404 Job not found.")
 
         logcapture.check_present(expected_log, )
 
@@ -393,4 +392,4 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         json_config = config.add_intraday_info_into_config(json_config)
         store.upload_config(config=json_config)
 
-#TODO: split large tests into multiple small tests
+# TODO: split large tests into multiple small tests
