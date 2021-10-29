@@ -35,7 +35,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=15,
+        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=30,
                                                            intraday_schedule_units="minutes")
         store.upload_config(config=json_config)
         # check
@@ -48,7 +48,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
 
                 # default intraday schedule
                 self.assertEqual(json_config[key]['intraday_schedule'], {
-                    "frequency": 15,
+                    "frequency": 30,
                     "units": "minutes"
                 })
 
