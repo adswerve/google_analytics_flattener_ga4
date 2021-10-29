@@ -261,4 +261,4 @@ def manage_intraday_schedule(event, context="context"):
 # The main flattening CF: if it gets a message: flatten intraday table  with data shard 20211023.
 # Make an API call to BQ. Does a DAILY nested table exist with this date shard?
 # If yes, log a warning and exit the function. We shouldn't flatten the intraday table in this case.
-# look thru logs - can it actually happen? So far I haven't seen many examples of that, normally, this risk isn't high
+# look thru logs - can it actually happen? So far I have seen only 1 example of that (GA4-BQ linking seems to have a malfunction), normally, this risk is low
