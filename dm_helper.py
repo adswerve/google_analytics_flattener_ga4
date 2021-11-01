@@ -62,7 +62,19 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         resource.type="bigquery_resource" 
         protoPayload.methodName="tableservice.insert" OR protoPayload.methodName="tableservice.delete"
         "events_intraday_"
+        NOT severity="error"
         '''
+        # we exclude severity="error" in intraday log filter, because we only want successful creations of intraday table
+        # there are logs about unsuccessful creation of this table: "table already exists" -
+        # they cause the intraday CF to fail:
+        # File "/workspace/main.py", line 160, in manage_intraday_schedule
+        #     input_event = InputValidatorIntraday(event)
+        #   File "/workspace/main.py", line 22, in __init__
+        #     self.gcp_project = bq_destination_table['projectId']
+        # KeyError: 'projectId'
+        # this is because the log about unsuccessful creation of the intraday nested table is not the right log for us
+        # it doesn't have table information in the API response part
+
         self.user_environment_variables = {
             "CONFIG_BUCKET_NAME": self.get_bucket_name(),
             "CONFIG_FILENAME": "config_datasets.json",
@@ -89,10 +101,10 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         '''
         if intraday:
             return '{d}-sink-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment)
-                                     , n=self._create_valid_gcp_resource_name(self.name))
+                                              , n=self._create_valid_gcp_resource_name(self.name))
         else:
             return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment)
-                                 , n=self._create_valid_gcp_resource_name(self.name))
+                                     , n=self._create_valid_gcp_resource_name(self.name))
 
     def get_project(self):
         return self.deployment_gcp_project
@@ -106,7 +118,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
                 self.get_project_number()))[:62]
 
     def get_filter(self, intraday=False):
-        #TODO: add feature for 3 options:
+        # TODO: add feature for 3 options:
         #       1. Daily tables only
         #       2. Intra day tables only
         #       3. Both Intra and Daily tables
