@@ -261,4 +261,8 @@ def manage_intraday_schedule(event, context="context"):
 # The main flattening CF: if it gets a message: flatten intraday table  with data shard 20211023.
 # Make an API call to BQ. Does a DAILY nested table exist with this date shard?
 # If yes, log a warning and exit the function. We shouldn't flatten the intraday table in this case.
-# look thru logs - can it actually happen? So far I have seen only 1 example of that (GA4-BQ linking seems to have a malfunction), normally, this risk is low
+# this it not likely: Daily table got created AFTER intraday table deleted, ~3 seconds later
+# This is good, daily table has the last say and will determine the histrorical flat tables
+
+#TODO: risk: we might have many intraday tables and therefore, many Cloud Scheduler jobs, which will waste resources
+# we decided to leave it for now and if we observe situations like this, we'll fix the intraday flattener
