@@ -100,11 +100,9 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         TODO: make sure returned value meets resource name requirements defined in GCP
         '''
         if intraday:
-            return '{d}-sink-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment)
-                                              , n=self._create_valid_gcp_resource_name(self.name))
+            return '{d}-sink-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
         else:
-            return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment)
-                                     , n=self._create_valid_gcp_resource_name(self.name))
+            return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment))
 
     def get_project(self):
         return self.deployment_gcp_project
@@ -129,7 +127,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
 
     def _create_valid_gcp_resource_name(self, p_field):
         '''
-        GCP resources must only contain letters, numbers, undrescores, dots or dashes
+        GCP resources must only contain letters, numbers, underscores, dots or dashes
         and be between 3 and 63 chars long.  Resources must start with a letter and may not end with a dash
         :param p_field: starting point of the field
         :return: cleaned big query field name
