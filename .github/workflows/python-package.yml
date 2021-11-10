@@ -2,8 +2,8 @@
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
 #TODO: just an idea: it would be cool if as part of CI/CD, before running unit tests, flattener also installed
-# uninstall first, before you install again
 # this way we can quickly detect any installation issue
+# uninstall first, before you install again
 # the flow could be as follows: 1) uninstall 2) install 3) run unit tests
 
 name: Python package

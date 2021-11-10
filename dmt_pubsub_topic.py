@@ -9,7 +9,7 @@ def generate_config(ctx):
             'name': 'topic-name',
             'type': 'pubsub.v1.topic',
             'properties': {
-                'topic': config.get_topic_name()
+                'topic': config.get_topic_id()
             },
             'accessControl':
                 {'gcpIamPolicy':
@@ -23,7 +23,7 @@ def generate_config(ctx):
                 'name': 'topic-name-intraday',
                 'type': 'pubsub.v1.topic',
                 'properties': {
-                    'topic': config.get_topic_name(intraday=True)
+                    'topic': config.get_topic_id(intraday=True)
                 },
                 'accessControl':
                     {'gcpIamPolicy':

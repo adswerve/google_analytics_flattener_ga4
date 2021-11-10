@@ -75,6 +75,19 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         # this is because the log about unsuccessful creation of the intraday nested table is not the right log for us
         # it doesn't have table information in the API response part
 
+        self.gcp_resource_name_limit = 63
+        """As of 2021-11-09, there are the following chars limits:
+            Deployment name         63
+            CF name                 63
+            GCS bucket              63
+            Pub / Sub topic id      255
+            Log sink name           100
+            
+           Deployment name will determine the names/ids of GCP resources.
+           This constant will help truncate deployment name, so the length of GCP resources is valid,
+           to prevent installation errors 
+            """
+
         self.user_environment_variables = {
             "CONFIG_BUCKET_NAME": self.get_bucket_name(),
             "CONFIG_FILENAME": "config_datasets.json",
@@ -83,26 +96,11 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "USER_PROPERTIES": "user_properties",
             "ITEMS": "items",
             "LOCATION_ID": "us-central1",
-            "TOPIC_NAME": self.get_topic_name()
+            "TOPIC_NAME": self.get_topic_id()
         }
 
-    def get_topic_name(self, intraday=False):
-        '''
-        TODO: make sure returned value meets resource name requirements defined in GCP
-        '''
-        if intraday:
-            return '{d}-topic-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
-        else:
-            return '{d}-topic'.format(d=self._create_valid_gcp_resource_name(self.deployment))
-
-    def get_sink_name(self, intraday=False):
-        '''
-        TODO: make sure returned value meets resource name requirements defined in GCP
-        '''
-        if intraday:
-            return '{d}-sink-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
-        else:
-            return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+    # TODO: truncate deployment name with a global hardcoded constant
+    # about 40
 
     def get_project(self):
         return self.deployment_gcp_project
@@ -110,20 +108,72 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
     def get_project_number(self):
         return self.deployment_gcp_project_number
 
-    def get_bucket_name(self):
-        return '{d}-{n}-adswerve-ga-flat-config'.format(d=self._create_valid_gcp_resource_name(self.deployment)
-                                                        , n=self._create_valid_gcp_resource_name(
-                self.get_project_number()))[:62]
-
     def get_filter(self, intraday=False):
-        # TODO: add feature for 3 options:
-        #       1. Daily tables only
-        #       2. Intra day tables only
-        #       3. Both Intra and Daily tables
         if intraday:
             return self.FILTER_INTRADAY
         else:
             return self.FILTER
+
+    def get_sink_name(self, intraday=False):
+        '''
+        As long as deployment name is valid, sink name will also be valid
+        As of 2021-11-09:
+            Deployment name can be up to 63 chars long.
+            Sink name can be up to 100 chars long.
+        '''
+        if intraday:
+            return '{d}-sink-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+        else:
+            return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+
+    def get_topic_id(self, intraday=False):
+        '''
+        Returns topic id
+        As long as deployment name is valid, topic id will also be valid
+        As of 2021-11-09:
+            Deployment name can be up to 63 chars long.
+            Pub/Sub topic id can be up to 255 chars long.
+        '''
+        if intraday:
+            return '{d}-topic-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+        else:
+            return '{d}-topic'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+
+    def get_cf_name(self, code_location):
+        """
+        As of 2021-11-09:
+            Deployment name can be up to 63 chars long.
+            CF name can also be up to 63 chars long.
+
+        We will be appending a string to deployment name to get a bucket name.
+        We need to truncate deployment name, so installation doesn't fail.
+        """
+        fn = code_location[:-1]
+
+        # -1 because of delimiter hyphen
+        trunc_deployment_name_length = self.gcp_resource_name_limit - len(fn) - 1
+
+        return "{d}-{fn}".format(d=self.deployment[:trunc_deployment_name_length], fn=fn)
+
+    def get_bucket_name(self):
+        """
+        As of 2021-11-09:
+            Deployment name can be up to 63 chars long.
+            GCS bucket name can also be up to 63 chars long.
+
+        We will be appending a string to deployment name to get a bucket name.
+        We need to truncate deployment name, so installation doesn't fail.
+        """
+        suffix = "adswerve-ga-flat-config"
+        number = self._create_valid_gcp_resource_name(self.get_project_number())
+
+        # -2 because we have 2 additional hyphens which are delimiters between deployment, name and
+        trunc_deployment_name_length = self.gcp_resource_name_limit - len(suffix) - len(number) - 2
+
+        deployment = self._create_valid_gcp_resource_name(self.deployment)[:trunc_deployment_name_length]
+
+        return '{d}-{n}-{suffix}'.format(d=deployment,
+                                         n=number, suffix=suffix)
 
     def _create_valid_gcp_resource_name(self, p_field):
         '''
