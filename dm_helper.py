@@ -99,9 +99,6 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "TOPIC_NAME": self.get_topic_id()
         }
 
-    # TODO: truncate deployment name with a global hardcoded constant
-    # about 40
-
     def get_project(self):
         return self.deployment_gcp_project
 
