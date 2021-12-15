@@ -14,7 +14,7 @@ c = Context()
 ''' Configuration Section Start '''
 '''*****************************'''
 topic_id = "ga-flattener-deployment-topic"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
-project_id = "adswerve-mobile-qa"  # GCP project ID, example:  [PROJECT_ID]
+project_id = "as-dev-ruslan" # GCP project ID, example:  [PROJECT_ID]
 dry_run = False  # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
 backfill_range_start = datetime.datetime(2021, 11, 1)
