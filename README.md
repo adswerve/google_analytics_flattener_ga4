@@ -15,6 +15,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
 * [Prerequisites](#prerequisites)
     + [Backfilling prerequisites](#backfilling-prerequisites)
 * [Installation steps](#installation-steps)
+    + [Deployment naming conventions](#deployment-naming-conventions)
 * [Verification steps](#verification-steps)
     + [Config file](#config-file)
       + [Enabling intraday flattening via the config file](#enabling-intraday-flattening-via-the-config-file)
@@ -172,12 +173,18 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
        browse to https://console.cloud.google.com/functions and click the cloud function named **[deployment_name]**
        -cfconfigbuilderps and go to the testing section and click "TEST THIS FUNCTION".
 
-   ### **[deployment_name]** naming convention
-    * Note that **[deployment_name]** cannot have underscores in its name, but can have hyphens.
-    * Example of a valid
-      name: ```gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml```
-    * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more
-      examples of valid values of **[deployment_name]**
+   ### Deployment naming conventions
+   * Deployment name must be a match of regex `'[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?'`
+    * Deployment naming conventions are as follows:
+      * Starts with a lowercase letter
+      * Can contain lowercase letters, numbers and hyphens
+      * Ends with a lowercase letter or number
+      * Up to 63 characters long (a beginning lowercase letter + 61 chars (hyphens, lowercase letters and number) + the ending lowercase letter or a number)
+    * Note that deployment name cannot have underscores in its name, but can have hyphens.
+    * An example of a valid
+      name is in this command: ```gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml```
+    * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid deployment names.
+    
 
 ## Verification steps ##
 
