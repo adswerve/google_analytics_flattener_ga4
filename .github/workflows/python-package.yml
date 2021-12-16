@@ -10,7 +10,7 @@ env:
 
 on:
   push:
-    branches: [ master, feature/ga4-intraday-testing, feature/installation-enhancements, feature/github_ci_cd_installation_test ]
+    branches: [ master, feature/ga4-intraday-testing, feature/installation-enhancements ]
   pull_request:
     branches: [ master ]
 
