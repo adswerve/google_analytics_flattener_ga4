@@ -17,3 +17,4 @@ class TestCFFlattenMethods(BaseUnitTest):
         ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
         ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
         self.assertTrue(True)
+        #TODO: test intraday flattening
