@@ -196,6 +196,8 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             })
         self.assertEqual(response_get_job.name, job_id_full_path)
         self.assertEqual(response_get_job.schedule, '*/30 * * * *')
+        self.assertEqual(str(response_get_job.pubsub_target.data),
+                         'b\'{"protoPayload": {"serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {"datasetId": "%s", "projectId": "%s", "tableId": "events_intraday_%s"}}}}}}}}\'' % (self.dataset_id, self.project_id, self.date_shard))
 
         # check log
         expected_log = ('root', 'INFO',

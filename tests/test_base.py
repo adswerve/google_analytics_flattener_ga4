@@ -26,9 +26,9 @@ class Context(object):
         else:  # if we are testing locally
             self.env = {
                 "deployment": "ga-flattener-deployment"
-                , "project": "adswerve-mobile-qa"
+                , "project": "as-dev-ruslan"
                 , "current_time": 1626736965
-                , "project_number": "86260628829"
+                , "project_number": "522429634784"
                 , "username": "ruslan.bergenov@adswerve.com"
                 , "name": "resource_name"
                 , "type": "dmt_resource_type.py"
