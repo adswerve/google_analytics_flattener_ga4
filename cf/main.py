@@ -6,7 +6,7 @@ import re
 import os
 import tempfile
 import logging
-
+from datetime import datetime
 
 class InputValidator(object):
     def __init__(self, event):
@@ -302,7 +302,70 @@ class GaExportedNestedDataStorage(object):
         # run the job
         query_job = client.query(query,
                                  job_config=query_job_config)
-        # query_job.result()  # Waits for job to complete.
+        query_job_result = query_job.result()  # Waits for job to complete.
+
+        # BQ -> pandas df
+        # # https://cloud.google.com/bigquery/docs/bigquery-storage-python-pandas#download_query_results_using_the_client_library
+
+        dataframe = query_job_result.to_dataframe()
+
+        # add date field to the dataframe
+        date = datetime.strptime(self.date_shard, '%Y%m%d')
+
+        partitioning_column = "event_date"
+
+        dataframe[partitioning_column] = date
+
+        # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
+        col = dataframe[partitioning_column]
+        dataframe.drop(labels=[partitioning_column], axis=1, inplace=True)
+        dataframe.insert(0, partitioning_column, col)
+
+        # pandas df -> BQ
+        # https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+
+
+        job_config_partitioned = bigquery.LoadJobConfig(
+            # Specify a (partial) schema. All columns are always written to the
+            # table. The schema is used to assist in data type definitions.
+            schema=[
+                # Specify the type of columns whose type cannot be auto-detected. For
+                # example the "title" column uses pandas dtype "object", so its
+                # data type is ambiguous.
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
+                # Indexes are written if included in the schema by name.
+                bigquery.SchemaField("event_params_key", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_params_value", bigquery.enums.SqlTypeNames.STRING),
+            ],
+            # https://stackoverflow.com/questions/59430708/how-to-load-dataframe-into-bigquery-partitioned-table-from-cloud-function-with-p
+            time_partitioning=bigquery.TimePartitioning(
+                type_=bigquery.TimePartitioningType.DAY,
+                field=partitioning_column # field to use for partitioning
+            ),
+            # Optionally, set the write disposition. BigQuery appends loaded rows
+            # to an existing table by default, but with WRITE_TRUNCATE write
+            # disposition it replaces the table with the loaded data.
+            write_disposition="WRITE_APPEND"
+        )
+
+        table_name_partitioned = "{p}.{ds}.{t}" \
+            .format(p=self.gcp_project, ds=self.dataset, t=table_type)
+        table_id_partitioned = bigquery.Table(table_name_partitioned)
+
+
+        job = client.load_table_from_dataframe(
+            dataframe=dataframe, destination=table_id_partitioned, job_config=job_config_partitioned
+        )  # Make an API request.
+        job.result()  # Wait for the job to complete.
+
+        table = client.get_table(table_id_partitioned)  # Make an API request.
+        print(
+            "Loaded {} rows and {} columns to {}".format(
+                table.num_rows, len(table.schema), table_id_partitioned
+            )
+        )
+
         return
 
 
