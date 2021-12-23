@@ -169,7 +169,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=30,
+        json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=30,
                                                            intraday_schedule_units="minutes")
         store.upload_config(config=json_config)
 
@@ -226,7 +226,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config)
+        json_config = config.add_intraday_params_into_config(json_config)
         store.upload_config(config=json_config)
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
@@ -266,7 +266,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=1,
+        json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
                                                            intraday_schedule_units="hours")
         store.upload_config(config=json_config)
 
@@ -313,7 +313,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         json_config = config.get_ga_datasets()
 
         # GCP won't accept this cron schedule
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=60,
+        json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=60,
                                                            intraday_schedule_units="minutes")
         store.upload_config(config=json_config)
 
@@ -359,7 +359,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             config = FlattenerDatasetConfig()
             store = FlattenerDatasetConfigStorage()
             json_config = config.get_ga_datasets()
-            json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=1,
+            json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
                                                                intraday_schedule_units="hours")
             store.upload_config(config=json_config)
 
@@ -389,7 +389,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config)
+        json_config = config.add_intraday_params_into_config(json_config)
         store.upload_config(config=json_config)
 
 # TODO: split large tests into multiple small tests

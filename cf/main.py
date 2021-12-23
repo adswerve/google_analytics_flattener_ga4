@@ -42,6 +42,17 @@ class InputValidator(object):
     def flatten_nested_table(self, nested_table):
         return nested_table in self.config[self.dataset]["tables_to_flatten"]
 
+    def get_output_configuration(self):
+        """
+        Extract info from the config file on whether we want sharded output, partitioned output or both
+        :return:
+        """
+        config_output = self.config[self.dataset].get("output", {
+            "sharded": True,
+            "partitioned": False})
+
+        return config_output
+
 
 class GaExportedNestedDataStorage(object):
     def __init__(self, gcp_project, dataset, table_name, date_shard, type='DAILY'):
@@ -82,7 +93,6 @@ class GaExportedNestedDataStorage(object):
             "user_properties.value.int_value",
             "user_properties.value.float_value",
             "user_properties.value.double_value",
-
             "user_properties.value.set_timestamp_micros"
         ]
 
@@ -288,114 +298,134 @@ class GaExportedNestedDataStorage(object):
             r = "_%s" % r
         return r[:300]  # trim the string to the first x chars
 
-    def run_query_job(self, query, table_type='flat'):
-        client = bigquery.Client()  # initialize BigQuery client
+    def run_query_job(self, query, table_type='flat', sharded_output_required=True, partitioned_output_required=False):
+
+        """
+        Depending on the configuration, we will write data to sharded table, partitioned table, or both.
+        :param query:
+        :param table_type:
+        :return:
+        """
+
+        # TODO: this function is huge, split it into multiple functions???
 
         # 1
         # QUERY AND FLATTEN DATA. WRITE SHARDED OUTPUT, if flattener is configured to do so
+
+        client = bigquery.Client()  # initialize BigQuery client
+
         # get table name
         table_name = "{p}.{ds}.{t}_{d}" \
             .format(p=self.gcp_project, ds=self.dataset, t=table_type, d=self.date_shard)
+
         table_id = bigquery.Table(table_name)
+
         # configure query job
         query_job_flatten_config = bigquery.QueryJobConfig(
-            destination=table_id
+            # we will query and flatten the data ,
+            # but we may or may not write the result to a sharded table,
+            # depending on the config
+            destination=table_id if sharded_output_required else None
             , dry_run=False
             # when a destination table is specified in the job configuration, query results are not cached
             # https://cloud.google.com/bigquery/docs/cached-results
             , use_query_cache=True
             , labels={"queryfunction": "flatteningquery"}  # todo: apply proper labels
             , write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE)
+
         # run the job
         query_job_flatten = client.query(query,
-                                 job_config=query_job_flatten_config)
+                                         job_config=query_job_flatten_config)
         query_job_flatten_result = query_job_flatten.result()  # Waits for job to complete.
 
-        # WRITE PARITIONED OUTPUT, if flattener is configured to do so
-        # BQ -> pandas df
-        # # https://cloud.google.com/bigquery/docs/bigquery-storage-python-pandas#download_query_results_using_the_client_library
-        query_job_flatten_result = query_job_flatten_result.result()  # Waits for job to complete.
+        # we may or may not save query result into into a pandas dataframe and write into a partitioned table,
+        # depending on the config
+        if partitioned_output_required:
 
-        dataframe = query_job_flatten_result.to_dataframe()  # we will need this dataframe if we load data to a partitioned table
+            # 2
+            # WRITE PARITIONED OUTPUT, if flattener is configured to do so
+            # BQ -> pandas df
+            # # https://cloud.google.com/bigquery/docs/bigquery-storage-python-pandas#download_query_results_using_the_client_library
+            dataframe = query_job_flatten_result.to_dataframe()  # we will need this dataframe if we load data to a partitioned table
 
-        # add date field to the dataframe
-        date = datetime.strptime(self.date_shard, '%Y%m%d')
+            # add date field to the dataframe
+            date = datetime.strptime(self.date_shard, '%Y%m%d')
 
-        partitioning_column = "event_date"
+            partitioning_column = "event_date"
 
-        dataframe[partitioning_column] = date
+            dataframe[partitioning_column] = date
 
-        # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
-        col = dataframe[partitioning_column]
-        dataframe.drop(labels=[partitioning_column], axis=1, inplace=True)
-        dataframe.insert(0, partitioning_column, col)
+            # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
+            col = dataframe[partitioning_column]
+            dataframe.drop(labels=[partitioning_column], axis=1, inplace=True)
+            dataframe.insert(0, partitioning_column, col)
 
-        try:
-            # delete the partition, if it already exists, before we load it
-            # this ensures that we don't have dupes
-            datetime_string = str(date)
-            date_string = re.search(r'20\d\d\-\d\d\-\d\d', datetime_string).group(0)
+            try:
+                # delete the partition, if it already exists, before we load it
+                # this ensures that we don't have dupes
+                datetime_string = str(date)
+                date_string = re.search(r'20\d\d\-\d\d\-\d\d', datetime_string).group(0)
 
-            query_delete = """
-                       DELETE FROM `{p}.{ds}.{t}` WHERE event_date = "{date_shard}";
-                   """.format(p=self.gcp_project, ds=self.dataset, t=table_type, date_shard=date_string)
+                query_delete = """
+                           DELETE FROM `{p}.{ds}.{t}` WHERE event_date = "{date_shard}";
+                       """.format(p=self.gcp_project, ds=self.dataset, t=table_type, date_shard=date_string)
 
-            query_job_delete_config = bigquery.QueryJobConfig(
-                labels={"queryfunction": "flattenerpartitiondeletionquery"}  # todo: apply proper labels
+                query_job_delete_config = bigquery.QueryJobConfig(
+                    labels={"queryfunction": "flattenerpartitiondeletionquery"}  # todo: apply proper labels
+                )
+                query_job_delete = client.query(query_delete,
+                                                job_config=query_job_delete_config)  # Make an API request.
+                query_job_delete.result()  # Waits for job to complete.
+                pass
+            except Exception as e:
+                if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
+                    logging.warning(f"cannot delete the partition because the table doesn't exist yet: {e}")
+                else:
+                    logging.critical(f"cannot delete the partition: {e}")
+            # pandas df -> BQ
+            # https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
+
+            load_job_config_partitioned = bigquery.LoadJobConfig(
+                # Specify a (partial) schema. All columns are always written to the
+                # table. The schema is used to assist in data type definitions.
+                schema=[
+                    # Specify the type of columns whose type cannot be auto-detected. For
+                    # example the "title" column uses pandas dtype "object", so its
+                    # data type is ambiguous.
+                    bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                    bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
+                    # Indexes are written if included in the schema by name.
+                    bigquery.SchemaField("event_params_key", bigquery.enums.SqlTypeNames.STRING),
+                    bigquery.SchemaField("event_params_value", bigquery.enums.SqlTypeNames.STRING),
+                ],
+                # https://stackoverflow.com/questions/59430708/how-to-load-dataframe-into-bigquery-partitioned-table-from-cloud-function-with-p
+                time_partitioning=bigquery.TimePartitioning(
+                    type_=bigquery.TimePartitioningType.DAY,
+                    field=partitioning_column  # field to use for partitioning
+                ),
+                # Optionally, set the write disposition. BigQuery appends loaded rows
+                # to an existing table by default, but with WRITE_TRUNCATE write
+                # disposition it replaces the table with the loaded data.
+                write_disposition="WRITE_APPEND"
+                , labels={"queryfunction": "flattenerpartitionloadjob"}
             )
-            query_job_delete = client.query(query_delete, job_config=query_job_delete_config)  # Make an API request.
-            query_job_delete.result()  # Waits for job to complete.
-            pass
-        except Exception as e:
-            if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
-                logging.warning(f"cannot delete the partition because the table doesn't exist yet: {e}")
-            else:
-                logging.critical(f"cannot delete the partition: {e}")
-        # pandas df -> BQ
-        # https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
 
-        load_job_config_partitioned = bigquery.LoadJobConfig(
-            # Specify a (partial) schema. All columns are always written to the
-            # table. The schema is used to assist in data type definitions.
-            schema=[
-                # Specify the type of columns whose type cannot be auto-detected. For
-                # example the "title" column uses pandas dtype "object", so its
-                # data type is ambiguous.
-                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
-                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
-                # Indexes are written if included in the schema by name.
-                bigquery.SchemaField("event_params_key", bigquery.enums.SqlTypeNames.STRING),
-                bigquery.SchemaField("event_params_value", bigquery.enums.SqlTypeNames.STRING),
-            ],
-            # https://stackoverflow.com/questions/59430708/how-to-load-dataframe-into-bigquery-partitioned-table-from-cloud-function-with-p
-            time_partitioning=bigquery.TimePartitioning(
-                type_=bigquery.TimePartitioningType.DAY,
-                field=partitioning_column  # field to use for partitioning
-            ),
-            # Optionally, set the write disposition. BigQuery appends loaded rows
-            # to an existing table by default, but with WRITE_TRUNCATE write
-            # disposition it replaces the table with the loaded data.
-            write_disposition="WRITE_APPEND"
-            , labels={"queryfunction": "flattenerpartitionloadjob"}
-        )
+            table_name_partitioned = "{p}.{ds}.{t}" \
+                .format(p=self.gcp_project, ds=self.dataset, t=table_type)
+            table_id_partitioned = bigquery.Table(table_name_partitioned)
 
-        table_name_partitioned = "{p}.{ds}.{t}" \
-            .format(p=self.gcp_project, ds=self.dataset, t=table_type)
-        table_id_partitioned = bigquery.Table(table_name_partitioned)
+            load_job_partition = client.load_table_from_dataframe(
+                dataframe=dataframe, destination=table_id_partitioned, job_config=load_job_config_partitioned
+            )  # Make an API request.
+            load_job_partition.result()  # Wait for the job to complete.
 
-        load_job_partition = client.load_table_from_dataframe(
-            dataframe=dataframe, destination=table_id_partitioned, job_config=load_job_config_partitioned
-        )  # Make an API request.
-        load_job_partition.result()  # Wait for the job to complete.
-
-        # TODO: move this to a unit test to verify outputs
-        # table = client.get_table(table_id_partitioned)  # Make an API request.
-        # print(
-        #     "Loaded {} rows and {} columns to {}".format(
-        #         table.num_rows, len(table.schema), table_id_partitioned
-        #     )
-        # )
-        return
+            # TODO: move this to a unit test to verify outputs
+            # table = client.get_table(table_id_partitioned)  # Make an API request.
+            # print(
+            #     "Loaded {} rows and {} columns to {}".format(
+            #         table.num_rows, len(table.schema), table_id_partitioned
+            #     )
+            # )
 
 
 def flatten_ga_data(event, context):
@@ -407,6 +437,9 @@ def flatten_ga_data(event, context):
          context (google.cloud.functions.Context): Metadata for the event.
     """
     input_event = InputValidator(event)
+    output_config = input_event.get_output_configuration()
+    output_config_sharded = output_config["sharded"]
+    output_config_partitioned = output_config["partitioned"]
 
     if input_event.valid_dataset():
         ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
@@ -416,7 +449,9 @@ def flatten_ga_data(event, context):
 
         # EVENT_PARAMS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
-            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params")
+            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
+                                    sharded_output_required=output_config_sharded,
+                                    partitioned_output_required=output_config_partitioned)
             logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
         else:
             logging.info(
