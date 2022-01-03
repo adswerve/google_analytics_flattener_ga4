@@ -8,6 +8,7 @@ import tempfile
 import logging
 from datetime import datetime
 from http import HTTPStatus
+import pandas as pd
 
 
 class InputValidator(object):
@@ -199,6 +200,113 @@ class GaExportedNestedDataStorage(object):
             "ecommerce.transaction_id"
         ]
 
+        self.partitioned_table_schemas = {
+            "flat_event_params": [
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_params_key", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_params_value", bigquery.enums.SqlTypeNames.STRING),
+            ],
+
+            "flat_events": [
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_timestamp", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("event_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_previous_timestamp", bigquery.enums.SqlTypeNames.INTEGER),
+                # bigquery.SchemaField("event_previous_timestamp", bigquery.enums.SqlTypeNames.INT64),
+                bigquery.SchemaField("event_value_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("event_bundle_sequence_id", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("event_server_timestamp_offset", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("user_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("user_pseudo_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("privacy_info_analytics_storage", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("privacy_info_ads_storage", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("privacy_info_uses_transient_token", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("user_first_touch_timestamp", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("user_ltv_revenue", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("user_ltv_currency", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_category", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_mobile_brand_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_mobile_model_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_mobile_marketing_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_mobile_os_hardware_model", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_operating_system", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_operating_system_version", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_vendor_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_advertising_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_language", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_is_limited_ad_tracking", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_time_zone_offset_seconds", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("device_browser", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_browser_version", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_web_info_browser", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_web_info_browser_version", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("device_web_info_hostname", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("geo_continent", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("geo_country", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("geo_region", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("geo_city", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("geo_sub_continent", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("geo_metro", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("app_info_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("app_info_version", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("app_info_install_store", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("app_info_firebase_app_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("app_info_install_source", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("traffic_source_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("traffic_source_medium", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("traffic_source_source", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("stream_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("platform", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_dimensions_hostname", bigquery.enums.SqlTypeNames.STRING),
+                # bigquery.SchemaField("event_dimensions_hostname", "STRING")
+            ],
+
+            "flat_items": [
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_brand", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_variant", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_category", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_category2", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_category3", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_category4", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_category5", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_price_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("items_price", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("items_quantity", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("items_item_revenue_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("items_item_revenue", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("items_item_refund_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("items_item_refund", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("items_coupon", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_affiliation", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_location_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_list_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_list_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_item_list_index", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_promotion_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_promotion_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_creative_name", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("items_creative_slot", bigquery.enums.SqlTypeNames.STRING),
+            ],
+
+            "flat_user_properties": [
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("user_properties_key", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("user_properties_value", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("user_properties_value_set_timestamp_micros", bigquery.enums.SqlTypeNames.INTEGER),
+            ],
+        }
+
+        self.partitioning_column = "event_date"
+
     def get_unique_event_id(self, unique_event_id_fields):
         """
         build unique event id
@@ -298,6 +406,48 @@ class GaExportedNestedDataStorage(object):
             r = "_%s" % r
         return r[:300]  # trim the string to the first x chars
 
+    def transform_dataframe(self, dataframe, table_type="flat"):
+        """
+
+        Transforms the dataframe which will be loaded into the partitioned table.
+
+        Adds a timestamp column into a dataframe, which will be used for partitioning.
+
+        Ensures the right column order.
+
+        Ensures the right data types, so they match the data types in the sharded table.
+        """
+
+        dataframe_cleaned = dataframe.copy()
+
+        # add date field to the dataframe
+        date = datetime.strptime(self.date_shard, '%Y%m%d')
+
+        dataframe_cleaned[self.partitioning_column] = date
+
+        # dataframe = dataframe.where(pd.notnull(dataframe), None)
+
+        dataframe_cleaned[["event_dimensions_hostname"]] = dataframe_cleaned[["event_dimensions_hostname"]].astype(str)
+
+        # if a pandas column has missing values
+        # Because NaN is a float, this forces an array of integers with any missing values to become floating point.
+        # you will have an error converting it from float to integer if you do df[[col]] = df[[col]].astype(int)
+        # pandas.errors.IntCastingNaNError: Cannot convert non-finite values (NA or inf) to integer
+        # In this case, even if you request that the field is BQ integer in BQ load job config, the field will still get loaded as float
+        # therefore, we first need to force the field to integer in pandas (by default, it will be float, because np.Nan is float)
+        # https://pandas.pydata.org/pandas-docs/stable/user_guide/integer_na.html
+        # https://stackoverflow.com/questions/48511484/data-type-conversion-error-valueerror-cannot-convert-non-finite-values-na-or
+
+        dataframe_cleaned["event_previous_timestamp"] = pd.Series(list(dataframe_cleaned["event_previous_timestamp"]),
+                                                                  dtype=pd.Int64Dtype())
+
+        # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
+        col = dataframe_cleaned[self.partitioning_column]
+        dataframe_cleaned.drop(labels=[self.partitioning_column], axis=1, inplace=True)
+        dataframe_cleaned.insert(0, self.partitioning_column, col)
+
+        return dataframe_cleaned
+
     def run_query_job(self, query, table_type='flat', sharded_output_required=True, partitioned_output_required=False):
 
         """
@@ -348,21 +498,12 @@ class GaExportedNestedDataStorage(object):
             # # https://cloud.google.com/bigquery/docs/bigquery-storage-python-pandas#download_query_results_using_the_client_library
             dataframe = query_job_flatten_result.to_dataframe()  # we will need this dataframe if we load data to a partitioned table
 
-            # add date field to the dataframe
-            date = datetime.strptime(self.date_shard, '%Y%m%d')
-
-            partitioning_column = "event_date"
-
-            dataframe[partitioning_column] = date
-
-            # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
-            col = dataframe[partitioning_column]
-            dataframe.drop(labels=[partitioning_column], axis=1, inplace=True)
-            dataframe.insert(0, partitioning_column, col)
+            dataframe = self.transform_dataframe(dataframe)
 
             try:
                 # delete the partition, if it already exists, before we load it
                 # this ensures that we don't have dupes
+                date = datetime.strptime(self.date_shard, '%Y%m%d')
                 datetime_string = str(date)
                 date_string = re.search(r'20\d\d\-\d\d\-\d\d', datetime_string).group(0)
 
@@ -376,7 +517,7 @@ class GaExportedNestedDataStorage(object):
                 query_job_delete = client.query(query_delete,
                                                 job_config=query_job_delete_config)  # Make an API request.
                 query_job_delete.result()  # Waits for job to complete.
-                pass
+
             except Exception as e:
                 if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
                     logging.warning(f"cannot delete the partition because the table doesn't exist yet: {e}")
@@ -388,20 +529,12 @@ class GaExportedNestedDataStorage(object):
             load_job_config_partitioned = bigquery.LoadJobConfig(
                 # Specify a (partial) schema. All columns are always written to the
                 # table. The schema is used to assist in data type definitions.
-                schema=[
-                    # Specify the type of columns whose type cannot be auto-detected. For
-                    # example the "title" column uses pandas dtype "object", so its
-                    # data type is ambiguous.
-                    bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
-                    bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
-                    # Indexes are written if included in the schema by name.
-                    bigquery.SchemaField("event_params_key", bigquery.enums.SqlTypeNames.STRING),
-                    bigquery.SchemaField("event_params_value", bigquery.enums.SqlTypeNames.STRING),
-                ],
+                schema=self.partitioned_table_schemas.get(table_type, None),
+                autodetect=False if self.partitioned_table_schemas.get(table_type, None) else True,
                 # https://stackoverflow.com/questions/59430708/how-to-load-dataframe-into-bigquery-partitioned-table-from-cloud-function-with-p
                 time_partitioning=bigquery.TimePartitioning(
                     type_=bigquery.TimePartitioningType.DAY,
-                    field=partitioning_column  # field to use for partitioning
+                    field=self.partitioning_column  # field to use for partitioning
                 ),
                 # Optionally, set the write disposition. BigQuery appends loaded rows
                 # to an existing table by default, but with WRITE_TRUNCATE write
@@ -418,7 +551,7 @@ class GaExportedNestedDataStorage(object):
                 dataframe=dataframe, destination=table_id_partitioned, job_config=load_job_config_partitioned
             )  # Make an API request.
             load_job_partition.result()  # Wait for the job to complete.
-
+            pass
             # TODO: move this to a unit test to verify outputs
             # table = client.get_table(table_id_partitioned)  # Make an API request.
             # print(
@@ -427,57 +560,56 @@ class GaExportedNestedDataStorage(object):
             #     )
             # )
 
+    def flatten_ga_data(event, context):
+        """
+        Flatten GA4 data
+        Triggered from a message on a Cloud Pub/Sub topic.
+        Args:
+             event (dict): Event payload.
+             context (google.cloud.functions.Context): Metadata for the event.
+        """
+        input_event = InputValidator(event)
+        output_config = input_event.get_output_configuration()
+        output_config_sharded = output_config["sharded"]
+        output_config_partitioned = output_config["partitioned"]
 
-def flatten_ga_data(event, context):
-    """
-    Flatten GA4 data
-    Triggered from a message on a Cloud Pub/Sub topic.
-    Args:
-         event (dict): Event payload.
-         context (google.cloud.functions.Context): Metadata for the event.
-    """
-    input_event = InputValidator(event)
-    output_config = input_event.get_output_configuration()
-    output_config_sharded = output_config["sharded"]
-    output_config_partitioned = output_config["partitioned"]
+        if input_event.valid_dataset():
+            ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
+                                                    dataset=input_event.dataset,
+                                                    table_name=input_event.table_name,
+                                                    date_shard=input_event.table_date_shard)
 
-    if input_event.valid_dataset():
-        ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
-                                                dataset=input_event.dataset,
-                                                table_name=input_event.table_name,
-                                                date_shard=input_event.table_date_shard)
+            # EVENT_PARAMS
+            if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
+                ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
+                                        sharded_output_required=output_config_sharded,
+                                        partitioned_output_required=output_config_partitioned)
+                logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
+            else:
+                logging.info(
+                    f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
 
-        # EVENT_PARAMS
-        if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
-            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
-                                    sharded_output_required=output_config_sharded,
-                                    partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
+            # USER_PROPERTIES
+            if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
+                ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
+                logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
+            else:
+                logging.info(
+                    f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
+
+            # ITEMS
+            if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
+                ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
+                logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
+            else:
+                logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
+
+            # EVENTS
+            if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
+                ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
+                logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
+            else:
+                logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
+
         else:
-            logging.info(
-                f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
-
-        # USER_PROPERTIES
-        if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
-            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
-            logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
-        else:
-            logging.info(
-                f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
-
-        # ITEMS
-        if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
-            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
-            logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
-        else:
-            logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
-
-        # EVENTS
-        if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
-            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
-            logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
-        else:
-            logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
-
-    else:
-        logging.warning(f'Dataset {input_event.dataset} not configured for flattening')
+            logging.warning(f'Dataset {input_event.dataset} not configured for flattening')
