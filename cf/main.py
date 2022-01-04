@@ -62,6 +62,7 @@ class GaExportedNestedDataStorage(object):
         self.gcp_project = gcp_project
         self.dataset = dataset
         self.date_shard = date_shard
+        self.date = datetime.strptime(self.date_shard, '%Y%m%d')
         self.table_name = table_name
         self.type = type
 
@@ -209,14 +210,11 @@ class GaExportedNestedDataStorage(object):
             ],
 
             "flat_events": [
-                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
-                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
                 bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
-                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
                 bigquery.SchemaField("event_timestamp", bigquery.enums.SqlTypeNames.INTEGER),
                 bigquery.SchemaField("event_name", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("event_previous_timestamp", bigquery.enums.SqlTypeNames.INTEGER),
-                # bigquery.SchemaField("event_previous_timestamp", bigquery.enums.SqlTypeNames.INT64),
                 bigquery.SchemaField("event_value_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
                 bigquery.SchemaField("event_bundle_sequence_id", bigquery.enums.SqlTypeNames.INTEGER),
                 bigquery.SchemaField("event_server_timestamp_offset", bigquery.enums.SqlTypeNames.INTEGER),
@@ -261,8 +259,7 @@ class GaExportedNestedDataStorage(object):
                 bigquery.SchemaField("traffic_source_source", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("stream_id", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("platform", bigquery.enums.SqlTypeNames.STRING),
-                bigquery.SchemaField("event_dimensions_hostname", bigquery.enums.SqlTypeNames.STRING),
-                # bigquery.SchemaField("event_dimensions_hostname", "STRING")
+                bigquery.SchemaField("event_dimensions_hostname", bigquery.enums.SqlTypeNames.STRING)
             ],
 
             "flat_items": [
@@ -421,13 +418,9 @@ class GaExportedNestedDataStorage(object):
         dataframe_cleaned = dataframe.copy()
 
         # add date field to the dataframe
-        date = datetime.strptime(self.date_shard, '%Y%m%d')
 
-        dataframe_cleaned[self.partitioning_column] = date
+        dataframe_cleaned[self.partitioning_column] = self.date
 
-        # dataframe = dataframe.where(pd.notnull(dataframe), None)
-
-        dataframe_cleaned[["event_dimensions_hostname"]] = dataframe_cleaned[["event_dimensions_hostname"]].astype(str)
 
         # if a pandas column has missing values
         # Because NaN is a float, this forces an array of integers with any missing values to become floating point.
@@ -438,8 +431,18 @@ class GaExportedNestedDataStorage(object):
         # https://pandas.pydata.org/pandas-docs/stable/user_guide/integer_na.html
         # https://stackoverflow.com/questions/48511484/data-type-conversion-error-valueerror-cannot-convert-non-finite-values-na-or
 
-        dataframe_cleaned["event_previous_timestamp"] = pd.Series(list(dataframe_cleaned["event_previous_timestamp"]),
-                                                                  dtype=pd.Int64Dtype())
+        bq_schema = self.partitioned_table_schemas.get(table_type, None)
+
+        for column in dataframe_cleaned:
+            for dest_bq_field in bq_schema:
+                if dest_bq_field.name == column:
+                    if dest_bq_field.field_type == "STRING":
+                        dataframe_cleaned[[column]] = dataframe_cleaned[[column]].astype(str)
+                    elif dest_bq_field.field_type == "FLOAT":
+                        dataframe_cleaned[[column]] = dataframe_cleaned[[column]].astype(float)
+                    elif dest_bq_field.field_type == "INTEGER":
+                        dataframe_cleaned[column] = pd.Series(list(dataframe_cleaned[column]),
+                                                                                  dtype=pd.Int64Dtype())
 
         # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
         col = dataframe_cleaned[self.partitioning_column]
@@ -498,13 +501,12 @@ class GaExportedNestedDataStorage(object):
             # # https://cloud.google.com/bigquery/docs/bigquery-storage-python-pandas#download_query_results_using_the_client_library
             dataframe = query_job_flatten_result.to_dataframe()  # we will need this dataframe if we load data to a partitioned table
 
-            dataframe = self.transform_dataframe(dataframe)
+            dataframe = self.transform_dataframe(dataframe, table_type=table_type)
 
             try:
                 # delete the partition, if it already exists, before we load it
                 # this ensures that we don't have dupes
-                date = datetime.strptime(self.date_shard, '%Y%m%d')
-                datetime_string = str(date)
+                datetime_string = str(self.date)
                 date_string = re.search(r'20\d\d\-\d\d\-\d\d', datetime_string).group(0)
 
                 query_delete = """

@@ -37,17 +37,17 @@ class TestCFFlattenMethods(BaseUnitTest):
         self.assertTrue(True)
 
     def test_flatten_ga_data_config_output_type_sharded_and_partitioned_(self):
-        # self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
-        #                              sharded_output_required=True, partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
+                                     sharded_output_required=True, partitioned_output_required=True)
 
         self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type="flat_events",
                                      sharded_output_required=True, partitioned_output_required=True)
 
-        # self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
-        #                              sharded_output_required=True, partitioned_output_required=True)
-        #
-        # self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-        #                              table_type="flat_user_properties", sharded_output_required=True,
-        #                              partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
+                                     sharded_output_required=True, partitioned_output_required=True)
+
+        self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
+                                     table_type="flat_user_properties", sharded_output_required=True,
+                                     partitioned_output_required=True)
 
         self.assertTrue(True)
