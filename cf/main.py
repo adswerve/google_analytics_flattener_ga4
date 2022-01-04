@@ -562,56 +562,56 @@ class GaExportedNestedDataStorage(object):
             #     )
             # )
 
-    def flatten_ga_data(event, context):
-        """
-        Flatten GA4 data
-        Triggered from a message on a Cloud Pub/Sub topic.
-        Args:
-             event (dict): Event payload.
-             context (google.cloud.functions.Context): Metadata for the event.
-        """
-        input_event = InputValidator(event)
-        output_config = input_event.get_output_configuration()
-        output_config_sharded = output_config["sharded"]
-        output_config_partitioned = output_config["partitioned"]
+def flatten_ga_data(event, context):
+    """
+    Flatten GA4 data
+    Triggered from a message on a Cloud Pub/Sub topic.
+    Args:
+         event (dict): Event payload.
+         context (google.cloud.functions.Context): Metadata for the event.
+    """
+    input_event = InputValidator(event)
+    output_config = input_event.get_output_configuration()
+    output_config_sharded = output_config["sharded"]
+    output_config_partitioned = output_config["partitioned"]
 
-        if input_event.valid_dataset():
-            ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
-                                                    dataset=input_event.dataset,
-                                                    table_name=input_event.table_name,
-                                                    date_shard=input_event.table_date_shard)
+    if input_event.valid_dataset():
+        ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
+                                                dataset=input_event.dataset,
+                                                table_name=input_event.table_name,
+                                                date_shard=input_event.table_date_shard)
 
-            # EVENT_PARAMS
-            if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
-                ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
-                                        sharded_output_required=output_config_sharded,
-                                        partitioned_output_required=output_config_partitioned)
-                logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
-            else:
-                logging.info(
-                    f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
-
-            # USER_PROPERTIES
-            if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
-                ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
-                logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
-            else:
-                logging.info(
-                    f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
-
-            # ITEMS
-            if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
-                ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
-                logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
-            else:
-                logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
-
-            # EVENTS
-            if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
-                ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
-                logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
-            else:
-                logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
-
+        # EVENT_PARAMS
+        if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
+            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
+                                    sharded_output_required=output_config_sharded,
+                                    partitioned_output_required=output_config_partitioned)
+            logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
         else:
-            logging.warning(f'Dataset {input_event.dataset} not configured for flattening')
+            logging.info(
+                f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
+
+        # USER_PROPERTIES
+        if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
+            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
+            logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
+        else:
+            logging.info(
+                f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
+
+        # ITEMS
+        if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
+            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
+            logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
+        else:
+            logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
+
+        # EVENTS
+        if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
+            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
+            logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
+        else:
+            logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
+
+    else:
+        logging.warning(f'Dataset {input_event.dataset} not configured for flattening')
