@@ -1,5 +1,6 @@
 #TODO: do we need a more extended unit test for partitioning?
-# load config file, run the flattening function, verify inputs and outputs?
+# load config file, backfill, verify inputs and outputs?
+# test backfill with diff config options (sharding vs partitioning vs both)
 
 # TODO: check that schemas match in sharded and partitioned table
 
@@ -8,8 +9,6 @@
 # TODO: verify partitioning
 
 # TODO: test to verify idempotent nature of append operation
-
-# TODO: test backfill with diff config options (sharding vs partitioning vs both)
 
 # TODO: test with the intraday feature
 

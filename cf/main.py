@@ -259,7 +259,18 @@ class GaExportedNestedDataStorage(object):
                 bigquery.SchemaField("traffic_source_source", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("stream_id", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("platform", bigquery.enums.SqlTypeNames.STRING),
-                bigquery.SchemaField("event_dimensions_hostname", bigquery.enums.SqlTypeNames.STRING)
+                bigquery.SchemaField("event_dimensions_hostname", bigquery.enums.SqlTypeNames.STRING),
+                bigquery.SchemaField("ecommerce_total_item_quantity", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("ecommerce_purchase_revenue_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_purchase_revenue", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_refund_value_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_refund_value", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_shipping_value_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_shipping_value", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_tax_value_in_usd", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_tax_value", bigquery.enums.SqlTypeNames.FLOAT),
+                bigquery.SchemaField("ecommerce_unique_items", bigquery.enums.SqlTypeNames.INTEGER),
+                bigquery.SchemaField("ecommerce_transaction_id", bigquery.enums.SqlTypeNames.STRING),
             ],
 
             "flat_items": [
@@ -413,6 +424,9 @@ class GaExportedNestedDataStorage(object):
         Ensures the right column order.
 
         Ensures the right data types, so they match the data types in the sharded table.
+
+        If we don't run this function, then wrong data types may be loaded into BQ,
+            even if you request the required data types in load job config schema.
         """
 
         # add date field to the dataframe
@@ -491,6 +505,8 @@ class GaExportedNestedDataStorage(object):
                                          job_config=query_job_flatten_config)
         # we may or may not save query result into into a pandas dataframe and write into a partitioned table,
         # depending on the config
+        query_job_flatten_result = query_job_flatten.result()  # Waits for job to complete.
+        pass
         if partitioned_output_required:
             # 2
             # WRITE PARTITIONED OUTPUT, if flattener is configured to do so
