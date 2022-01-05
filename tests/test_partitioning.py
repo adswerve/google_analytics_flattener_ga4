@@ -3,6 +3,8 @@
 
 # TODO: check that schemas match in sharded and partitioned table
 
+#TODO: make sure that event_date col is a DATE, not TIMESTAMP
+
 # TODO: verify partitioning
 
 # TODO: test to verify idempotent nature of append operation

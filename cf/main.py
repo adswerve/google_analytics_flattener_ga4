@@ -210,8 +210,8 @@ class GaExportedNestedDataStorage(object):
             ],
 
             "flat_events": [
-                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("event_date", bigquery.enums.SqlTypeNames.DATE),
+                bigquery.SchemaField("event_id", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("event_timestamp", bigquery.enums.SqlTypeNames.INTEGER),
                 bigquery.SchemaField("event_name", bigquery.enums.SqlTypeNames.STRING),
                 bigquery.SchemaField("event_previous_timestamp", bigquery.enums.SqlTypeNames.INTEGER),
@@ -440,6 +440,9 @@ class GaExportedNestedDataStorage(object):
                     elif dest_bq_field.field_type == "INTEGER":
                         dataframe[column] = pd.Series(list(dataframe[column]),
                                                       dtype=pd.Int64Dtype())
+                    # https://www.statology.org/convert-datetime-to-date-pandas/
+                    elif dest_bq_field.field_type == "DATE":
+                        dataframe[column] = dataframe[column].dt.date
 
         # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
         col = dataframe[self.partitioning_column]
@@ -490,7 +493,7 @@ class GaExportedNestedDataStorage(object):
         # depending on the config
         if partitioned_output_required:
             # 2
-            # WRITE PARITIONED OUTPUT, if flattener is configured to do so
+            # WRITE PARTITIONED OUTPUT, if flattener is configured to do so
             # BQ -> pandas df
             query_job_flatten_result = query_job_flatten.result()  # Waits for job to complete.
             # # https://cloud.google.com/bigquery/docs/bigquery-storage-python-pandas#download_query_results_using_the_client_library
@@ -548,7 +551,6 @@ class GaExportedNestedDataStorage(object):
                 dataframe=dataframe, destination=table_id_partitioned, job_config=load_job_config_partitioned
             )  # Make an API request.
             load_job_partition.result()  # Wait for the job to complete.
-            pass
             # TODO: move this to a unit test to verify outputs
             # table = client.get_table(table_id_partitioned)  # Make an API request.
             # print(
@@ -556,6 +558,7 @@ class GaExportedNestedDataStorage(object):
             #         table.num_rows, len(table.schema), table_id_partitioned
             #     )
             # )
+            pass
 
 
 def flatten_ga_data(event, context):
