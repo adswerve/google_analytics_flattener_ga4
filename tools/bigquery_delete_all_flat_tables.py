@@ -1,3 +1,4 @@
+#TODO: use this as teardown step in your unit tests.
 """
 USE WITH CAUTION!
 deletes all flat tables from dataset

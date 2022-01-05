@@ -5,7 +5,9 @@ from cfconfigbuilderps.main import FlattenerDatasetConfig as FlattenerDatasetCon
 from cfconfigbuilderps.main import FlattenerDatasetConfigStorage as FlattenerDatasetConfigStoragePS
 
 
-# TODO: question: what's the diff between these two unit tests?
+# TODO: question: what's the diff between these two unit tests? test_build_flattener_ga_dataset_config vs test_build_flattener_ga_dataset_config_ps
+
+# TODO: merge some of the repetitive unit tests
 
 class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
 
@@ -82,6 +84,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         self.assertTrue(True)
 
     def test_build_flattener_ga_dataset_config_add_output_params_default(self):
+        # TODO: use this as teardown step in your unit tests, in order to ensure default config is restored
         # generate config and upload it to GCS
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()

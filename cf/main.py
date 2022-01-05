@@ -505,8 +505,6 @@ class GaExportedNestedDataStorage(object):
                                          job_config=query_job_flatten_config)
         # we may or may not save query result into into a pandas dataframe and write into a partitioned table,
         # depending on the config
-        query_job_flatten_result = query_job_flatten.result()  # Waits for job to complete.
-        pass
         if partitioned_output_required:
             # 2
             # WRITE PARTITIONED OUTPUT, if flattener is configured to do so
@@ -536,9 +534,9 @@ class GaExportedNestedDataStorage(object):
 
             except Exception as e:
                 if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
-                    logging.warning(f"cannot delete the partition because the table doesn't exist yet: {e}")
+                    logging.warning(f"Cannot delete the partition because the table doesn't exist yet: {e}")
                 else:
-                    logging.critical(f"cannot delete the partition: {e}")
+                    logging.critical(f"Cannot delete the partition: {e}")
             # pandas df -> BQ
             # https://cloud.google.com/bigquery/docs/samples/bigquery-load-table-dataframe
 
