@@ -15,6 +15,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config)
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
         # check
         self.assertIsInstance(json_config, dict)
@@ -37,6 +38,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=30,
                                                              intraday_schedule_units="minutes")
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
         # check
 
@@ -62,6 +64,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
                                                              intraday_schedule_units="hours")
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
         # check
 
@@ -133,6 +136,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         store = FlattenerDatasetConfigStoragePS()
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config)
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
         # check
         self.assertIsInstance(json_config, dict)

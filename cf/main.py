@@ -415,12 +415,9 @@ class GaExportedNestedDataStorage(object):
         Ensures the right data types, so they match the data types in the sharded table.
         """
 
-        dataframe_cleaned = dataframe.copy()
-
         # add date field to the dataframe
 
-        dataframe_cleaned[self.partitioning_column] = self.date
-
+        dataframe[self.partitioning_column] = self.date
 
         # if a pandas column has missing values
         # Because NaN is a float, this forces an array of integers with any missing values to become floating point.
@@ -433,23 +430,23 @@ class GaExportedNestedDataStorage(object):
 
         bq_schema = self.partitioned_table_schemas.get(table_type, None)
 
-        for column in dataframe_cleaned:
+        for column in dataframe:
             for dest_bq_field in bq_schema:
                 if dest_bq_field.name == column:
                     if dest_bq_field.field_type == "STRING":
-                        dataframe_cleaned[[column]] = dataframe_cleaned[[column]].astype(str)
+                        dataframe[[column]] = dataframe[[column]].astype(str)
                     elif dest_bq_field.field_type == "FLOAT":
-                        dataframe_cleaned[[column]] = dataframe_cleaned[[column]].astype(float)
+                        dataframe[[column]] = dataframe[[column]].astype(float)
                     elif dest_bq_field.field_type == "INTEGER":
-                        dataframe_cleaned[column] = pd.Series(list(dataframe_cleaned[column]),
-                                                                                  dtype=pd.Int64Dtype())
+                        dataframe[column] = pd.Series(list(dataframe[column]),
+                                                      dtype=pd.Int64Dtype())
 
         # https://stackoverflow.com/questions/25122099/move-column-by-name-to-front-of-table-in-pandas
-        col = dataframe_cleaned[self.partitioning_column]
-        dataframe_cleaned.drop(labels=[self.partitioning_column], axis=1, inplace=True)
-        dataframe_cleaned.insert(0, self.partitioning_column, col)
+        col = dataframe[self.partitioning_column]
+        dataframe.drop(labels=[self.partitioning_column], axis=1, inplace=True)
+        dataframe.insert(0, self.partitioning_column, col)
 
-        return dataframe_cleaned
+        return dataframe
 
     def run_query_job(self, query, table_type='flat', sharded_output_required=True, partitioned_output_required=False):
 
@@ -489,15 +486,13 @@ class GaExportedNestedDataStorage(object):
         # run the job
         query_job_flatten = client.query(query,
                                          job_config=query_job_flatten_config)
-        query_job_flatten_result = query_job_flatten.result()  # Waits for job to complete.
-
         # we may or may not save query result into into a pandas dataframe and write into a partitioned table,
         # depending on the config
         if partitioned_output_required:
-
             # 2
             # WRITE PARITIONED OUTPUT, if flattener is configured to do so
             # BQ -> pandas df
+            query_job_flatten_result = query_job_flatten.result()  # Waits for job to complete.
             # # https://cloud.google.com/bigquery/docs/bigquery-storage-python-pandas#download_query_results_using_the_client_library
             dataframe = query_job_flatten_result.to_dataframe()  # we will need this dataframe if we load data to a partitioned table
 
@@ -562,6 +557,7 @@ class GaExportedNestedDataStorage(object):
             #     )
             # )
 
+
 def flatten_ga_data(event, context):
     """
     Flatten GA4 data
@@ -593,7 +589,9 @@ def flatten_ga_data(event, context):
 
         # USER_PROPERTIES
         if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
-            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties")
+            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties",
+                                    sharded_output_required=output_config_sharded,
+                                    partitioned_output_required=output_config_partitioned)
             logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
         else:
             logging.info(
@@ -601,14 +599,18 @@ def flatten_ga_data(event, context):
 
         # ITEMS
         if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
-            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items")
+            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items",
+                                    sharded_output_required=output_config_sharded,
+                                    partitioned_output_required=output_config_partitioned)
             logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
         else:
             logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
 
         # EVENTS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
-            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events")
+            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events",
+                                    sharded_output_required=output_config_sharded,
+                                    partitioned_output_required=output_config_partitioned)
             logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
         else:
             logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
