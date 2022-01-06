@@ -115,3 +115,7 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
                         "flattener configuration error: 404 GET https://storage.googleapis.com/download/storage/v1/b/non-existing-bucket/o/config_datasets.json?alt=media: The specified bucket does not exist.: ('Request failed with status code', 404, 'Expected one of', <HTTPStatus.OK: 200>, <HTTPStatus.PARTIAL_CONTENT: 206>)")
 
         logcapture.check_present(expected_log, )  # check that our expected_log message is present in InputValidator log
+
+
+    def tearDown(self):
+        pass
