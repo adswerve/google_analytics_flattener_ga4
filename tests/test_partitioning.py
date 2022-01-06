@@ -1,9 +1,9 @@
-# TODO: do we need a more extended unit test for partitioning?
+#TODO: do we need a more extended unit test for partitioning?
 # load config file, backfill, verify inputs and outputs?
 # test backfill with diff config options (sharding vs partitioning vs both)
 # I've already done this manually
 
-# TODO: test with the intraday feature
+#TODO: test with the intraday feature
 # do this manually first
 
 from google.cloud import bigquery
@@ -190,7 +190,6 @@ class TestPartitioning(BaseUnitTest):
                 - breakdown of rows by date is the same in sharded vs partitioned data
         """
         client = bigquery.Client()
-        # TODO: delete the partitioned table (or else the test might fail)
         # drop partitioned table if it exists
         # we need to do it, because we need to check number of rows later
         # drop partitioned table if it exists

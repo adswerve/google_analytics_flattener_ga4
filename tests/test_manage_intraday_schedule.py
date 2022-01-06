@@ -403,3 +403,4 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
     def tearDown(self):
         self.restore_default_config()
         self.delete_intraday_scheduler_jobs()
+        #TODO: write a function to delete intraday schedules after testing

@@ -565,14 +565,6 @@ class GaExportedNestedDataStorage(object):
                 dataframe=dataframe, destination=table_id_partitioned, job_config=load_job_config_partitioned
             )  # Make an API request.
             load_job_partition.result()  # Wait for the job to complete.
-            # TODO: move this to a unit test to verify outputs
-            # table = client.get_table(table_id_partitioned)  # Make an API request.
-            # print(
-            #     "Loaded {} rows and {} columns to {}".format(
-            #         table.num_rows, len(table.schema), table_id_partitioned
-            #     )
-            # )
-            pass
 
 
 def flatten_ga_data(event, context):
