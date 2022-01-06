@@ -390,17 +390,12 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         logcapture.check_present(expected_log, )
 
-        # generate config again. restore default: no intraday flattening
-        config = FlattenerDatasetConfig()
-        store = FlattenerDatasetConfigStorage()
-        json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config)
-        store.upload_config(config=json_config)
 
 # TODO: split large tests into multiple small tests?
 
     def tearDown(self):
         self.restore_default_config()
-        self.delete_intraday_scheduler_jobs()
-        #TODO: write a function to delete intraday schedules after testing
+        # test_delete_intraday_flattening_schedule will be the last one to run in this test class
+        # so we don't need to worry about
+        # deleting a Scheduler job
+

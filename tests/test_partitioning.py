@@ -1,10 +1,10 @@
 #TODO: do we need a more extended unit test for partitioning?
 # load config file, backfill, verify inputs and outputs?
 # test backfill with diff config options (sharding vs partitioning vs both)
-# I've already done this manually
+# have done this manually and documented results
 
 #TODO: test with the intraday feature
-# do this manually first
+# tested this manually and documented results - passed
 
 from google.cloud import bigquery
 from google.cloud.bigquery import SchemaField

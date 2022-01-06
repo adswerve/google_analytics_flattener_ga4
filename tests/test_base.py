@@ -67,7 +67,6 @@ class BaseUnitTest(unittest.TestCase):
     def tearDown(self):
         self.delete_all_flat_tables_from_dataset()
         self.restore_default_config()
-        self.delete_intraday_scheduler_jobs()
 
     def delete_all_flat_tables_from_dataset(self):
 
@@ -101,6 +100,3 @@ class BaseUnitTest(unittest.TestCase):
         json_config = config.add_intraday_params_into_config(json_config)
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
-
-    def delete_intraday_scheduler_jobs(self):
-        pass
