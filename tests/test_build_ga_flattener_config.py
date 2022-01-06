@@ -11,7 +11,9 @@ from cfconfigbuilderps.main import FlattenerDatasetConfigStorage as FlattenerDat
 
 class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
 
-    def test_build_flattener_ga_dataset_config(self):
+    def test_build_flattener_ga_dataset_config_default(self):
+        # TODO: use this as teardown step in your unit tests, in order to ensure default config is restored
+
         # generate config and upload it to GCS
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
@@ -26,11 +28,37 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                 self.assertIsInstance(key, str)
                 self.assertIsInstance(value, dict)
 
-                self.assertEqual(json_config[key]['intraday_schedule'], {
+                self.assertEqual({
                     "frequency": None,
                     "units": "hours"
-                })
+                },
+                    json_config[key]['intraday_schedule'])
 
+                self.assertEqual({
+                    "sharded": True,
+                    "partitioned": False
+                }, json_config[key]['output'])
+                # TODO: in all other examples of assertEqual, swap the order
+                # syntax is this: assertEqual(expected, actual)
+                # we got them the other way round
+            # https://stackoverflow.com/questions/17920625/what-is-actually-assertequals-in-python
+
+        self.assertTrue(True)
+
+    def test_build_flattener_ga_dataset_config_ps(self):
+        # generate config and upload it to GCS
+        config = FlattenerDatasetConfigPS()
+        store = FlattenerDatasetConfigStoragePS()
+        json_config = config.get_ga_datasets()
+        json_config = config.add_intraday_params_into_config(json_config)
+        json_config = config.add_output_params_into_config(json_config)
+        store.upload_config(config=json_config)
+        # check
+        self.assertIsInstance(json_config, dict)
+        if json_config.keys():
+            for key, value in json_config.items():
+                self.assertIsInstance(key, str)
+                self.assertIsInstance(value, dict)
         self.assertTrue(True)
 
     def test_build_flattener_ga_dataset_config_add_intraday_schedule_minutes(self):
@@ -83,41 +111,14 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
 
         self.assertTrue(True)
 
-    def test_build_flattener_ga_dataset_config_add_output_params_default(self):
-        # TODO: use this as teardown step in your unit tests, in order to ensure default config is restored
+    def test_build_flattener_ga_dataset_config_add_custom_output_params(self):
         # generate config and upload it to GCS
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config)
-        store.upload_config(config=json_config)
-        # check
-        self.assertIsInstance(json_config, dict)
-        if json_config.keys():
-            for key, value in json_config.items():
-                self.assertIsInstance(key, str)
-                self.assertIsInstance(value, dict)
-
-                self.assertEqual({
-                    "sharded": True,
-                    "partitioned": False
-                }, json_config[key]['output'])
-                #TODO: in all other examples of assertEqual, swap the order
-                # syntax is this: assertEqual(expected, actual)
-                # we got them the other way round
-            # https://stackoverflow.com/questions/17920625/what-is-actually-assertequals-in-python
-
-        self.assertTrue(True)
-
-    def test_build_flattener_ga_dataset_config_add_output_params_non_default(self):
-        # generate config and upload it to GCS
-        config = FlattenerDatasetConfig()
-        store = FlattenerDatasetConfigStorage()
-        json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config, output_sharded = False,
-                                                                                          output_partitioned = True)
+        json_config = config.add_output_params_into_config(json_config, output_sharded=False,
+                                                           output_partitioned=True)
         store.upload_config(config=json_config)
         # check
         self.assertIsInstance(json_config, dict)
@@ -131,20 +132,4 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                     "partitioned": True
                 }, json_config[key]['output'])
 
-        self.assertTrue(True)
-
-    def test_build_flattener_ga_dataset_config_ps(self):
-        # generate config and upload it to GCS
-        config = FlattenerDatasetConfigPS()
-        store = FlattenerDatasetConfigStoragePS()
-        json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config)
-        store.upload_config(config=json_config)
-        # check
-        self.assertIsInstance(json_config, dict)
-        if json_config.keys():
-            for key, value in json_config.items():
-                self.assertIsInstance(key, str)
-                self.assertIsInstance(value, dict)
         self.assertTrue(True)
