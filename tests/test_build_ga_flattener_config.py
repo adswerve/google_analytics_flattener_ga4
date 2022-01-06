@@ -12,7 +12,6 @@ from cfconfigbuilderps.main import FlattenerDatasetConfigStorage as FlattenerDat
 class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
 
     def test_build_flattener_ga_dataset_config_default(self):
-        # TODO: use this as teardown step in your unit tests, in order to ensure default config is restored
 
         # generate config and upload it to GCS
         config = FlattenerDatasetConfig()
@@ -133,3 +132,6 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                 }, json_config[key]['output'])
 
         self.assertTrue(True)
+
+    def tearDown(self):
+        self.restore_default_config()

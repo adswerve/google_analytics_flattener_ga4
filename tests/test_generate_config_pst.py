@@ -9,3 +9,6 @@ class TestGenerateConfigPst(BaseUnitTest):
         c = Context()
         config = generate_config(c)
         self.assertIsInstance(config, dict)
+
+    def tearDown(self):
+        pass

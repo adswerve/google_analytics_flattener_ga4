@@ -3,7 +3,7 @@ from dm_helper import GaFlattenerDeploymentConfiguration
 from tests.test_base import Context
 
 
-class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
+class TestValidResourceNames(BaseUnitTest):
     c = Context()
     c.env["deployment"] = "deployment-name-deployment-name-deployment-name-deployment-name"
     configuration = GaFlattenerDeploymentConfiguration(c.env)
@@ -23,3 +23,6 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         cf_name_2 = self.configuration.get_cf_name(code_location="cfintraday/")
 
         assert len(cf_name_1) == len(cf_name_2) == 63
+
+    def tearDown(self):
+        pass

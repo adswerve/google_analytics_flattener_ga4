@@ -19,3 +19,6 @@ class TestCFFlattenMethods(BaseUnitTest):
                                      table_type="flat_user_properties")
 
         self.assertTrue(True)
+
+    def tearDown(self):
+        self.delete_all_flat_tables_from_dataset()

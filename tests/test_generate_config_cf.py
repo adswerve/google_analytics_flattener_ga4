@@ -25,3 +25,6 @@ class TestGenerateConfigCf(BaseUnitTest):
         c = ContextCloudFunction()
         config = generate_config(c)
         self.assertIsInstance(config, dict)
+
+    def tearDown(self):
+        pass

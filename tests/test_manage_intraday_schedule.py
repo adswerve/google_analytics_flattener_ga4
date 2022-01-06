@@ -398,4 +398,8 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
-# TODO: split large tests into multiple small tests
+# TODO: split large tests into multiple small tests?
+
+    def tearDown(self):
+        self.restore_default_config()
+        self.delete_intraday_scheduler_jobs()

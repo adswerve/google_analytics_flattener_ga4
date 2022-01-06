@@ -1,9 +1,9 @@
-#TODO: do we need a more extended unit test for partitioning?
+# TODO: do we need a more extended unit test for partitioning?
 # load config file, backfill, verify inputs and outputs?
 # test backfill with diff config options (sharding vs partitioning vs both)
 # I've already done this manually
 
-#TODO: test with the intraday feature
+# TODO: test with the intraday feature
 # do this manually first
 
 from google.cloud import bigquery
@@ -26,8 +26,6 @@ class TestPartitioning(BaseUnitTest):
                                             date_shard=c.env["date"],
                                             )
 
-    # initialize BigQuery client
-    # client = bigquery.Client(project=ga_source.gcp_project)
     # SIMPLE TESTS
     def test_flatten_ga_data_config_output_type_partitioned_only(self):
         self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
@@ -89,7 +87,7 @@ class TestPartitioning(BaseUnitTest):
         self.flatten_ga_data_check_number_of_rows(table_type="flat_user_properties")
 
     # HELPER FUNCTIONS
-    def drop_partitioned_table(self, table_type = "flat_events"):
+    def drop_partitioned_table(self, table_type="flat_events"):
 
         client = bigquery.Client()
 
@@ -100,7 +98,6 @@ class TestPartitioning(BaseUnitTest):
         except Exception as e:
             if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
                 logging.warning(f"Cannot delete the partition because the table doesn't exist yet: {e}")
-
 
     def flatten_ga_data_check_output_schema(self, table_type="flat_events"):
         """
@@ -119,7 +116,6 @@ class TestPartitioning(BaseUnitTest):
         table_name_partitioned = "{p}.{ds}.{t}" \
             .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
         table_id_partitioned = bigquery.Table(table_name_partitioned)
-
 
         # flatten data
         self.flatten_ga_data(table_type=table_type)
@@ -267,3 +263,7 @@ class TestPartitioning(BaseUnitTest):
         dataframe_sharded['event_date'] = dataframe_sharded['event_date'].dt.date
 
         assert dataframe_sharded.equals(dataframe_partitioned)
+
+
+    def tearDown(self):
+        self.delete_all_flat_tables_from_dataset()
