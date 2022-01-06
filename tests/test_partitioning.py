@@ -27,7 +27,7 @@ class TestPartitioning(BaseUnitTest):
                                             )
 
     # initialize BigQuery client
-    client = bigquery.Client()
+    client = bigquery.Client(project=ga_source.gcp_project)
     # SIMPLE TESTS
     def test_flatten_ga_data_config_output_type_partitioned_only(self):
         self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
