@@ -27,7 +27,7 @@ class TestPartitioning(BaseUnitTest):
                                             )
 
     # initialize BigQuery client
-    client = bigquery.Client(project=ga_source.gcp_project)
+    # client = bigquery.Client(project=ga_source.gcp_project)
     # SIMPLE TESTS
     def test_flatten_ga_data_config_output_type_partitioned_only(self):
         self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
@@ -91,10 +91,12 @@ class TestPartitioning(BaseUnitTest):
     # HELPER FUNCTIONS
     def drop_partitioned_table(self, table_type = "flat_events"):
 
-        table_ref = self.client.dataset(self.ga_source.dataset).table(table_type)
+        client = bigquery.Client()
+
+        table_ref = client.dataset(self.ga_source.dataset).table(table_type)
 
         try:
-            self.client.delete_table(table_ref)
+            client.delete_table(table_ref)
         except Exception as e:
             if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
                 logging.warning(f"Cannot delete the partition because the table doesn't exist yet: {e}")
@@ -109,7 +111,7 @@ class TestPartitioning(BaseUnitTest):
             number of rows is correct
             idempotence of append operation
         """
-
+        client = bigquery.Client()
         # drop partitioned table if it exists
         self.drop_partitioned_table(table_type=table_type)
 
@@ -123,7 +125,7 @@ class TestPartitioning(BaseUnitTest):
         self.flatten_ga_data(table_type=table_type)
 
         # extract info about partitioned table
-        table_partitioned = self.client.get_table(table_id_partitioned)  # Make an API request.
+        table_partitioned = client.get_table(table_id_partitioned)  # Make an API request.
 
         # verify partitioning
         self.assertIsNotNone(table_partitioned.partitioning_type)
@@ -138,7 +140,7 @@ class TestPartitioning(BaseUnitTest):
             .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type, d=self.ga_source.date_shard)
 
         table_id_sharded = bigquery.Table(table_name_sharded)
-        table_sharded = self.client.get_table(table_id_sharded)
+        table_sharded = client.get_table(table_id_sharded)
 
         # remove event_date, because we know this field type won't match in sharded vs partitioned table
         # in sharded table, it's string, in partitioned table, it's date
@@ -191,6 +193,7 @@ class TestPartitioning(BaseUnitTest):
                 - partitioned table number of rows is equal to sharded tables total number of rows
                 - breakdown of rows by date is the same in sharded vs partitioned data
         """
+        client = bigquery.Client()
         # TODO: delete the partitioned table (or else the test might fail)
         # drop partitioned table if it exists
         # we need to do it, because we need to check number of rows later
@@ -217,14 +220,14 @@ class TestPartitioning(BaseUnitTest):
                         d=self.ga_source.date_shard)
 
             table_id_sharded = bigquery.Table(table_name_sharded)
-            table_sharded = self.client.get_table(table_id_sharded)
+            table_sharded = client.get_table(table_id_sharded)
             num_rows_sharded = num_rows_sharded + table_sharded.num_rows
 
         # count partitioned rows
         table_name_partitioned = "{p}.{ds}.{t}" \
             .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
         table_id_partitioned = bigquery.Table(table_name_partitioned)
-        table_partitioned = self.client.get_table(table_id_partitioned)
+        table_partitioned = client.get_table(table_id_partitioned)
         num_rows_partitioned = table_partitioned.num_rows
 
         self.assertEqual(num_rows_sharded, num_rows_partitioned)
@@ -237,7 +240,7 @@ class TestPartitioning(BaseUnitTest):
         """.format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
 
         dataframe_partitioned = (
-            self.client.query(query_string_partitioned)
+            client.query(query_string_partitioned)
                 .result()
                 .to_dataframe(
             )
@@ -253,7 +256,7 @@ class TestPartitioning(BaseUnitTest):
                    end=dates_list[1])
 
         dataframe_sharded = (
-            self.client.query(query_string_sharded)
+            client.query(query_string_sharded)
                 .result()
                 .to_dataframe(
             )
