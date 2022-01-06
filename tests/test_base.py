@@ -5,8 +5,8 @@ from google.cloud import bigquery
 import logging
 
 from dm_helper import GaFlattenerDeploymentConfiguration
-from cfconfigbuilder.main import FlattenerDatasetConfig
-from cfconfigbuilder.main import FlattenerDatasetConfigStorage
+# from cfconfigbuilder.main import FlattenerDatasetConfig
+# from cfconfigbuilder.main import FlattenerDatasetConfigStorage
 
 
 class Context(object):
@@ -94,13 +94,14 @@ class BaseUnitTest(unittest.TestCase):
             logging.info("deleted table %s.%s.%s" % (table_ref.project, table_ref.dataset_id, table_ref.table_id))
 
     def restore_default_config(self):
+        pass
         # generate config and upload it to GCS
-        config = FlattenerDatasetConfig()
-        store = FlattenerDatasetConfigStorage()
-        json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config)
-        store.upload_config(config=json_config)
+        # config = FlattenerDatasetConfig()
+        # store = FlattenerDatasetConfigStorage()
+        # json_config = config.get_ga_datasets()
+        # json_config = config.add_intraday_params_into_config(json_config)
+        # json_config = config.add_output_params_into_config(json_config)
+        # store.upload_config(config=json_config)
 
     def delete_intraday_scheduler_jobs(self):
         pass
