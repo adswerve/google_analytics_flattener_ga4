@@ -7,7 +7,7 @@ import sys
 class Context(object):
     def __init__(self):
         self.properties = {}
-        #TODO: I put dataset, table_type and date under context env var, but probably they don't really belong here(?)
+        # TODO: I put dataset, table_type and date under context env var, but probably they don't really belong here(?)
         if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
             self.env = {
                 "deployment": "ga-flattener-deployment"
@@ -34,7 +34,7 @@ class Context(object):
                 , "type": "dmt_resource_type.py"
                 , "dataset": 'analytics_222460912'  # specific to your project
                 , "table_type": 'events'
-                , "date": '20211213'  # any historical date will suffice if that date shard exists in GA_EVENTS_YYYYMMDD
+                , "date": '20211013'  # any historical date will suffice if that date shard exists in GA_EVENTS_YYYYMMDD
 
             }
         self.imports = {}
@@ -58,3 +58,17 @@ class BaseUnitTest(unittest.TestCase):
         if sys.platform.startswith('linux'):
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
                 os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
+
+    # def tearDown(self):
+    #     self.delete_all_flat_tables()
+    #     self.restore_default_config()
+    #     self.delete_intraday_scheduler_jobs()
+    #
+    # def delete_all_flat_tables_from_dataset(self):
+    #     pass
+    #
+    # def restore_default_config(self):
+    #     pass
+    #
+    # def delete_intraday_scheduler_jobs(self):
+    #     pass

@@ -1,5 +1,3 @@
-# TODO: verify number of rows when you load 2 dates
-
 # TODO: do we need a more extended unit test for partitioning?
 # load config file, backfill, verify inputs and outputs?
 # test backfill with diff config options (sharding vs partitioning vs both)
@@ -7,14 +5,16 @@
 # TODO: test with the intraday feature
 
 
-from tests.test_base import BaseUnitTest
-from tests.test_base import Context
-from cf.main import GaExportedNestedDataStorage
 from google.cloud import bigquery
 from google.cloud.bigquery import SchemaField
 import logging
 from http import HTTPStatus
 from datetime import datetime
+import pandas as pd
+
+from tests.test_base import BaseUnitTest
+from tests.test_base import Context
+from cf.main import GaExportedNestedDataStorage
 
 
 class TestPartitioning(BaseUnitTest):
@@ -127,13 +127,20 @@ class TestPartitioning(BaseUnitTest):
         # verify number of rows again
         self.assertEqual(table_sharded.num_rows, table_partitioned.num_rows)
 
-    def test_flatten_ga_data_confirm_number_of_rows(self, dates_list=["20211201", "20211202"],
-                                                    table_type="flat_events"):
+    def flatten_ga_data_check_number_of_rows(self, dates_list=["20211201", "20211202"],
+                                             table_type="flat_events"):
 
-        """verify that the append operation works correctly
-            if we sync two date shards and two partitions, partitioned table number of rows is equal to
-            sharded tables total number of rows
+        """verify that the append operation works correctly.
+
+            if we sync two date shards and two partitions:
+                - partitioned table number of rows is equal to sharded tables total number of rows
+                - breakdown of rows by date is the same in sharded vs partitioned data
         """
+        # TODO: delete the partitioned table (or else the test might fail)
+
+        self.assertEqual(2, len(dates_list))
+
+        assert dates_list[0] < dates_list[1]
 
         num_rows_sharded = 0
 
@@ -143,8 +150,22 @@ class TestPartitioning(BaseUnitTest):
             self.ga_source.date = datetime.strptime(date, '%Y%m%d')
 
             # flatten data
-            self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type=table_type,
-                                         sharded_output_required=True, partitioned_output_required=True)
+            if table_type == "flat_event_params":
+                self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type=table_type,
+                                             sharded_output_required=True, partitioned_output_required=True)
+
+            elif table_type == "flat_events":
+                self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type=table_type,
+                                             sharded_output_required=True, partitioned_output_required=True)
+
+            elif table_type == "flat_items":
+                self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type=table_type,
+                                             sharded_output_required=True, partitioned_output_required=True)
+
+            elif table_type == "flat_user_properties":
+                self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
+                                             table_type=table_type, sharded_output_required=True,
+                                             partitioned_output_required=True)
 
             # keep track of number of sharded rows
             table_name_sharded = "{p}.{ds}.{t}_{d}" \
@@ -164,3 +185,50 @@ class TestPartitioning(BaseUnitTest):
 
         self.assertEqual(num_rows_sharded, num_rows_partitioned)
 
+        # make sure that breakdown of rows by date is the same in sharded vs partitioned data
+        query_string_partitioned = """
+            SELECT event_date, count(*) nrow FROM `{p}.{ds}.{t}`
+            GROUP BY 1
+            ORDER BY 1 
+        """.format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
+
+        dataframe_partitioned = (
+            self.client.query(query_string_partitioned)
+                .result()
+                .to_dataframe(
+            )
+        )
+
+        query_string_sharded = """
+            SELECT _TABLE_SUFFIX as event_date, count(*) nrow
+            FROM `{p}.{ds}.{t}_*`
+            WHERE _TABLE_SUFFIX BETWEEN "{start}" AND "{end}"
+            GROUP BY 1
+            ORDER BY 1
+        """.format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type, start=dates_list[0],
+                   end=dates_list[1])
+
+        dataframe_sharded = (
+            self.client.query(query_string_sharded)
+                .result()
+                .to_dataframe(
+            )
+        )
+
+        dataframe_sharded['event_date'] = pd.to_datetime(dataframe_sharded['event_date'], format='%Y%m%d')
+
+        dataframe_sharded['event_date'] = dataframe_sharded['event_date'].dt.date
+
+        assert dataframe_sharded.equals(dataframe_partitioned)
+
+    def test_flatten_ga_data_check_number_of_rows_event_params(self):
+        self.flatten_ga_data_check_number_of_rows(table_type="flat_event_params")
+
+    def test_flatten_ga_data_check_number_of_rows_events(self):
+        self.flatten_ga_data_check_number_of_rows(table_type="flat_events")
+
+    def test_flatten_ga_data_check_number_of_rows_items(self):
+        self.flatten_ga_data_check_number_of_rows(table_type="flat_items")
+
+    def test_flatten_ga_data_check_number_of_rows_user_properties(self):
+        self.flatten_ga_data_check_number_of_rows(table_type="flat_user_properties")
