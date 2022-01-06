@@ -59,16 +59,16 @@ class BaseUnitTest(unittest.TestCase):
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.normpath(
                 os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
 
-    # def tearDown(self):
-    #     self.delete_all_flat_tables()
-    #     self.restore_default_config()
-    #     self.delete_intraday_scheduler_jobs()
-    #
-    # def delete_all_flat_tables_from_dataset(self):
-    #     pass
-    #
-    # def restore_default_config(self):
-    #     pass
-    #
-    # def delete_intraday_scheduler_jobs(self):
-    #     pass
+    def tearDown(self):
+        self.delete_all_flat_tables_from_dataset()
+        self.restore_default_config()
+        self.delete_intraday_scheduler_jobs()
+
+    def delete_all_flat_tables_from_dataset(self):
+        pass
+
+    def restore_default_config(self):
+        pass
+
+    def delete_intraday_scheduler_jobs(self):
+        pass
