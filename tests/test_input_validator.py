@@ -32,10 +32,10 @@ class TestInputValidator(BaseUnitTest):
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
         # checks
-        self.assertEqual(iv.table_date_shard, date_shard)
-        self.assertEqual(iv.gcp_project, project_id)
-        self.assertEqual(iv.dataset, dataset_id)
-        self.assertEqual(iv.table_name, table_type)
+        self.assertEqual(date_shard, iv.table_date_shard)
+        self.assertEqual(project_id, iv.gcp_project)
+        self.assertEqual(dataset_id, iv.dataset)
+        self.assertEqual(table_type, iv.table_name)
         assert isinstance(iv.valid_dataset(), bool)
         self.assertTrue(True)
 

@@ -37,10 +37,8 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                     "sharded": True,
                     "partitioned": False
                 }, json_config[key]['output'])
-                #TODO: in all other examples of assertEqual, swap the order
-                # syntax is this: assertEqual(expected, actual)
-                # we got them the other way round
-            # https://stackoverflow.com/questions/17920625/what-is-actually-assertequals-in-python
+                # assertEqual syntax is this: assertEqual(expected, actual)
+                # https://stackoverflow.com/questions/17920625/what-is-actually-assertequals-in-python
 
         self.assertTrue(True)
 
@@ -78,10 +76,10 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                 self.assertIsInstance(value, dict)
 
                 # default intraday schedule
-                self.assertEqual(json_config[key]['intraday_schedule'], {
+                self.assertEqual({
                     "frequency": 30,
                     "units": "minutes"
-                })
+                }, json_config[key]['intraday_schedule'])
 
         self.assertTrue(True)
 
@@ -103,10 +101,10 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                 self.assertIsInstance(key, str)
                 self.assertIsInstance(value, dict)
 
-                self.assertEqual(json_config[key]['intraday_schedule'], {
+                self.assertEqual({
                     "frequency": 1,
                     "units": "hours"
-                })
+                }, json_config[key]['intraday_schedule'])
 
         self.assertTrue(True)
 

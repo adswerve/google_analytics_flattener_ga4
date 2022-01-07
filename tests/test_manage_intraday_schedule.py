@@ -134,10 +134,10 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
 
-        self.assertEqual(iv.table_date_shard, self.date_shard)
-        self.assertEqual(iv.gcp_project, self.project_id)
-        self.assertEqual(iv.dataset, self.dataset_id)
-        self.assertEqual(iv.table_name, self.table_type)
+        self.assertEqual(self.date_shard, iv.table_date_shard)
+        self.assertEqual(self.project_id, iv.gcp_project)
+        self.assertEqual(self.dataset_id, iv.dataset)
+        self.assertEqual(self.table_type, iv.table_name)
         assert isinstance(iv.valid_dataset(), bool)
         self.assertTrue(True)
 
@@ -148,10 +148,10 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
 
-        self.assertEqual(iv.table_date_shard, self.date_shard)
-        self.assertEqual(iv.gcp_project, self.project_id)
-        self.assertEqual(iv.dataset, self.dataset_id)
-        self.assertEqual(iv.table_name, self.table_type)
+        self.assertEqual(self.date_shard, iv.table_date_shard)
+        self.assertEqual(self.project_id, iv.gcp_project)
+        self.assertEqual(self.dataset_id, iv.dataset)
+        self.assertEqual(self.table_type, iv.table_name)
         assert isinstance(iv.valid_dataset(), bool)
         self.assertTrue(True)
 
@@ -170,7 +170,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=30,
-                                                           intraday_schedule_units="minutes")
+                                                             intraday_schedule_units="minutes")
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
@@ -195,8 +195,8 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             request={
                 "name": job_id_full_path
             })
-        self.assertEqual(response_get_job.name, job_id_full_path)
-        self.assertEqual(response_get_job.schedule, '*/30 * * * *')
+        self.assertEqual(job_id_full_path, response_get_job.name)
+        self.assertEqual('*/30 * * * *', response_get_job.schedule)
 
         # check log
         expected_log = ('root', 'INFO',
@@ -269,7 +269,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
-                                                           intraday_schedule_units="hours")
+                                                             intraday_schedule_units="hours")
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
@@ -294,8 +294,8 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             request={
                 "name": job_id_full_path
             })
-        self.assertEqual(response_get_job.name, job_id_full_path)
-        self.assertEqual(response_get_job.schedule, '0 */1 * * *')
+        self.assertEqual(job_id_full_path, response_get_job.name)
+        self.assertEqual('0 */1 * * *', response_get_job.schedule)
 
         # check log
         expected_log = ('root', 'INFO',
@@ -317,7 +317,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         # GCP won't accept this cron schedule
         json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=60,
-                                                           intraday_schedule_units="minutes")
+                                                             intraday_schedule_units="minutes")
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
@@ -364,7 +364,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             store = FlattenerDatasetConfigStorage()
             json_config = config.get_ga_datasets()
             json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
-                                                               intraday_schedule_units="hours")
+                                                                 intraday_schedule_units="hours")
             json_config = config.add_output_params_into_config(json_config)
             store.upload_config(config=json_config)
 
@@ -390,12 +390,10 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         logcapture.check_present(expected_log, )
 
-
-# TODO: split large tests into multiple small tests?
+    # TODO: split large tests into multiple small tests?
 
     def tearDown(self):
         self.restore_default_config()
         # test_delete_intraday_flattening_schedule will be the last one to run in this test class
         # so we don't need to worry about
         # deleting a Scheduler job
-
