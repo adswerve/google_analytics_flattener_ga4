@@ -25,6 +25,10 @@
     "intraday_schedule": {
       "frequency": 15,
       "units": "minutes"
+    },
+    "output": {
+      "sharded": true,
+      "partitioned": true
     }
   },
   "analytics_987654321": {
@@ -37,6 +41,10 @@
     "intraday_schedule": {
       "frequency": 1,
       "units": "hours"
+    },
+    "output": {
+      "sharded": false,
+      "partitioned": true
     }
   }
 }
