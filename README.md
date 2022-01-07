@@ -225,7 +225,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
     C) both sharded and partitioned output
 
-- You configure output type by changing the following part of the config file: ```"output": {"sharded": true, "partitioned": false}```
+- You configure output type by changing the following part of the config file: ```"output": {"sharded": true, "partitioned": false}```.
 
 #### Examples of a config file
 
@@ -325,7 +325,7 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
   - This config file will create all 4 flat tables for each of the 2 GA4 properties. 
   - In both properties, we will also do intraday flattening. 
   - The flattened intraday tables will refresh every 15 minutes for the 1st dataset and every hour for the 2nd dataset.
-  - In both properties, we create do both shaded and partitioned output.
+  - In both properties, we create both shaded and partitioned output.
 
 
 - See another example in ```./sample_config/config_datasets_sample.json``` in this repo.
