@@ -19,7 +19,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
 * [Verification steps](#verification-steps)
     + [Config file](#config-file)
       + [Enabling intraday flattening in the config file](#enabling-intraday-flattening-in-the-config-file)
-      + [Enabling partitioned output in the config file](#enabling-intraday-flattening-in-the-config-file)
+      + [Enabling partitioned output in the config file](#enabling-partitioned-output-in-the-config-file)
       + [Examples of a config file](#examples-of-a-config-file)
     + [Backfilling steps](#backfilling-steps)
 * [Un-install steps](#un-install-steps)
