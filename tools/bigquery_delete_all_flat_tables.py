@@ -1,6 +1,7 @@
-"""deletes all flat tables from dataset
+"""
+USE WITH CAUTION!
+deletes all flat tables from dataset
 purpose: clean up after a unit test
-USE WITH CAUTION
 Credit: https://stackoverflow.com/questions/52151185/bigquery-best-way-to-drop-date-sharded-tables
 """
 
@@ -12,7 +13,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 '''*****************************'''
 ''' Configuration Section Start '''
 '''*****************************'''
-my_project_id = 'adswerve-mobile-qa'
+my_project_id = "as-dev-ruslan"
 my_dataset_id = 'analytics_222460912'
 delete = True
 '''*****************************'''

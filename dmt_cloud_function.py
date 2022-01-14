@@ -24,7 +24,7 @@ def generate_config(ctx):
   config = GaFlattenerDeploymentConfiguration(ctx.env)
   """Generate YAML resource configuration."""
   in_memory_output_file = BytesIO()
-  function_name = "{d}-{fn}".format(d=config.deployment,fn=ctx.properties['codeLocation'][:-1])
+  function_name = config.get_cf_name(code_location=ctx.properties['codeLocation'])
   zip_file = zipfile.ZipFile(
       in_memory_output_file, mode='w', compression=zipfile.ZIP_DEFLATED)
   for imp in ctx.imports:
@@ -121,13 +121,13 @@ def generate_config(ctx):
       if ctx.properties['codeLocation'] == "cfintraday/":
           cloud_function['properties']['eventTrigger'] = {
               'resource': 'projects/{gcp_project}/topics/{topic_name}{config_topic}'.format(
-                  gcp_project=config.get_project(), topic_name=config.get_topic_name(intraday=True)
+                  gcp_project=config.get_project(), topic_name=config.get_topic_id(intraday=True)
                   , config_topic="config" if function_name.__contains__("config") else ""),
               'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
       else:
           cloud_function['properties']['eventTrigger']= {
                   'resource': 'projects/{gcp_project}/topics/{topic_name}{config_topic}'.format(
-                      gcp_project=config.get_project(),topic_name=config.get_topic_name()
+                      gcp_project=config.get_project(),topic_name=config.get_topic_id()
                       ,config_topic="config" if function_name.__contains__("config") else ""),
                   'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
   elif ctx.properties['triggerType'] == 'gcs':
