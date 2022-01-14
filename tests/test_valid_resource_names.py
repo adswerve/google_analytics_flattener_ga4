@@ -3,7 +3,7 @@ from dm_helper import GaFlattenerDeploymentConfiguration
 from tests.test_base import Context
 
 
-class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
+class TestValidNames(BaseUnitTest):
     c = Context()
     c.env["deployment"] = "deployment-name-deployment-name-deployment-name-deployment-name"
     configuration = GaFlattenerDeploymentConfiguration(c.env)
