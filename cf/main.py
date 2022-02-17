@@ -414,7 +414,7 @@ class GaExportedNestedDataStorage(object):
             r = "_%s" % r
         return r[:300]  # trim the string to the first x chars
 
-    def transform_dataframe(self, dataframe, table_type="flat"):
+    def transform_dataframe(self, dataframe, table_type):
         """
 
         Transforms the dataframe which will be loaded into the partitioned table.
@@ -465,7 +465,7 @@ class GaExportedNestedDataStorage(object):
 
         return dataframe
 
-    def run_query_job(self, query, table_type='flat', sharded_output_required=True, partitioned_output_required=False):
+    def run_query_job(self, query, table_type, sharded_output_required=True, partitioned_output_required=False):
 
         """
         Depending on the configuration, we will write data to sharded table, partitioned table, or both.
