@@ -32,10 +32,10 @@ class TestInputValidator(BaseUnitTest):
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
         # checks
-        self.assertEqual(iv.table_date_shard, date_shard)
-        self.assertEqual(iv.gcp_project, project_id)
-        self.assertEqual(iv.dataset, dataset_id)
-        self.assertEqual(iv.table_name, table_type)
+        self.assertEqual(date_shard, iv.table_date_shard)
+        self.assertEqual(project_id, iv.gcp_project)
+        self.assertEqual(dataset_id, iv.dataset)
+        self.assertEqual(table_type, iv.table_name)
         assert isinstance(iv.valid_dataset(), bool)
         self.assertTrue(True)
 
@@ -63,7 +63,7 @@ class TestInputValidator(BaseUnitTest):
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
         message = "invalid message: {'protoPayload': {'serviceData': {'jobCompletedEvent': {'job': {'jobConfiguration': {'load': {'destinationTable': {'datasetId': '%s', 'projectId': '%s', 'tableId': 'events'}}}}}}}}" % (
-        dataset_id, project_id)
+            dataset_id, project_id)
 
         # check log
         # https://testfixtures.readthedocs.io/en/latest/logging.html
@@ -73,6 +73,9 @@ class TestInputValidator(BaseUnitTest):
         logcapture.check_present(expected_log, )  # check that our expected_log message is present in InputValidator log
         # check_present means "contains"
         # check means "equals"
+
+    def tearDown(self):
+        pass
 
 
 class TestInputValidatorConfigurationError(BaseUnitTest):
@@ -115,3 +118,6 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
                         "flattener configuration error: 404 GET https://storage.googleapis.com/download/storage/v1/b/non-existing-bucket/o/config_datasets.json?alt=media: The specified bucket does not exist.: ('Request failed with status code', 404, 'Expected one of', <HTTPStatus.OK: 200>, <HTTPStatus.PARTIAL_CONTENT: 206>)")
 
         logcapture.check_present(expected_log, )  # check that our expected_log message is present in InputValidator log
+
+    def tearDown(self):
+        pass

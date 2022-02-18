@@ -18,7 +18,8 @@ The GCP resources for the solutions are installed via Deployment Manager.
     + [Deployment naming conventions](#deployment-naming-conventions)
 * [Verification steps](#verification-steps)
     + [Config file](#config-file)
-      + [Enabling intraday flattening via the config file](#enabling-intraday-flattening-via-the-config-file)
+      + [Enabling intraday flattening in the config file](#enabling-intraday-flattening-in-the-config-file)
+      + [Enabling partitioned output in the config file](#enabling-partitioned-output-in-the-config-file)
       + [Examples of a config file](#examples-of-a-config-file)
     + [Backfilling steps](#backfilling-steps)
 * [Un-install steps](#un-install-steps)
@@ -201,7 +202,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
 - You can also enable intraday flattening via this config file and specify its frequency in hours or minutes.
 
-#### Enabling intraday flattening via the config file
+#### Enabling intraday flattening in the config file
 
 - In addition to daily tables ```events_yyyymmdd```, you may also have the table ```events_intraday_yyyymmdd```, which refreshes every few minutes.
 
@@ -213,25 +214,119 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
   - ```"your_frequency"``` is an integer.
   - if your units are minutes, then the frequency should be between 1 and 59.
   
+#### Enabling partitioned output in the config file
+
+- By default, the flattener produces flat sharded tables, because the original GA tables are also sharded.
+- You can enable the following in the config file:
+
+    A) sharded output
+
+    B) paritioned output
+
+    C) both sharded and partitioned output
+
+- You configure output type by changing the following part of the config file: ```"output": {"sharded": true, "partitioned": false}```.
 
 #### Examples of a config file
 
-- ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": null, "units": "hours"}}}``` 
-  - this is the default config file. 
+Example 1 - default config 
+
+```
+{
+  "analytics_123456789": {
+    "tables_to_flatten": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ],
+    "intraday_schedule": {
+      "frequency": null,
+      "units": "hours"
+    },
+    "output": {
+      "sharded": true,
+      "partitioned": false
+    }
+  }
+}
+``` 
+
+  - This is the default config file. 
   - 4 flat tables will be created. 
   - There will be no flattening of the intraday table. 
   - You may notice that "intraday_schedule" is not necessary, but it provides a template in case you do want intraday flattening.
+  - Only sharded output is produced.
 
-- ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params"], "intraday_schedule": {"frequency": null, "units": "hours"}}}``` 
-  - this config file will only create 2 flat tables for one GA4 property. 
-  - There will be no intraday flattening
+Example 2 - excluding tables from flattening.
 
-- ```{"analytics_123456789": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": 15, "units": "minutes"}},"analytics_987654321": {"tables_to_flatten": ["events", "event_params", "user_properties", "items"], "intraday_schedule": {"frequency": 1, "units": "hours"}}}```
-  - this config file will create all 4 flat tables for each of the 2 GA4 properties. 
-  - In both properties, we will also do
-  intraday flattening. 
-  - The flattened intraday tables will refresh every 15 minutes for the 1st dataset and every hour
-  for the 2nd dataset.
+ ```
+ {
+  "analytics_123456789": {
+    "tables_to_flatten": [
+      "events",
+      "event_params"
+    ],
+    "intraday_schedule": {
+      "frequency": null,
+      "units": "hours"
+    },
+    "output": {
+      "sharded": true,
+      "partitioned": false
+    }
+  }
+}
+ ``` 
+
+  - This config file will only create 2 flat tables for one GA4 property. 
+  - There will be no intraday flattening.
+  - Only sharded output is produced.
+
+Example 3 - adding more datasets, intraday flattening and partitioned output.
+
+ ```
+{
+  "analytics_123456789": {
+    "tables_to_flatten": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ],
+    "intraday_schedule": {
+      "frequency": 15,
+      "units": "minutes"
+    },
+    "output": {
+      "sharded": true,
+      "partitioned": true
+    }
+  },
+  "analytics_987654321": {
+    "tables_to_flatten": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ],
+    "intraday_schedule": {
+      "frequency": 1,
+      "units": "hours"
+    },
+    "output": {
+      "sharded": true,
+      "partitioned": true
+    }
+  }
+}
+  ```
+
+  - This config file will create all 4 flat tables for each of the 2 GA4 properties. 
+  - In both properties, we will also do intraday flattening. 
+  - The flattened intraday tables will refresh every 15 minutes for the 1st dataset and every hour for the 2nd dataset.
+  - In both properties, we create both shaded and partitioned output.
+
 
 - See another example in ```./sample_config/config_datasets_sample.json``` in this repo.
 

@@ -79,15 +79,27 @@ FROM (
                                          ]
         return ret_val
 
-    def add_intraday_info_into_config(self, json_config, intraday_schedule_frequency=None,
+    def add_intraday_params_into_config(self, json_config, intraday_schedule_frequency=None,
                                       intraday_schedule_units="hours"):
         """
-        Adds cfintraday config params to config files.
+        Adds cfintraday config params to config file.
 
         Args:
             json_config:
-                {"analytics_222460912": ["events", "event_params", "user_properties", "items"],
-                "analytics_251817041": ["events", "event_params", "user_properties", "items"]}
+                {
+                  "analytics_222460912": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ],
+                  "analytics_251817041": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ]
+                }
 
         Returns:
             json_config:
@@ -137,8 +149,6 @@ FROM (
 
                 If the intraday schedule units is minutes, then intraday schedule frequency can only be a number between 1 and 59. It can't be 60+ (or else GCP with throw an invalid schedule error
 
-
-
         """
         json_config_updated = {}
 
@@ -149,6 +159,48 @@ FROM (
                     "units": intraday_schedule_units
                 }}})
         return json_config_updated
+
+    def add_output_params_into_config(self, json_config, output_sharded=True,
+                                      output_partitioned=False):
+        """
+        Adds cfintraday config params to config file.
+
+        Args:
+            json_config:
+                {
+                  "analytics_222460912": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ]
+                }
+
+        Returns:
+            json_config:
+                {
+                  "analytics_222460912": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ],
+                  "output": {
+                    "sharded": true,
+                    "partitioned": false
+                  }
+                }
+
+        Config file, after being transformed by this function, answers the following questions:
+            Do we want sharded, partitioned output, or both?
+        """
+        for dataset, config in json_config.items():
+            config.update(
+                            {"output": {
+                  "sharded": output_sharded,
+                  "partitioned": output_partitioned
+                }})
+        return json_config
 
 
 def build_ga_flattener_config(request):
@@ -164,6 +216,7 @@ def build_ga_flattener_config(request):
     config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
     store = FlattenerDatasetConfigStorage()  # object with the bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
-    json_config = config.add_intraday_info_into_config(json_config)
+    json_config = config.add_intraday_params_into_config(json_config)
+    json_config = config.add_output_params_into_config(json_config)
     store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))

@@ -134,10 +134,10 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
 
-        self.assertEqual(iv.table_date_shard, self.date_shard)
-        self.assertEqual(iv.gcp_project, self.project_id)
-        self.assertEqual(iv.dataset, self.dataset_id)
-        self.assertEqual(iv.table_name, self.table_type)
+        self.assertEqual(self.date_shard, iv.table_date_shard)
+        self.assertEqual(self.project_id, iv.gcp_project)
+        self.assertEqual(self.dataset_id, iv.dataset)
+        self.assertEqual(self.table_type, iv.table_name)
         assert isinstance(iv.valid_dataset(), bool)
         self.assertTrue(True)
 
@@ -148,10 +148,10 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
 
-        self.assertEqual(iv.table_date_shard, self.date_shard)
-        self.assertEqual(iv.gcp_project, self.project_id)
-        self.assertEqual(iv.dataset, self.dataset_id)
-        self.assertEqual(iv.table_name, self.table_type)
+        self.assertEqual(self.date_shard, iv.table_date_shard)
+        self.assertEqual(self.project_id, iv.gcp_project)
+        self.assertEqual(self.dataset_id, iv.dataset)
+        self.assertEqual(self.table_type, iv.table_name)
         assert isinstance(iv.valid_dataset(), bool)
         self.assertTrue(True)
 
@@ -169,8 +169,9 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=30,
-                                                           intraday_schedule_units="minutes")
+        json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=30,
+                                                             intraday_schedule_units="minutes")
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
@@ -194,10 +195,10 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             request={
                 "name": job_id_full_path
             })
-        self.assertEqual(response_get_job.name, job_id_full_path)
-        self.assertEqual(response_get_job.schedule, '*/30 * * * *')
-        self.assertEqual(str(response_get_job.pubsub_target.data),
-                         'b\'{"protoPayload": {"serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {"datasetId": "%s", "projectId": "%s", "tableId": "events_intraday_%s"}}}}}}}}\'' % (self.dataset_id, self.project_id, self.date_shard))
+        self.assertEqual(job_id_full_path, response_get_job.name)
+        self.assertEqual('*/30 * * * *', response_get_job.schedule)
+        self.assertEqual('b\'{"protoPayload": {"serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {"datasetId": "%s", "projectId": "%s", "tableId": "events_intraday_%s"}}}}}}}}\'' % (self.dataset_id, self.project_id, self.date_shard), str(response_get_job.pubsub_target.data)
+                         )
 
         # check log
         expected_log = ('root', 'INFO',
@@ -228,7 +229,8 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config)
+        json_config = config.add_intraday_params_into_config(json_config)
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
@@ -268,8 +270,9 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=1,
-                                                           intraday_schedule_units="hours")
+        json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
+                                                             intraday_schedule_units="hours")
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
@@ -293,8 +296,8 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             request={
                 "name": job_id_full_path
             })
-        self.assertEqual(response_get_job.name, job_id_full_path)
-        self.assertEqual(response_get_job.schedule, '0 */1 * * *')
+        self.assertEqual(job_id_full_path, response_get_job.name)
+        self.assertEqual('0 */1 * * *', response_get_job.schedule)
 
         # check log
         expected_log = ('root', 'INFO',
@@ -315,8 +318,9 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         json_config = config.get_ga_datasets()
 
         # GCP won't accept this cron schedule
-        json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=60,
-                                                           intraday_schedule_units="minutes")
+        json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=60,
+                                                             intraday_schedule_units="minutes")
+        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
@@ -361,8 +365,9 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
             config = FlattenerDatasetConfig()
             store = FlattenerDatasetConfigStorage()
             json_config = config.get_ga_datasets()
-            json_config = config.add_intraday_info_into_config(json_config, intraday_schedule_frequency=1,
-                                                               intraday_schedule_units="hours")
+            json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
+                                                                 intraday_schedule_units="hours")
+            json_config = config.add_output_params_into_config(json_config)
             store.upload_config(config=json_config)
 
             # create scheduler job
@@ -387,11 +392,10 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         logcapture.check_present(expected_log, )
 
-        # generate config again. restore default: no intraday flattening
-        config = FlattenerDatasetConfig()
-        store = FlattenerDatasetConfigStorage()
-        json_config = config.get_ga_datasets()
-        json_config = config.add_intraday_info_into_config(json_config)
-        store.upload_config(config=json_config)
+    # TODO: split large tests into multiple small tests?
 
-# TODO: split large tests into multiple small tests
+    def tearDown(self):
+        self.restore_default_config()
+        # test_delete_intraday_flattening_schedule will be the last one to run in this test class
+        # so we don't need to worry about
+        # deleting a Scheduler job

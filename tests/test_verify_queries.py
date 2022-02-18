@@ -73,3 +73,6 @@ class TestGenerateQuery(BaseUnitTest):
             test_user_properties_dynamic_query, ga_source)
 
         assert sample_hardcoded_user_properties_query == test_user_properties_dynamic_query
+
+    def tearDown(self):
+        pass

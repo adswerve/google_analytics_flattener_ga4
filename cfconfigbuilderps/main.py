@@ -74,7 +74,7 @@ FROM (
                                          ]
         return ret_val
 
-    def add_intraday_info_into_config(self, json_config, intraday_schedule_frequency=None,
+    def add_intraday_params_into_config(self, json_config, intraday_schedule_frequency=None,
                                       intraday_schedule_units="hours"):
         """
         Adds cfintraday config params to config files.
@@ -89,6 +89,19 @@ FROM (
                 }}})
         return json_config_updated
 
+    def add_output_params_into_config(self, json_config, output_sharded=True,
+                                      output_partitioned=False):
+        """
+        Adds cfintraday config params to config file.
+        """
+        for dataset, config in json_config.items():
+            config.update(
+                            {"output": {
+                  "sharded": output_sharded,
+                  "partitioned": output_partitioned
+                }})
+        return json_config
+
 
 def build_ga_flattener_config(event, context):
     """Triggered from a message on a Cloud Pub/Sub topic.
@@ -100,6 +113,7 @@ def build_ga_flattener_config(event, context):
     config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
     store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
-    json_config = config.add_intraday_info_into_config(json_config)
+    json_config = config.add_intraday_params_into_config(json_config)
+    json_config = config.add_output_params_into_config(json_config)
     store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))
