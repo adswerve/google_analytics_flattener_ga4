@@ -100,7 +100,7 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
 **The following steps are only required if you plan to backfill historical tables.**
 
-8. Install python 3.7 or higher
+8. Install python >= 3.7 but < 3.10
 
 9. From Mac Terminal or Windows Command Prompt, upgrade pip:
 
@@ -338,7 +338,11 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
    small date range to start, like yesterday only.
 3. From a gcloud command prompt, authenticate the installing user using command:
    ```gcloud auth application-default login```
-4. Run tools/pubsub_message_publish.py locally, which will publish a simulated logging event of GA4 data being ingested
+4. Run tools/pubsub_message_publish.py locally, for example from the package root:
+    
+    ```python -m tools.pubsub_message_publish```
+
+   which will publish a simulated logging event of GA4 data being ingested
    into BigQuery. Check dataset(s) that are configured for new date sharded tables such as (depending on what is
    configured):
     * flat_event_params_yyyymmdd
