@@ -17,9 +17,9 @@ topic_id = "ga-flattener-deployment-topic"  # pubsub topic your cloud function i
 project_id = "as-dev-ga4-flattener-320623" # GCP project ID, example:  [PROJECT_ID]
 dry_run = False  # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
-backfill_range_start = datetime.datetime(2021, 12, 9)
-backfill_range_end = datetime.datetime(2021, 12, 10)  # datetime.datetime.today()
-datasets_to_backfill = ["analytics_222460912"]  # GA properties to backfill, "analytics_222460912"
+backfill_range_start = datetime.datetime(2022, 9, 10)
+backfill_range_end = datetime.datetime(2022, 9, 10)  # datetime.datetime.today()
+datasets_to_backfill = ["analytics_206551716"]  # GA properties to backfill, "analytics_222460912"
 '''*****************************'''
 '''  Configuration Section End  '''
 '''*****************************'''
