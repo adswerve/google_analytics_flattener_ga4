@@ -48,7 +48,7 @@ resources:
     location: us-east1
     timeout: 540s
     runtime: python37
-    availableMemoryMb: 8192
+    availableMemoryMb: 512
     entryPoint: flatten_ga_data
 - name: httpfunction
   type: dmt_cloud_function.py
