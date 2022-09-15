@@ -10,8 +10,9 @@ from datetime import datetime
 from http import HTTPStatus
 import pandas as pd
 
-#TODO: {dir}/google_analytics_flattener_ga4/tests/test_partitioning.py:94: PendingDeprecationWarning: Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
-  # table_ref = client.dataset(self.ga_source.dataset).table(table_type)
+
+# TODO: {dir}/google_analytics_flattener_ga4/tests/test_partitioning.py:94: PendingDeprecationWarning: Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
+# table_ref = client.dataset(self.ga_source.dataset).table(table_type)
 
 class InputValidator(object):
     def __init__(self, event):
@@ -58,7 +59,8 @@ class InputValidator(object):
 
 
 class GaExportedNestedDataStorage(object):
-    def __init__(self, gcp_project, dataset, table_name, date_shard, type='DAILY'):#TODO: set this to INTRADAY for intraday flattening. Right now this type parameter is not being used at all, daily vs intraday is set somewhere else
+    def __init__(self, gcp_project, dataset, table_name, date_shard,
+                 type='DAILY'):  # TODO: set this to INTRADAY for intraday flattening. Right now this type parameter is not being used at all, daily vs intraday is set somewhere else
 
         # main configurations
         self.gcp_project = gcp_project
@@ -305,7 +307,6 @@ class GaExportedNestedDataStorage(object):
             r = "_%s" % r
         return r[:300]  # trim the string to the first x chars
 
-
     def run_query_job(self, query, table_type, sharded_output_required=True, partitioned_output_required=False):
 
         """
@@ -346,7 +347,7 @@ class GaExportedNestedDataStorage(object):
 
             # run the job
             query_job_flatten_sharded = client.query(query,
-                                             job_config=query_job_flatten_config_sharded)
+                                                     job_config=query_job_flatten_config_sharded)
 
             query_job_flatten_result_sharded = query_job_flatten_sharded.result()  # Waits for job to complete.
 
@@ -384,10 +385,10 @@ class GaExportedNestedDataStorage(object):
             query_job_config_partitioned = bigquery.QueryJobConfig(
                 # Specify a (partial) schema. All columns are always written to the
                 # table. The schema is used to assist in data type definitions.
-                destination = table_id_partitioned,
-                dry_run = False,
-                use_query_cache = True,
-                labels = {"queryfunction": "flattenerpartitioncreationquery"},
+                destination=table_id_partitioned,
+                dry_run=False,
+                use_query_cache=True,
+                labels={"queryfunction": "flattenerpartitioncreationquery"},
                 write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
                 time_partitioning=bigquery.TimePartitioning(
                     type_=bigquery.TimePartitioningType.DAY,
@@ -397,7 +398,7 @@ class GaExportedNestedDataStorage(object):
 
             # run the job
             query_job_flatten_partitioned = client.query(query,
-                                                     job_config=query_job_config_partitioned)
+                                                         job_config=query_job_config_partitioned)
 
             query_job_flatten_result_partitioned = query_job_flatten_partitioned.result()  # Waits for job to complete.
 
