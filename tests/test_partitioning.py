@@ -6,6 +6,10 @@
 #TODO: test with the intraday feature
 # tested this manually and documented results - passed
 
+
+# TODO: {dir}/google_analytics_flattener_ga4/tests/test_partitioning.py:94: PendingDeprecationWarning: Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
+# table_ref = client.dataset(self.ga_source.dataset).table(table_type)
+
 from google.cloud import bigquery
 from google.cloud.bigquery import SchemaField
 import logging
@@ -31,15 +35,15 @@ class TestPartitioning(BaseUnitTest):
         self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
                                      sharded_output_required=False, partitioned_output_required=True)
 
-        self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type="flat_events",
-                                     sharded_output_required=False, partitioned_output_required=True)
-
-        self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
-                                     sharded_output_required=False, partitioned_output_required=True)
-
-        self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-                                     table_type="flat_user_properties", sharded_output_required=False,
-                                     partitioned_output_required=True)
+        # self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type="flat_events",
+        #                              sharded_output_required=False, partitioned_output_required=True)
+        #
+        # self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
+        #                              sharded_output_required=False, partitioned_output_required=True)
+        #
+        # self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
+        #                              table_type="flat_user_properties", sharded_output_required=False,
+        #                              partitioned_output_required=True)
 
         self.assertTrue(True)
 

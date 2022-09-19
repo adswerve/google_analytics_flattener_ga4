@@ -8,11 +8,7 @@ import tempfile
 import logging
 from datetime import datetime
 from http import HTTPStatus
-import pandas as pd
 
-
-# TODO: {dir}/google_analytics_flattener_ga4/tests/test_partitioning.py:94: PendingDeprecationWarning: Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
-# table_ref = client.dataset(self.ga_source.dataset).table(table_type)
 
 class InputValidator(object):
     def __init__(self, event):

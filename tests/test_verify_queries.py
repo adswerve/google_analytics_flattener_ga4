@@ -10,7 +10,7 @@ class TestGenerateQuery(BaseUnitTest):
         """Cleans up a sample hardcoded query , so this query can be compared to a dynamically generated query
             for testing purposes"""
 
-        query_cleaned_up = query.upper().replace(" ", "").replace("\n", "").replace("\t", "")
+        query_cleaned_up = query.upper().replace(" ", "").replace("\n", "").replace("\t", "").replace("%%Y%%M%%D", "%Y%M%D")
 
         return query_cleaned_up
 
