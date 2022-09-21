@@ -3,12 +3,6 @@
 # test backfill with diff config options (sharding vs partitioning vs both)
 # have done this manually and documented results
 
-#TODO: test with the intraday feature
-# tested this manually and documented results - passed
-
-
-# TODO: {dir}/google_analytics_flattener_ga4/tests/test_partitioning.py:94: PendingDeprecationWarning: Client.dataset is deprecated and will be removed in a future version. Use a string like 'my_project.my_dataset' or a cloud.google.bigquery.DatasetReference object, instead.
-# table_ref = client.dataset(self.ga_source.dataset).table(table_type)
 
 from google.cloud import bigquery
 from google.cloud.bigquery import SchemaField
@@ -35,15 +29,15 @@ class TestPartitioning(BaseUnitTest):
         self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
                                      sharded_output_required=False, partitioned_output_required=True)
 
-        # self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type="flat_events",
-        #                              sharded_output_required=False, partitioned_output_required=True)
-        #
-        # self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
-        #                              sharded_output_required=False, partitioned_output_required=True)
-        #
-        # self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-        #                              table_type="flat_user_properties", sharded_output_required=False,
-        #                              partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type="flat_events",
+                                     sharded_output_required=False, partitioned_output_required=True)
+
+        self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
+                                     sharded_output_required=False, partitioned_output_required=True)
+
+        self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
+                                     table_type="flat_user_properties", sharded_output_required=False,
+                                     partitioned_output_required=True)
 
         self.assertTrue(True)
 
@@ -95,10 +89,10 @@ class TestPartitioning(BaseUnitTest):
 
         client = bigquery.Client()
 
-        table_ref = client.dataset(self.ga_source.dataset).table(table_type)
+        table_path = "%s.%s.%s" % (self.ga_source.gcp_project, self.ga_source.dataset, table_type)
 
         try:
-            client.delete_table(table_ref)
+            client.delete_table(table_path)
         except Exception as e:
             if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
                 logging.warning(f"Cannot delete the partition because the table doesn't exist yet: {e}")
@@ -128,8 +122,8 @@ class TestPartitioning(BaseUnitTest):
         table_partitioned = client.get_table(table_id_partitioned)  # Make an API request.
 
         # verify partitioning
-        self.assertIsNotNone(table_partitioned.partitioning_type)
-        self.assertEqual("DAY", table_partitioned.time_partitioning._properties['type'])
+        self.assertIsNotNone(table_partitioned.time_partitioning)
+        self.assertEqual("DAY", table_partitioned.time_partitioning.type_)
         self.assertEqual("event_date", table_partitioned.time_partitioning._properties['field'])
 
         # verify date field
@@ -270,3 +264,4 @@ class TestPartitioning(BaseUnitTest):
 
     def tearDown(self):
         self.delete_all_flat_tables_from_dataset()
+        # pass
