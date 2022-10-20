@@ -82,7 +82,6 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * Logs Configuration Writer
     * Cloud Functions Developer
     * Pub/Sub Admin
-    * Cloud Scheduler Admin (if you need to flatten intraday tables)
 
 5. As the installing user for **[PROJECT_ID]**, create a bucket or use an existing bucket for staging code, for example:
    **[PROJECT_NUMBER]**-function-code-staging. Referred to as **[BUCKET_NAME]**.
