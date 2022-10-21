@@ -345,7 +345,8 @@ class GaExportedNestedDataStorage(object):
             query_job_flatten_sharded = client.query(query,
                                                      job_config=query_job_flatten_config_sharded)
 
-            query_job_flatten_result_sharded = query_job_flatten_sharded.result()  # Waits for job to complete.
+            # we decided not to wait for hte job to complete, but exit the function after submitting the job, in orde to avoid a potential Cloud Function timeout
+            # query_job_flatten_result_sharded = query_job_flatten_sharded.result()  # Waits for job to complete.
 
         if partitioned_output_required:
             # 2
@@ -396,7 +397,8 @@ class GaExportedNestedDataStorage(object):
             query_job_flatten_partitioned = client.query(query,
                                                          job_config=query_job_config_partitioned)
 
-            query_job_flatten_result_partitioned = query_job_flatten_partitioned.result()  # Waits for job to complete.
+            # we decided not to wait for hte job to complete, but exit the function after submitting the job, in orde to avoid a potential Cloud Function timeout
+            # query_job_flatten_result_partitioned = query_job_flatten_partitioned.result()  # Waits for job to complete.
 
 
 def flatten_ga_data(event, context):
