@@ -26,7 +26,7 @@ class InputValidator(object):
         except AttributeError:
             logging.critical(f'invalid message: {message_payload}')
         try:
-            storage_client = storage.Client()
+            storage_client = storage.Client(project=self.gcp_project)
             bucket = storage_client.bucket(os.environ["CONFIG_BUCKET_NAME"])
             blob = bucket.blob(os.environ["CONFIG_FILENAME"])
             downloaded_file = os.path.join(tempfile.gettempdir(), "tmp.json")
@@ -303,7 +303,7 @@ class GaExportedNestedDataStorage(object):
             r = "_%s" % r
         return r[:300]  # trim the string to the first x chars
 
-    def run_query_job(self, query, table_type, sharded_output_required=True, partitioned_output_required=False):
+    def run_query_job(self, query, table_type, sharded_output_required=True, partitioned_output_required=False, wait_for_the_query_job_to_complete=False):
 
         """
         Depending on the configuration, we will write data to sharded table, partitioned table, or both.
@@ -317,7 +317,7 @@ class GaExportedNestedDataStorage(object):
         # 1
         # QUERY AND FLATTEN DATA. WRITE SHARDED OUTPUT, if flattener is configured to do so
 
-        client = bigquery.Client()  # initialize BigQuery client
+        client = bigquery.Client(project=self.gcp_project)  # initialize BigQuery client
 
         # we will write a sharded or a partitioned table, depending on the config
 
@@ -345,8 +345,10 @@ class GaExportedNestedDataStorage(object):
             query_job_flatten_sharded = client.query(query,
                                                      job_config=query_job_flatten_config_sharded)
 
-            # we decided not to wait for hte job to complete, but exit the function after submitting the job, in orde to avoid a potential Cloud Function timeout
-            # query_job_flatten_result_sharded = query_job_flatten_sharded.result()  # Waits for job to complete.
+            # as a default option, we decided not to wait for hte job to complete, but exit the function after submitting the job, in orde to avoid a potential Cloud Function timeout
+            # however, some unit tests (e.g., partitioning) are much easier to manage, if we wait for the job to complete, therefore, an option to wait is available
+            if wait_for_the_query_job_to_complete:
+                query_job_flatten_result_sharded = query_job_flatten_sharded.result()  # Waits for job to complete.
 
         if partitioned_output_required:
             # 2
@@ -397,8 +399,10 @@ class GaExportedNestedDataStorage(object):
             query_job_flatten_partitioned = client.query(query,
                                                          job_config=query_job_config_partitioned)
 
-            # we decided not to wait for hte job to complete, but exit the function after submitting the job, in orde to avoid a potential Cloud Function timeout
-            # query_job_flatten_result_partitioned = query_job_flatten_partitioned.result()  # Waits for job to complete.
+            # as a default option, we decided not to wait for hte job to complete, but exit the function after submitting the job, in orde to avoid a potential Cloud Function timeout
+            # however, some unit tests (e.g., partitioning) are much easier to manage, if we wait for the job to complete, therefore, an option to wait is available
+            if wait_for_the_query_job_to_complete:
+                query_job_flatten_result_partitioned = query_job_flatten_partitioned.result()  # Waits for job to complete.
 
 
 def flatten_ga_data(event, context):
