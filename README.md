@@ -15,6 +15,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
 * [Prerequisites](#prerequisites)
     + [Backfilling prerequisites](#backfilling-prerequisites)
 * [Installation steps](#installation-steps)
+    + [Installation commands recap](#installation-commands-recap)
     + [Deployment naming conventions](#deployment-naming-conventions)
 * [Verification steps](#verification-steps)
     + [Config file](#config-file)
@@ -84,12 +85,21 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * Cloud Functions Developer
     * Pub/Sub Admin
 
-5. As the installing user for **[PROJECT_ID]**, create a bucket or use an existing bucket for staging code, for example:
-   **[PROJECT_NUMBER]**-function-code-staging. Referred to as **[BUCKET_NAME]**.
+    If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com yet. To fix
+    this, enable Compute Engine API and then disable it. The service account **[PROJECT_NUMBER]**
+    @cloudservices.gserviceaccount.com will appear in your GCP project under IAM.
 
-If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com yet. To fix
-this, enable Compute Engine API and then disable it. The service account **[PROJECT_NUMBER]**
-@cloudservices.gserviceaccount.com will appear in your GCP project under IAM.
+5. As the installing user for **[PROJECT_ID]**, create a bucket or use an existing bucket for staging code, for example:
+   **`[PROJECT_NUMBER]**-function-code-staging`. Referred to as **[BUCKET_NAME]**.
+
+    We recommend adding a label to this GCS bucket, for example:
+
+    `key: bucket`
+
+    `value: ga4-flattener-function-code-staging`
+
+    This label will help you roughly estimate GCS cost related to flattener. 
+
 
 6. Clone this github repo or download the source code from the releases section to your local machine or cloud shell.
 
@@ -156,9 +166,23 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
 
 ## Installation steps ##
 
-1. Execute command in Google Cloud SDK Shell: gcloud config set project **[PROJECT_ID]**
-2. Execute command: gcloud config set account <username@domain.com>. **Note** - This must be the installing user from
-   above prerequisites.
+1. Execute command in Google Cloud SDK Shell: `gcloud config set project **[PROJECT_ID]**`
+
+    - alternatively, you can use this commands:
+
+
+    ```
+    # instantiate a configuration (connect to a GCP project)
+    gcloud init 
+
+    # activate the configuration
+    gcloud config congirations activate {configuration_name} 
+
+    # make sure you're in the right GCP project)
+    gcloud config configurations list
+    ```
+
+2. Execute command: `gcloud config set account <username@domain.com>`. **Note** - This must be the installing user from above prerequisites. Feel free to skip this part unless it's required - I usually skip it as GCP already detects the user.
 3. Navigate (locally) to root directory of this repository
 4. If **[PROJECT_ID]** does **NOT** contain a colon (:) execute command:
 
@@ -173,6 +197,43 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
        necessary configuration file in the applications Google Coud Storage bucket. An easy method to do this is to
        browse to https://console.cloud.google.com/functions and click the cloud function named **[deployment_name]**
        -cfconfigbuilderps and go to the testing section and click "TEST THIS FUNCTION".
+  
+   ### Installation commands recap
+
+   The steps above can be summarized in the template below. When I install the flattener, I like referring to the commands below. I adjust the commands to a specific project run one command at a time. 
+
+    ```
+    # INSTALL
+
+    # initiate the configuration
+    gcloud init
+
+    # view configurations
+    gcloud config configurations list
+
+    # activate the right configuration
+    gcloud config configurations activate {configuration}
+
+    # dir
+
+    cd {code_directory}
+
+    # install
+    gcloud deployment-manager deployments create ga4-flattener-deployment --config ga_flattener.yaml
+
+    # DESCRIBE
+
+    # verify installation
+    gcloud deployment-manager deployments describe ga4-flattener-deployment
+
+    # UNINSTALL
+
+    # delete the flattener config file
+    gsutil rm gs://ga4-flattener-deployment-{project_number}-adswerve-ga-flat-config/config_datasets.json
+    
+    # uninstall
+    gcloud deployment-manager deployments delete ga4-flattener-deployment -q
+    ```
 
    ### Deployment naming conventions
    * Deployment name must be a match of regex `'[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?'`
@@ -183,7 +244,10 @@ this, enable Compute Engine API and then disable it. The service account **[PROJ
       * Up to 63 characters long (a beginning lowercase letter + 61 chars (hyphens, lowercase letters and number) + the ending lowercase letter or a number)
     * Note that deployment name cannot have underscores in its name, but can have hyphens.
     * An example of a valid
-      name is in this command: ```gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml```
+      name is in this command: 
+      
+      ```gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml```
+
     * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid deployment names.
     
 
