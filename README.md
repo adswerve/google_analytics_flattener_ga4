@@ -65,7 +65,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
 
 ## Prerequisites ##
 
-1. Browse to https://cloud.console.google.com to create Google GCP project or use an existing project that has Google
+1. Browse to https://console.cloud.google.com/ to create Google GCP project or use an existing project that has Google
    Analytics data flowing to it. Referred to as **[PROJECT_ID]**.
 
 2. Grant the installing user (you most likely) the pre-defined IAM role of "Owner".
