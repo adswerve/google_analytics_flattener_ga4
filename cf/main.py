@@ -591,7 +591,7 @@ def flatten_ga_data(event, context):
             ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query. Destination table: {input_event.gcp_project}.{input_event.dataset}.{input_event.table_name}{input_event.table_date_shard}')
+            logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} for {input_event.table_date_shard}')
         else:
             logging.info(
                 f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
@@ -601,7 +601,7 @@ def flatten_ga_data(event, context):
             ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query. Destination table: {input_event.gcp_project}.{input_event.dataset}.{input_event.table_name}{input_event.table_date_shard}')
+            logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} for {input_event.table_date_shard}')
         else:
             logging.info(
                 f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
@@ -611,7 +611,7 @@ def flatten_ga_data(event, context):
             ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["ITEMS"]} flattening query. Destination table: {input_event.gcp_project}.{input_event.dataset}.{input_event.table_name}{input_event.table_date_shard}')
+            logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset} for {input_event.table_date_shard}')
         else:
             logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
 
@@ -620,7 +620,7 @@ def flatten_ga_data(event, context):
             ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["EVENTS"]} flattening query. Destination table: {input_event.gcp_project}.{input_event.dataset}.{input_event.table_name}{input_event.table_date_shard}')
+            logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset} for {input_event.table_date_shard}')
         else:
             logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
 
