@@ -18,11 +18,17 @@ The GCP resources for the solutions are installed via Deployment Manager.
     + [Installation commands recap](#installation-commands-recap)
     + [Deployment naming conventions](#deployment-naming-conventions)
 * [Verification steps](#verification-steps)
-    + [Config file](#config-file)
-      + [Enabling intraday flattening in the config file](#enabling-intraday-flattening-in-the-config-file)
-      + [Enabling partitioned output in the config file](#enabling-partitioned-output-in-the-config-file)
-      + [Examples of a config file](#examples-of-a-config-file)
-    + [Backfilling steps](#backfilling-steps)
++ [About the config file](#about-the-config-file)
+  + [How do edit the config file](#how-do-edit-the-config-file)
++ [Intraday flattening](#intraday-flattening)
+  + [Background on intraday flattening](#background-on-intraday-flattening )
+  + [How to enable intraday flattening in the config file](#how-to-enable-intraday-flattening-in-the-config-file)
+  + [Disclaimer regarding GA4 intraday data in BigQuery](#disclaimer-regarding-ga4-intraday-data-in-bigquery)
++ [Controlling the type of output](#controlling-the-type-of-output)
+  + [Background on sharded and partitioned output](#background-on-sharded-and-partitioned-output)
+  + [How to enable partitioned output in the config file](#how-to-enable-partitioned-output-in-the-config-file)
++ [Config file examples](#config-file-examples)
++ [Backfilling steps](#backfilling-steps)
 * [Un-install steps](#un-install-steps)
 * [Common errors](#common-errors)
     + [Install](#install)
@@ -76,6 +82,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * Cloud Deployment Manager V2 API
     * Cloud Functions API
     * Identity and Access Management (IAM) API
+    * Cloud Scheduler API (if you need to flatten intraday tables)
 
 4. As the installing user for **[PROJECT_ID]**, grant the following pre-defined IAM roles to
    **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com (built in service account) otherwise deployment will fail with
@@ -253,7 +260,23 @@ The GCP resources for the solutions are installed via Deployment Manager.
 
 ## Verification steps ##
 
-### Config file
+Below are some ideas, you don't have to do all of them.
+
+- Important checks: 
+
+  - Check to make sure the deployement command gave no errors
+
+  - Check to make sure the config file is correct. See below more information about the config file.
+
+  - Run backfill (at least for a couple of days) to make sure there are no errors in the Cloud Functions and flat data is being written. See the section about backfill.
+
+- Optional checks: 
+
+  - Check GCP Cloud Functions to make sure they deployed successfully. 
+
+  - Check GCP logs to make sure there are no errors in the flattening Cloud Function.
+
+## About the config file
 
 1. After installation, a configuration file named ```config_datasets.json``` exists in **gs://[deployment_name]
    -[PROJECT_NUMBER]-adswerve-ga-flat-config/** (Cloud Storage Bucket within **[PROJECT_ID]**).
@@ -264,21 +287,65 @@ The GCP resources for the solutions are installed via Deployment Manager.
 
 - Edit this file accordingly to include or exclude certain datasets or tables to unnest.
 
-- You can also enable intraday flattening via this config file and specify its frequency in hours or minutes.
+- You can enable intraday flattening via this config file and specify its frequency in hours or minutes.
 
-#### Enabling intraday flattening in the config file
+- You can also enable sharded and/or partitioned output in the config file.
 
-- In addition to daily tables ```events_yyyymmdd```, you may also have the table ```events_intraday_yyyymmdd```, which refreshes every few minutes.
+### How do edit the config file
+
+If you want non-default config file options, you need to do the following:
+
+- Manually download the `config_datasets.json` file from GCS (Google Cloud Storage)
+
+- Edit it locally in a text/code upload
+
+- Upload the config file back to GCS and overwrite the old version.
+
+
+## Intraday flattening 
+
+### Background on intraday flattening 
+
+- In addition to daily tables ```events_yyyymmdd```, you may also have the table ```events_intraday_yyyymmdd```, which has data from today and refreshes in real-time.
+
+- To get the intraday BigQuery table, you need to check `Frequency`: `Streaming` in your GA4 BigQuery linking. 
 
 - By default, the flattener does not flatten the intraday table.
+
+- You can enable intraday flattening by editing the config file (see instructions below).
+
+- If you don't have have a daily table yet for a specific date (usually, today or yesterday), but you have an intraday table for that date, then the intraday table will be flattened. You will have flat tables, such as ```flat_events_yyyymmdd```, which are based on a specific date's intraday table ```events_intraday_yyyymmdd``.
+
+- At night, Google deletes the intraday table for a specific date and writes a daily table for that date.
+
+- The flattener Cloud Function runs and ovewrites the flat table `flat_events_yyyymmdd`. Now you have flat tables based on **daily** table `events_yyyymmdd`.
+
+
+### How to enable intraday flattening in the config file
+
 
 - You can enable intraday flattening by editing the config file and supplying ```"intraday_schedule": {"frequency": "your_frequency", "units": "your_units"}```. 
 
   - ```"your_units"``` can be ```"hours"``` or ```"minutes"```
   - ```"your_frequency"``` is an integer.
   - if your units are minutes, then the frequency should be between 1 and 59.
-  
-#### Enabling partitioned output in the config file
+
+- The flattened intraday tables will be overwritten at the specified frequency. 
+
+
+### Disclaimer regarding GA4 intraday data in BigQuery
+
+- In the intraday table, user properties are not accurate, until the daily table arrives
+
+- The flat intraday table doesn't say it's based on intraday data in its name. The flat intraday table is called `flat_events_{date}`.
+
+- therefore, please interpret flattened intraday data with caution 
+
+## Controlling the type of output
+
+### Background on sharded and partitioned output
+
+Enabling partitioned output in the config file
 
 - By default, the flattener produces flat sharded tables, because the original GA tables are also sharded.
 - You can enable the following in the config file:
@@ -287,11 +354,13 @@ The GCP resources for the solutions are installed via Deployment Manager.
 
     B) paritioned output
 
-    C) both sharded and partitioned output
+    C) both sharded and partitioned output. It means you have two sets of flat tables: sharded flat tables and partitioned flat tables. 
 
-- You configure output type by changing the following part of the config file: ```"output": {"sharded": true, "partitioned": false}```.
 
-#### Examples of a config file
+### How to enable partitioned output in the config file
+- You configure output type by changing the following part of the config file: ```"output": {"sharded": true, "partitioned": false}```. If you only want partitioned output, This default option should be changed to this: ```"output": {"sharded": false, "partitioned": true}```
+
+## Config file examples
 
 Example 1 - default config 
 
@@ -394,7 +463,7 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
 
 - See another example in ```./sample_config/config_datasets_sample.json``` in this repo.
 
-### Backfilling steps
+## Backfilling steps
 
 **The following steps are only required if you plan to backfill historical tables.**
 
