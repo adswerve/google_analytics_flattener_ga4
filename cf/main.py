@@ -215,7 +215,7 @@ class GaExportedNestedDataStorage(object):
 
     def get_event_params_query(self):
         qry = "SELECT "
-        qry += 'PARSE_DATE("%%Y%%m%%d", %s) AS %s, ' % (self.date_field_name, self.date_field_name)
+        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
         # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
@@ -234,7 +234,7 @@ class GaExportedNestedDataStorage(object):
 
     def get_user_properties_query(self):
         qry = "SELECT "
-        qry += 'PARSE_DATE("%%Y%%m%%d", %s) AS %s, ' % (self.date_field_name, self.date_field_name)
+        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
         # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
@@ -255,7 +255,7 @@ class GaExportedNestedDataStorage(object):
 
     def get_items_query(self):
         qry = "SELECT "
-        qry += 'PARSE_DATE("%%Y%%m%%d", %s) AS %s, ' % (self.date_field_name, self.date_field_name)
+        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
         # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
@@ -271,7 +271,7 @@ class GaExportedNestedDataStorage(object):
 
     def get_events_query(self):
         qry = "SELECT "
-        qry += 'PARSE_DATE("%%Y%%m%%d", %s) AS %s, ' % (self.date_field_name, self.date_field_name)
+        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
         # get unique event id
         qry += self.get_unique_event_id(self.unique_event_id_fields)
 
