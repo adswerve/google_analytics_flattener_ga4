@@ -208,27 +208,17 @@ class GaExportedNestedDataStorage(object):
         """
         build unique event id
         """
-        return 'CONCAT(%s, "_", %s, "_", %s, "_", %s) as event_id' % (unique_event_id_fields[0],
-                                                                      unique_event_id_fields[1],
-                                                                      unique_event_id_fields[2],
-                                                                      unique_event_id_fields[3])
+        return f'CONCAT({unique_event_id_fields[0]}, "_", {unique_event_id_fields[1]}, "_", {unique_event_id_fields[2]}, "_", {unique_event_id_fields[3]}) as event_id'
 
     def get_event_params_query(self):
-        qry = "SELECT "
-        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
-        # get unique event id
-        qry += self.get_unique_event_id(self.unique_event_id_fields)
 
-        qry += ",%s as %s" % (self.event_params_fields[0], self.event_params_fields[0].replace(".", "_"))
-
-        qry += ",CONCAT(IFNULL(%s, ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), '')) AS event_params_value" \
-               % (self.event_params_fields[1], self.event_params_fields[2], self.event_params_fields[3],
-                  self.event_params_fields[4])
-
-        qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
-                                                 d=self.date_shard)
-
-        qry += ",UNNEST (event_params) AS event_params"
+        qry =   f"SELECT " \
+                f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, ' \
+                f"{self.get_unique_event_id(self.unique_event_id_fields)}" \
+                f',{self.event_params_fields[0]} as {self.event_params_fields[0].replace(".", "_")}' \
+                f",CONCAT(IFNULL({self.event_params_fields[1]}, ''), IFNULL(CAST({self.event_params_fields[2]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[3]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[4]} AS STRING), '')) AS event_params_value" \
+                f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`" \
+                f",UNNEST (event_params) AS event_params"
 
         return qry
 
@@ -246,8 +236,7 @@ class GaExportedNestedDataStorage(object):
 
         qry += ",%s as %s" % (self.user_properties_fields[5], self.user_properties_fields[5].replace(".", "_"))
 
-        qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
-                                                 d=self.date_shard)
+        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
 
         qry += ",UNNEST (user_properties) AS user_properties"
 
@@ -262,8 +251,7 @@ class GaExportedNestedDataStorage(object):
         for f in self.items_fields:
             qry += ",%s as %s" % (f, f.replace(".", "_"))
 
-        qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
-                                                 d=self.date_shard)
+        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
 
         qry += ",UNNEST (items) AS items"
 
@@ -278,8 +266,8 @@ class GaExportedNestedDataStorage(object):
         for f in self.events_fields:
             qry += ",%s as %s" % (f, f.replace(".", "_"))
 
-        qry += " FROM `{p}.{ds}.{t}_{d}`".format(p=self.gcp_project, ds=self.dataset, t=self.table_name,
-                                                 d=self.date_shard)
+        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
+
         return qry
 
     def _create_valid_bigquery_field_name(self, p_field):
@@ -323,8 +311,7 @@ class GaExportedNestedDataStorage(object):
 
         if sharded_output_required:
             # get table name
-            table_name = "{p}.{ds}.{t}_{d}" \
-                .format(p=self.gcp_project, ds=self.dataset, t=table_type, d=self.date_shard)
+            table_name = f"{self.gcp_project}.{self.dataset}.{table_type}_{self.date_shard}"
 
             table_id = bigquery.Table(table_name)
             # WRITE SHARDED OUTPUT, if flattener is configured to do so
@@ -359,9 +346,7 @@ class GaExportedNestedDataStorage(object):
                 datetime_string = str(self.date)
                 date_string = re.search(r'20\d\d\-\d\d\-\d\d', datetime_string).group(0)
 
-                query_delete = """
-                           DELETE FROM `{p}.{ds}.{t}` WHERE event_date = "{date_shard}";
-                       """.format(p=self.gcp_project, ds=self.dataset, t=table_type, date_shard=date_string)
+                query_delete = f'DELETE FROM `{self.gcp_project}.{self.dataset}.{table_type}` WHERE event_date = "{date_string}";'
 
                 query_job_delete_config = bigquery.QueryJobConfig(
                     labels={"queryfunction": "flattenerpartitiondeletionquery"}  # todo: apply proper labels
@@ -376,8 +361,7 @@ class GaExportedNestedDataStorage(object):
                 else:
                     logging.critical(f"Cannot delete the partition: {e}")
 
-            table_name_partitioned = "{p}.{ds}.{t}" \
-                .format(p=self.gcp_project, ds=self.dataset, t=table_type)
+            table_name_partitioned = f"{self.gcp_project}.{self.dataset}.{table_type}"
 
             table_id_partitioned = bigquery.Table(table_name_partitioned)
 
