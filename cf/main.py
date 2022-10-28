@@ -211,45 +211,37 @@ class GaExportedNestedDataStorage(object):
         return f'CONCAT({unique_event_id_fields[0]}, "_", {unique_event_id_fields[1]}, "_", {unique_event_id_fields[2]}, "_", {unique_event_id_fields[3]}) as event_id'
 
     def get_event_params_query(self):
-
-        qry =   f"SELECT " \
-                f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, ' \
-                f"{self.get_unique_event_id(self.unique_event_id_fields)}" \
-                f',{self.event_params_fields[0]} as {self.event_params_fields[0].replace(".", "_")}' \
-                f",CONCAT(IFNULL({self.event_params_fields[1]}, ''), IFNULL(CAST({self.event_params_fields[2]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[3]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[4]} AS STRING), '')) AS event_params_value" \
-                f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`" \
-                f",UNNEST (event_params) AS event_params"
+        #TODO: instead of concatenating IFNULLs, use COALESCE function
+        qry = f"SELECT " \
+              f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, ' \
+              f"{self.get_unique_event_id(self.unique_event_id_fields)}" \
+              f',{self.event_params_fields[0]} as {self.event_params_fields[0].replace(".", "_")}' \
+              f",CONCAT(IFNULL({self.event_params_fields[1]}, ''), IFNULL(CAST({self.event_params_fields[2]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[3]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[4]} AS STRING), '')) AS event_params_value" \
+              f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`" \
+              f",UNNEST (event_params) AS event_params"
 
         return qry
 
     def get_user_properties_query(self):
-        qry = "SELECT "
-        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
-        # get unique event id
-        qry += self.get_unique_event_id(self.unique_event_id_fields)
 
-        qry += ",%s as %s" % (self.user_properties_fields[0], self.user_properties_fields[0].replace(".", "_"))
-
-        qry += ",CONCAT(IFNULL(%s, ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), ''), IFNULL(CAST(%s AS STRING), '')) AS user_properties_value" \
-               % (self.user_properties_fields[1], self.user_properties_fields[2], self.user_properties_fields[3],
-                  self.user_properties_fields[4])
-
-        qry += ",%s as %s" % (self.user_properties_fields[5], self.user_properties_fields[5].replace(".", "_"))
-
-        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
-
-        qry += ",UNNEST (user_properties) AS user_properties"
+        qry = f"SELECT " \
+                f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, ' \
+            f"{self.get_unique_event_id(self.unique_event_id_fields)}" \
+            f',{self.user_properties_fields[0]} as {self.user_properties_fields[0].replace(".", "_")}' \
+            f",CONCAT(IFNULL({self.user_properties_fields[1]}, ''), IFNULL(CAST({self.user_properties_fields[2]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[3]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[4]} AS STRING), '')) AS user_properties_value" \
+            f',{self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}' \
+            f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`" \
+            f",UNNEST (user_properties) AS user_properties"
 
         return qry
 
     def get_items_query(self):
-        qry = "SELECT "
-        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
-        # get unique event id
-        qry += self.get_unique_event_id(self.unique_event_id_fields)
+        qry = f"SELECT " \
+        f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, ' \
+        f"{self.get_unique_event_id(self.unique_event_id_fields)}"
 
-        for f in self.items_fields:
-            qry += ",%s as %s" % (f, f.replace(".", "_"))
+        for field in self.items_fields:
+            qry += f',{field} as {field.replace(".", "_")}'
 
         qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
 
@@ -258,18 +250,17 @@ class GaExportedNestedDataStorage(object):
         return qry
 
     def get_events_query(self):
-        qry = "SELECT "
-        qry += f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, '
-        # get unique event id
-        qry += self.get_unique_event_id(self.unique_event_id_fields)
-
-        for f in self.events_fields:
-            qry += ",%s as %s" % (f, f.replace(".", "_"))
+        qry = f"SELECT " \
+                f'PARSE_DATE("%%Y%%m%%d", {self.date_field_name}) AS {self.date_field_name}, ' \
+                f"{self.get_unique_event_id(self.unique_event_id_fields)}"
+        for field in self.events_fields:
+            qry += f',{field} as {field.replace(".", "_")}'
 
         qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
 
         return qry
 
+    #TODO: this function is not being used anywhere: _create_valid_bigquery_field_name. Should we delete it?
     def _create_valid_bigquery_field_name(self, p_field):
         '''
         Creates a valid BigQuery field name
@@ -288,7 +279,7 @@ class GaExportedNestedDataStorage(object):
                 r += "_"
         # if field starts with digit, prepend it with underscore
         if r[0].isdigit():
-            r = "_%s" % r
+            r = f"_{r}"
         return r[:300]  # trim the string to the first x chars
 
     def run_query_job(self, query, table_type, sharded_output_required=True, partitioned_output_required=False, wait_for_the_query_job_to_complete=False):
