@@ -260,28 +260,6 @@ class GaExportedNestedDataStorage(object):
 
         return qry
 
-    #TODO: this function is not being used anywhere: _create_valid_bigquery_field_name. Should we delete it?
-    def _create_valid_bigquery_field_name(self, p_field):
-        '''
-        Creates a valid BigQuery field name
-        BQ Fields must contain only letters, numbers, and underscores, start with a letter or underscore,
-        and be at most 300 characters long.
-        :param p_field: starting point of the field
-        :return: cleaned big query field name
-        '''
-        r = ""  # initialize emptry string
-        for char in p_field.lower():
-            if char.isalnum():
-                # if char is alphanumeric (either letters or numbers), append char to our string
-                r += char
-            else:
-                # otherwise, replace it with underscore
-                r += "_"
-        # if field starts with digit, prepend it with underscore
-        if r[0].isdigit():
-            r = f"_{r}"
-        return r[:300]  # trim the string to the first x chars
-
     def run_query_job(self, query, table_type, sharded_output_required=True, partitioned_output_required=False, wait_for_the_query_job_to_complete=False):
 
         """
