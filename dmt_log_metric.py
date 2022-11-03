@@ -9,7 +9,7 @@ def generate_config(ctx):
             'name': 'metric-name',
             'type': 'gcp-types/logging-v2:projects.metrics',
             'properties': {
-                'metric': '{metric_name}'.format(metric_name=config.get_sink_name()),
+                'metric': config.get_sink_name(),
                 'filter': config.get_filter(),
             }
         }]

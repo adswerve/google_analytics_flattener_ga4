@@ -213,7 +213,7 @@ def manage_intraday_schedule(event, context="context"):
                             "name": job_id_full_path
                         })
 
-                    logging.info('Created Scheduler job: {}'.format(response.name))
+                    logging.info(f'Created Scheduler job: {response.name}')
                     return response
 
                 # if it already exists, it doesn't need to be created

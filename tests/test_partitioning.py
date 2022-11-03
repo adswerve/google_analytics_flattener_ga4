@@ -125,8 +125,7 @@ class TestPartitioning(BaseUnitTest):
         self.drop_partitioned_table(table_type=table_type)
 
         # we need to do it, because we need to check number of rows later
-        table_name_partitioned = "{p}.{ds}.{t}" \
-            .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
+        table_name_partitioned = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}"
         table_id_partitioned = bigquery.Table(table_name_partitioned)
 
         # flatten data
@@ -144,8 +143,7 @@ class TestPartitioning(BaseUnitTest):
         self.assertEqual(SchemaField('event_date', 'DATE', 'NULLABLE', None, (), None), table_partitioned.schema[0])
 
         # extract info about sharded output
-        table_name_sharded = "{p}.{ds}.{t}_{d}" \
-            .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type, d=self.ga_source.date_shard)
+        table_name_sharded = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_{self.ga_source.date_shard}"
 
         table_id_sharded = bigquery.Table(table_name_sharded)
         table_sharded = client.get_table(table_id_sharded)
@@ -235,17 +233,13 @@ class TestPartitioning(BaseUnitTest):
             self.flatten_ga_data(table_type=table_type)
 
             # keep track of number of sharded rows
-            table_name_sharded = "{p}.{ds}.{t}_{d}" \
-                .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type,
-                        d=self.ga_source.date_shard)
-
+            table_name_sharded = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_{self.ga_source.date_shard}"
             table_id_sharded = bigquery.Table(table_name_sharded)
             table_sharded = client.get_table(table_id_sharded)
             num_rows_sharded = num_rows_sharded + table_sharded.num_rows
 
         # count partitioned rows
-        table_name_partitioned = "{p}.{ds}.{t}" \
-            .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
+        table_name_partitioned = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}"
         table_id_partitioned = bigquery.Table(table_name_partitioned)
         table_partitioned = client.get_table(table_id_partitioned)
         num_rows_partitioned = table_partitioned.num_rows
@@ -253,11 +247,11 @@ class TestPartitioning(BaseUnitTest):
         self.assertEqual(num_rows_sharded, num_rows_partitioned)
 
         # make sure that breakdown of rows by date is the same in sharded vs partitioned data
-        query_string_partitioned = """
-            SELECT event_date, count(*) nrow FROM `{p}.{ds}.{t}`
+        query_string_partitioned = f"""
+            SELECT event_date, count(*) nrow FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}`
             GROUP BY 1
             ORDER BY 1 
-        """.format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
+        """
 
         dataframe_partitioned = (
             client.query(query_string_partitioned)
@@ -266,14 +260,13 @@ class TestPartitioning(BaseUnitTest):
             )
         )
 
-        query_string_sharded = """
+        query_string_sharded = f"""
             SELECT _TABLE_SUFFIX as event_date, count(*) nrow
-            FROM `{p}.{ds}.{t}_*`
-            WHERE _TABLE_SUFFIX BETWEEN "{start}" AND "{end}"
+            FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_*`
+            WHERE _TABLE_SUFFIX BETWEEN "{dates_list[0]}" AND "{dates_list[1]}"
             GROUP BY 1
             ORDER BY 1
-        """.format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type, start=dates_list[0],
-                   end=dates_list[1])
+        """
 
         dataframe_sharded = (
             client.query(query_string_sharded)

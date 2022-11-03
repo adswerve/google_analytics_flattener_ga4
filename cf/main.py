@@ -223,6 +223,7 @@ class GaExportedNestedDataStorage(object):
         return qry
 
     def get_user_properties_query(self):
+        #TODO: triple quotes
 
         qry = f"SELECT " \
                 f'PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, ' \
