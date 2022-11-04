@@ -48,11 +48,10 @@ for db in range(0, num_days_in_backfill_range):
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
                 , "projectId": project_id
-                , "tableId": "events_%s" % date_shard
+                , "tableId": f"events_{date_shard}"
             }}}}}}}}
 
-        logging.info('Publishing backfill message to topic %s for %s.%s.events_%s' % (
-            topic_id, project_id, dataset_id, date_shard))
+        logging.info(f'Publishing backfill message to topic {topic_id} for {project_id}.{dataset_id}.events_{date_shard}')
         if not dry_run:
             publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
                               , username='gcp')

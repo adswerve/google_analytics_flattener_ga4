@@ -9,7 +9,9 @@ import logging
 from datetime import datetime
 from http import HTTPStatus
 
-
+#TODO: triple quotes
+#TODO: f-strings instead of "%s"
+#TODO: consistent use of f' vs f" in f-strings
 class InputValidator(object):
     def __init__(self, event):
         try:
@@ -223,7 +225,6 @@ class GaExportedNestedDataStorage(object):
         return qry
 
     def get_user_properties_query(self):
-        #TODO: triple quotes
 
         qry = f"SELECT " \
                 f'PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, ' \

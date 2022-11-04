@@ -32,6 +32,6 @@ for table in tables:
         logging.info(table.full_table_id)
 if delete:
     for table_id in tables_to_delete:
-        table_path = "%s.%s.%s" % (my_project_id, my_dataset_id, table_id)
+        table_path = f"{my_project_id}.{my_dataset_id}.{table_id}"
         client.delete_table(table_path)
-        logging.info("deleted table %s" % (table_path))
+        logging.info(f"deleted table {table_path}")

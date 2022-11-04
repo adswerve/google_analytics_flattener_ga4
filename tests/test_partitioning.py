@@ -103,7 +103,7 @@ class TestPartitioning(BaseUnitTest):
 
         client = bigquery.Client(project=self.ga_source.gcp_project)
 
-        table_path = "%s.%s.%s" % (self.ga_source.gcp_project, self.ga_source.dataset, table_type)
+        table_path = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}"
 
         try:
             client.delete_table(table_path)

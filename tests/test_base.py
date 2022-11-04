@@ -85,9 +85,9 @@ class BaseUnitTest(unittest.TestCase):
                 tables_to_delete.append(table.table_id)
                 logging.info(table.full_table_id)
         for table_id in tables_to_delete:
-            table_path = "%s.%s.%s" % (my_project_id, my_dataset_id, table_id)
+            table_path = f"{my_project_id}.{my_dataset_id}.{table_id}"
             client.delete_table(table_path)
-            logging.info("deleted table %s" % (table_path))
+            logging.info(f"deleted table {table_path}")
 
     def restore_default_config(self):
         # generate config and upload it to GCS

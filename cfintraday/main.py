@@ -178,7 +178,7 @@ def manage_intraday_schedule(event, context="context"):
                     "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                         "datasetId": input_event.dataset
                         , "projectId": input_event.gcp_project
-                        , "tableId": "events_intraday_%s" % input_event.table_date_shard
+                        , "tableId": f"events_intraday_{input_event.table_date_shard}"
                     }}}}}}}}
 
                 topic_name = os.environ["TOPIC_NAME"]

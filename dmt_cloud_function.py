@@ -40,20 +40,17 @@ def generate_config(ctx):
   content = base64.b64encode(in_memory_output_file.getvalue())
   m = hashlib.md5()
   m.update(content)
-  source_archive_url = 'gs://%s/%s' % (ctx.properties['codeBucket'],
-                                       m.hexdigest() + '.zip')
+  source_archive_url = f'gs://{ctx.properties["codeBucket"]}/{m.hexdigest()}.zip'
 
   chunk_length = 3500
   content_chunks = [content[ii:ii + chunk_length] for ii in range(0, len(content), chunk_length)]
   # use `>` first in case the file exists
-  cmds = ["echo '%s' | base64 -d > /function/function.zip;" % (content_chunks[0].decode('ascii'))]
+  cmds = [f"echo '{content_chunks[0].decode('ascii')}' | base64 -d > /function/function.zip;"]
   # then use `>>` to append
   cmds += [
-      "echo '%s' | base64 -d >> /function/function.zip;" % (chunk.decode('ascii'))
+      f"echo '{chunk.decode('ascii')}' | base64 -d >> /function/function.zip;"
       for chunk in content_chunks[1:]
   ]
-
-  #cmd = "echo '%s' | base64 -d > /function/function.zip;" % (content.decode('ascii'))
 
   volumes = [{'name': 'function-code', 'path': '/function'}]
 
