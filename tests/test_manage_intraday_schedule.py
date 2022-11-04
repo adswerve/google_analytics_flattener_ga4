@@ -199,6 +199,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
         self.assertEqual('*/30 * * * *', response_get_job.schedule)
         # I refactored %s to be an f-string. In case with a stringified dictionary, f-strings actully became less readable and maintainable
         # While using a dict with an f-string, we need to duplicate { for this to appear in the string, we also have to escape the quotes
+        # https://realpython.com/python-f-strings/#python-f-strings-the-pesky-details
         # For now, I decided to keep both % and f-string
         expected_percent_string = 'b\'{"protoPayload": {"serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {"datasetId": "%s", "projectId": "%s", "tableId": "events_intraday_%s"}}}}}}}}\'' % (self.dataset_id, self.project_id, self.date_shard)
         expected_f_string = f"b\'{{\"protoPayload\": {{\"serviceData\": {{\"jobCompletedEvent\": {{\"job\": {{\"jobConfiguration\": {{\"load\": {{\"destinationTable\": {{\"datasetId\": \"{self.dataset_id}\", \"projectId\": \"{self.project_id}\", \"tableId\": \"events_intraday_{self.date_shard}\"}}}}}}}}}}}}}}}}\'"

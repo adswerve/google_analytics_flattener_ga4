@@ -10,8 +10,10 @@ from datetime import datetime
 from http import HTTPStatus
 
 #TODO: triple quotes
+#TODO: use list comprehension in 2 dynamic queries?
 #TODO: f-strings instead of "%s"
 #TODO: consistent use of f' vs f" in f-strings
+#TODO: instead of concatenating IFNULLs, use COALESCE function
 class InputValidator(object):
     def __init__(self, event):
         try:
@@ -213,27 +215,30 @@ class GaExportedNestedDataStorage(object):
         return f'CONCAT({unique_event_id_fields[0]}, "_", {unique_event_id_fields[1]}, "_", {unique_event_id_fields[2]}, "_", {unique_event_id_fields[3]}) as event_id'
 
     def get_event_params_query(self):
-        #TODO: instead of concatenating IFNULLs, use COALESCE function
-        qry = f"SELECT " \
-              f'PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, ' \
-              f"{self.get_unique_event_id(self.unique_event_id_fields)}" \
-              f',{self.event_params_fields[0]} as {self.event_params_fields[0].replace(".", "_")}' \
-              f",CONCAT(IFNULL({self.event_params_fields[1]}, ''), IFNULL(CAST({self.event_params_fields[2]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[3]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[4]} AS STRING), '')) AS event_params_value" \
-              f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`" \
-              f",UNNEST (event_params) AS event_params"
+        qry = f"""
+              SELECT 
+                  PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, 
+                  {self.get_unique_event_id(self.unique_event_id_fields)},
+                  {self.event_params_fields[0]} as {self.event_params_fields[0].replace(".", "_")},
+                  CONCAT(IFNULL({self.event_params_fields[1]}, ''), IFNULL(CAST({self.event_params_fields[2]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[3]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[4]} AS STRING), '')) AS event_params_value
+              FROM 
+                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+              ,UNNEST (event_params) AS event_params"""
 
         return qry
 
     def get_user_properties_query(self):
 
-        qry = f"SELECT " \
-                f'PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, ' \
-            f"{self.get_unique_event_id(self.unique_event_id_fields)}" \
-            f',{self.user_properties_fields[0]} as {self.user_properties_fields[0].replace(".", "_")}' \
-            f",CONCAT(IFNULL({self.user_properties_fields[1]}, ''), IFNULL(CAST({self.user_properties_fields[2]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[3]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[4]} AS STRING), '')) AS user_properties_value" \
-            f',{self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}' \
-            f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`" \
-            f",UNNEST (user_properties) AS user_properties"
+        qry = f"""
+            SELECT
+                PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name},
+                {self.get_unique_event_id(self.unique_event_id_fields)},
+                {self.user_properties_fields[0]} as {self.user_properties_fields[0].replace(".", "_")},
+                CONCAT(IFNULL({self.user_properties_fields[1]}, ''), IFNULL(CAST({self.user_properties_fields[2]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[3]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[4]} AS STRING), '')) AS user_properties_value,
+                {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}
+            FROM 
+                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+            ,UNNEST (user_properties) AS user_properties"""
 
         return qry
 
