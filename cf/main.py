@@ -9,10 +9,8 @@ import logging
 from datetime import datetime
 from http import HTTPStatus
 
-#TODO: triple quotes
-#TODO: use list comprehension in 2 dynamic queries?
-#TODO: f-strings instead of "%s"
 #TODO: consistent use of f' vs f" in f-strings
+#TODO: should we use list comprehension in 2 dynamic queries?
 #TODO: instead of concatenating IFNULLs, use COALESCE function
 class InputValidator(object):
     def __init__(self, event):
@@ -243,23 +241,22 @@ class GaExportedNestedDataStorage(object):
         return qry
 
     def get_items_query(self):
-        qry = f"SELECT " \
-        f'PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, ' \
-        f"{self.get_unique_event_id(self.unique_event_id_fields)}"
-
+        qry = f"""SELECT 
+        PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name},
+        {self.get_unique_event_id(self.unique_event_id_fields)}"""
+        
         for field in self.items_fields:
             qry += f',{field} as {field.replace(".", "_")}'
 
-        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
-
-        qry += ",UNNEST (items) AS items"
+        qry += f"""FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+        ,UNNEST (items) AS items"""
 
         return qry
 
     def get_events_query(self):
-        qry = f"SELECT " \
-                f'PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, ' \
-                f"{self.get_unique_event_id(self.unique_event_id_fields)}"
+        qry = f"""SELECT
+                PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name},
+                {self.get_unique_event_id(self.unique_event_id_fields)}"""
         for field in self.events_fields:
             qry += f',{field} as {field.replace(".", "_")}'
 
