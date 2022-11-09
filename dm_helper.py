@@ -119,9 +119,9 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             Sink name can be up to 100 chars long.
         '''
         if intraday:
-            return f'{self._create_valid_gcp_resource_name(self.deployment)}-sink-intraday'
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-sink-intraday"
         else:
-            return f'{self._create_valid_gcp_resource_name(self.deployment)}-sink'
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-sink"
 
     def get_topic_id(self, intraday=False):
         '''
@@ -132,9 +132,9 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             Pub/Sub topic id can be up to 255 chars long.
         '''
         if intraday:
-            return f'{self._create_valid_gcp_resource_name(self.deployment)}-topic-intraday'
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-topic-intraday"
         else:
-            return f'{self._create_valid_gcp_resource_name(self.deployment)}-topic'
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-topic"
 
     def get_cf_name(self, code_location):
         """
@@ -169,7 +169,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
 
         deployment = self._create_valid_gcp_resource_name(self.deployment)[:trunc_deployment_name_length]
 
-        return f'{deployment}-{number}-{suffix}'
+        return f"{deployment}-{number}-{suffix}"
 
     def _create_valid_gcp_resource_name(self, p_field):
         '''

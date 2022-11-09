@@ -9,7 +9,6 @@ import logging
 from datetime import datetime
 from http import HTTPStatus
 
-#TODO: consistent use of f' vs f" in f-strings
 #TODO: should we use list comprehension in 2 dynamic queries?
 #TODO: instead of concatenating IFNULLs, use COALESCE function
 class InputValidator(object):
@@ -26,7 +25,7 @@ class InputValidator(object):
             self.table_date_shard = re.search(r'_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
             self.table_name = re.search(r'(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
         except AttributeError:
-            logging.critical(f'invalid message: {message_payload}')
+            logging.critical(f"invalid message: {message_payload}")
         try:
             storage_client = storage.Client(project=self.gcp_project)
             bucket = storage_client.bucket(os.environ["CONFIG_BUCKET_NAME"])
@@ -36,7 +35,7 @@ class InputValidator(object):
             with open(downloaded_file, "r") as config_json:
                 self.config = json.load(config_json)
         except Exception as e:
-            logging.critical(f'flattener configuration error: {e}')
+            logging.critical(f"flattener configuration error: {e}")
 
     def valid_dataset(self):
         return self.dataset in self.config.keys()
@@ -210,12 +209,12 @@ class GaExportedNestedDataStorage(object):
         """
         build unique event id
         """
-        return f'CONCAT({unique_event_id_fields[0]}, "_", {unique_event_id_fields[1]}, "_", {unique_event_id_fields[2]}, "_", {unique_event_id_fields[3]}) as event_id'
+        return f"CONCAT({unique_event_id_fields[0]}, '_', {unique_event_id_fields[1]}, '_', {unique_event_id_fields[2]}, '_', {unique_event_id_fields[3]}) as event_id"
 
     def get_event_params_query(self):
         qry = f"""
               SELECT 
-                  PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name}, 
+                  PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name}, 
                   {self.get_unique_event_id(self.unique_event_id_fields)},
                   {self.event_params_fields[0]} as {self.event_params_fields[0].replace(".", "_")},
                   CONCAT(IFNULL({self.event_params_fields[1]}, ''), IFNULL(CAST({self.event_params_fields[2]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[3]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[4]} AS STRING), '')) AS event_params_value
@@ -229,7 +228,7 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
-                PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name},
+                PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name},
                 {self.get_unique_event_id(self.unique_event_id_fields)},
                 {self.user_properties_fields[0]} as {self.user_properties_fields[0].replace(".", "_")},
                 CONCAT(IFNULL({self.user_properties_fields[1]}, ''), IFNULL(CAST({self.user_properties_fields[2]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[3]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[4]} AS STRING), '')) AS user_properties_value,
@@ -242,11 +241,11 @@ class GaExportedNestedDataStorage(object):
 
     def get_items_query(self):
         qry = f"""SELECT 
-        PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name},
+        PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name},
         {self.get_unique_event_id(self.unique_event_id_fields)}"""
         
         for field in self.items_fields:
-            qry += f',{field} as {field.replace(".", "_")}'
+            qry += f",{field} as {field.replace('.', '_')}"
 
         qry += f"""FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
         ,UNNEST (items) AS items"""
@@ -255,10 +254,10 @@ class GaExportedNestedDataStorage(object):
 
     def get_events_query(self):
         qry = f"""SELECT
-                PARSE_DATE("%Y%m%d", {self.date_field_name}) AS {self.date_field_name},
+                PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name},
                 {self.get_unique_event_id(self.unique_event_id_fields)}"""
         for field in self.events_fields:
-            qry += f',{field} as {field.replace(".", "_")}'
+            qry += f",{field} as {field.replace('.', '_')}"
 
         qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
 
@@ -319,7 +318,7 @@ class GaExportedNestedDataStorage(object):
                 datetime_string = str(self.date)
                 date_string = re.search(r'20\d\d\-\d\d\-\d\d', datetime_string).group(0)
 
-                query_delete = f'DELETE FROM `{self.gcp_project}.{self.dataset}.{table_type}` WHERE event_date = "{date_string}";'
+                query_delete = f"DELETE FROM `{self.gcp_project}.{self.dataset}.{table_type}` WHERE event_date = '{date_string}';"
 
                 query_job_delete_config = bigquery.QueryJobConfig(
                     labels={"queryfunction": "flattenerpartitiondeletionquery"}  # todo: apply proper labels
@@ -386,38 +385,38 @@ def flatten_ga_data(event, context):
             ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset}')
+            logging.info(f"Ran {os.environ['EVENT_PARAMS']} flattening query for {input_event.dataset}")
         else:
             logging.info(
-                f'{os.environ["EVENT_PARAMS"]} flattening query for {input_event.dataset} not configured to run')
+                f"{os.environ['EVENT_PARAMS']} flattening query for {input_event.dataset} not configured to run")
 
         # USER_PROPERTIES
         if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
             ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset}')
+            logging.info(f"Ran {os.environ['USER_PROPERTIES']} flattening query for {input_event.dataset}")
         else:
             logging.info(
-                f'{os.environ["USER_PROPERTIES"]} flattening query for {input_event.dataset} not configured to run')
+                f"{os.environ['USER_PROPERTIES']} flattening query for {input_event.dataset} not configured to run")
 
         # ITEMS
         if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
             ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["ITEMS"]} flattening query for {input_event.dataset}')
+            logging.info(f"Ran {os.environ['ITEMS']} flattening query for {input_event.dataset}")
         else:
-            logging.info(f'{os.environ["ITEMS"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(f"{os.environ['ITEMS']} flattening query for {input_event.dataset} not configured to run")
 
         # EVENTS
         if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
             ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events",
                                     sharded_output_required=output_config_sharded,
                                     partitioned_output_required=output_config_partitioned)
-            logging.info(f'Ran {os.environ["EVENTS"]} flattening query for {input_event.dataset}')
+            logging.info(f"Ran {os.environ['EVENTS']} flattening query for {input_event.dataset}")
         else:
-            logging.info(f'{os.environ["EVENTS"]} flattening query for {input_event.dataset} not configured to run')
+            logging.info(f"{os.environ['EVENTS']} flattening query for {input_event.dataset} not configured to run")
 
     else:
-        logging.warning(f'Dataset {input_event.dataset} not configured for flattening')
+        logging.warning(f"Dataset {input_event.dataset} not configured for flattening")

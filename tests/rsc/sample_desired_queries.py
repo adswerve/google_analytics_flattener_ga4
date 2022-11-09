@@ -12,8 +12,8 @@
 
 sample_events_query = """
 SELECT 
-    PARSE_DATE("%%Y%%m%%d", event_date) AS event_date,
-    CONCAT(stream_id, "_" , user_pseudo_id, "_" ,  event_name,  "_" , event_timestamp) AS event_id,
+    PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
+    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
     
     event_timestamp AS event_timestamp,
     event_name AS event_name,
@@ -88,8 +88,8 @@ SELECT
 
 sample_event_params_query = """
 SELECT 
-    PARSE_DATE("%%Y%%m%%d", event_date) AS event_date,
-    CONCAT(stream_id, "_" , user_pseudo_id, "_" ,  event_name,  "_" , event_timestamp) AS event_id,
+    PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
+    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
     event_params.key as event_params_key,
     CONCAT(IFNULL(event_params.value.string_value, ''), 
             IFNULL(CAST(event_params.value.int_value AS STRING), ''), 
@@ -103,8 +103,8 @@ FROM `gcp-project.dataset.events_date_shard`
 
 sample_user_properties_query = """
 SELECT 
-    PARSE_DATE("%%Y%%m%%d", event_date) AS event_date,
-    CONCAT(stream_id, "_" , user_pseudo_id, "_" ,  event_name,  "_" , event_timestamp) AS event_id,
+    PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
+    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
     user_properties.key	AS user_properties_key	,
     CONCAT(IFNULL(user_properties.value.string_value, ''), 
             IFNULL(CAST(user_properties.value.int_value AS STRING), ''), 
@@ -119,8 +119,8 @@ SELECT
 sample_items_query = """
 SELECT 
     
-    PARSE_DATE("%%Y%%m%%d", event_date) AS event_date,
-    CONCAT(stream_id, "_" , user_pseudo_id, "_" ,  event_name,  "_" , event_timestamp) AS event_id,
+    PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
+    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
     
     items.item_id AS items_item_id,
     items.item_name AS items_item_name,

@@ -40,7 +40,7 @@ def generate_config(ctx):
   content = base64.b64encode(in_memory_output_file.getvalue())
   m = hashlib.md5()
   m.update(content)
-  source_archive_url = f'gs://{ctx.properties["codeBucket"]}/{m.hexdigest()}.zip'
+  source_archive_url = f"gs://{ctx.properties['codeBucket']}/{m.hexdigest()}.zip"
 
   chunk_length = 3500
   content_chunks = [content[ii:ii + chunk_length] for ii in range(0, len(content), chunk_length)]
@@ -62,7 +62,7 @@ def generate_config(ctx):
       } for cmd in cmds
   ]
   build_step = {
-      'name': f'upload-{function_name}-code',
+      'name': f"upload-{function_name}-code",
       'action': 'gcp-types/cloudbuild-v1:cloudbuild.projects.builds.create',
       'metadata': {
           'runtimePolicy': ['UPDATE_ON_CHANGE']
@@ -108,7 +108,7 @@ def generate_config(ctx):
               ctx.properties['runtime']
       },
       'metadata': {
-          'dependsOn': [f'upload-{function_name}-code']
+          'dependsOn': [f"upload-{function_name}-code"]
       }
   }
 
@@ -117,15 +117,15 @@ def generate_config(ctx):
   elif ctx.properties['triggerType'] == 'pubsub':
       if ctx.properties['codeLocation'] == "cfintraday/":
           cloud_function['properties']['eventTrigger'] = {
-              'resource': f'projects/{config.get_project()}/topics/{config.get_topic_id(intraday=True)}{"config" if function_name.__contains__("config") else ""}',
+              'resource': f"projects/{config.get_project()}/topics/{config.get_topic_id(intraday=True)}{'config' if function_name.__contains__('config') else ''}",
               'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
       else:
           cloud_function['properties']['eventTrigger'] = {
-                  'resource': f'projects/{config.get_project()}/topics/{config.get_topic_id()}{"config" if function_name.__contains__("config") else ""}',
+                  'resource': f"projects/{config.get_project()}/topics/{config.get_topic_id()}{'config' if function_name.__contains__('config') else ''}",
                   'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
   elif ctx.properties['triggerType'] == 'gcs':
       cloud_function['properties']['eventTrigger'] = {
-          'resource': f'projects/{config.get_project()}/buckets/{config.get_bucket_name()}',
+          'resource': f"projects/{config.get_project()}/buckets/{config.get_bucket_name()}",
           'eventType': 'google.storage.object.finalize'}
 
 
