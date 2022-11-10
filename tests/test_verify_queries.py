@@ -25,7 +25,7 @@ class TestGenerateQuery(BaseUnitTest):
 
         return query_cleaned_up
 
-    def test_check_sql_queries(self):
+    def test_check_sql_queries_evens(self):
         """Compares dynamically generated queries to hardcoded expected baseline examples"""
         c = Context()
         ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],

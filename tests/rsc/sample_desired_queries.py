@@ -90,12 +90,12 @@ sample_event_params_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
     CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
-    event_params.key as event_params_key,
-    CONCAT(IFNULL(event_params.value.string_value, ''), 
-            IFNULL(CAST(event_params.value.int_value AS STRING), ''), 
-            IFNULL(CAST(event_params.value.float_value AS STRING), ''), 
-            IFNULL(CAST(event_params.value.double_value AS STRING), '')
-            ) AS event_params_value
+    event_params.key as event_params_key,     
+    COALESCE(event_params.value.string_value,
+        CAST(event_params.value.int_value AS STRING),
+        CAST(event_params.value.float_value AS STRING),
+        CAST(event_params.value.double_value AS STRING) 
+    ) AS event_params_value                        
 FROM `gcp-project.dataset.events_date_shard` 
 ,UNNEST (event_params) AS event_params
 """
@@ -105,12 +105,13 @@ sample_user_properties_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
     CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
-    user_properties.key	AS user_properties_key	,
-    CONCAT(IFNULL(user_properties.value.string_value, ''), 
-            IFNULL(CAST(user_properties.value.int_value AS STRING), ''), 
-            IFNULL(CAST(user_properties.value.float_value AS STRING), ''), 
-            IFNULL(CAST(user_properties.value.double_value AS STRING), '')
-            ) AS user_properties_value,
+    user_properties.key	AS user_properties_key,            
+    COALESCE(user_properties.value.string_value,
+        CAST(user_properties.value.int_value AS STRING),
+        CAST(user_properties.value.float_value AS STRING),
+        CAST(user_properties.value.double_value AS STRING) 
+    ) AS user_properties_value,
+                
     user_properties.value.set_timestamp_micros AS user_properties_value_set_timestamp_micros
  FROM `gcp-project.dataset.events_date_shard` 
   ,UNNEST (user_properties) AS user_properties

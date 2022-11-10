@@ -217,7 +217,11 @@ class GaExportedNestedDataStorage(object):
                   PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name}, 
                   {self.get_unique_event_id(self.unique_event_id_fields)},
                   {self.event_params_fields[0]} as {self.event_params_fields[0].replace(".", "_")},
-                  CONCAT(IFNULL({self.event_params_fields[1]}, ''), IFNULL(CAST({self.event_params_fields[2]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[3]} AS STRING), ''), IFNULL(CAST({self.event_params_fields[4]} AS STRING), '')) AS event_params_value
+                  COALESCE({self.event_params_fields[1]}, 
+                      CAST({self.event_params_fields[2]} AS STRING), 
+                      CAST({self.event_params_fields[3]} AS STRING), 
+                      CAST({self.event_params_fields[4]} AS STRING)
+                  ) AS event_params_value
               FROM 
                 `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
               ,UNNEST (event_params) AS event_params"""
@@ -231,7 +235,11 @@ class GaExportedNestedDataStorage(object):
                 PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name},
                 {self.get_unique_event_id(self.unique_event_id_fields)},
                 {self.user_properties_fields[0]} as {self.user_properties_fields[0].replace(".", "_")},
-                CONCAT(IFNULL({self.user_properties_fields[1]}, ''), IFNULL(CAST({self.user_properties_fields[2]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[3]} AS STRING), ''), IFNULL(CAST({self.user_properties_fields[4]} AS STRING), '')) AS user_properties_value,
+                COALESCE({self.user_properties_fields[1]}, 
+                    CAST({self.user_properties_fields[2]} AS STRING), 
+                    CAST({self.user_properties_fields[3]} AS STRING), 
+                    CAST({self.user_properties_fields[4]} AS STRING)
+                ) AS user_properties_value,
                 {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}
             FROM 
                 `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
