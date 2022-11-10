@@ -5,7 +5,6 @@ This will trigger your intraday Cloud Function which will create or delete a Clo
 """
 from google.cloud import pubsub_v1
 import json
-import datetime, time
 from tests.test_base import Context
 import logging
 
@@ -31,6 +30,494 @@ dry_run = False  # set to False to Backfill.  Setting to True will not pubish an
 '''  Configuration Section End  '''
 '''*****************************'''
 
+json_schema_dict = {"fields": [{
+      "name": "event_date",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  }, {
+      "name": "event_timestamp",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }, {
+      "name": "event_name",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  }, {
+      "name": "event_params",
+    "type": "RECORD",
+    "mode": "REPEATED",
+    "schema": {
+        "fields": [{
+          "name": "key",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "value",
+        "type": "RECORD",
+        "mode": "NULLABLE",
+        "schema": {
+            "fields": [{
+              "name": "string_value",
+            "type": "STRING",
+            "mode": "NULLABLE"
+          }, {
+              "name": "int_value",
+            "type": "INTEGER",
+            "mode": "NULLABLE"
+          }, {
+              "name": "float_value",
+            "type": "FLOAT",
+            "mode": "NULLABLE"
+          }, {
+              "name": "double_value",
+            "type": "FLOAT",
+            "mode": "NULLABLE"
+          }]
+        }
+      }]
+    }
+  }, {
+      "name": "event_previous_timestamp",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }, {
+      "name": "event_value_in_usd",
+    "type": "FLOAT",
+    "mode": "NULLABLE"
+  }, {
+      "name": "event_bundle_sequence_id",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }, {
+      "name": "event_server_timestamp_offset",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }, {
+      "name": "user_id",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  }, {
+      "name": "user_pseudo_id",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  }, {
+      "name": "privacy_info",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "analytics_storage",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "ads_storage",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "uses_transient_token",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }, {
+      "name": "user_properties",
+    "type": "RECORD",
+    "mode": "REPEATED",
+    "schema": {
+        "fields": [{
+          "name": "key",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "value",
+        "type": "RECORD",
+        "mode": "NULLABLE",
+        "schema": {
+            "fields": [{
+              "name": "string_value",
+            "type": "STRING",
+            "mode": "NULLABLE"
+          }, {
+              "name": "int_value",
+            "type": "INTEGER",
+            "mode": "NULLABLE"
+          }, {
+              "name": "float_value",
+            "type": "FLOAT",
+            "mode": "NULLABLE"
+          }, {
+              "name": "double_value",
+            "type": "FLOAT",
+            "mode": "NULLABLE"
+          }, {
+              "name": "set_timestamp_micros",
+            "type": "INTEGER",
+            "mode": "NULLABLE"
+          }]
+        }
+      }]
+    }
+  }, {
+      "name": "user_first_touch_timestamp",
+    "type": "INTEGER",
+    "mode": "NULLABLE"
+  }, {
+      "name": "user_ltv",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "revenue",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "currency",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }, {
+      "name": "device",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "category",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "mobile_brand_name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "mobile_model_name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "mobile_marketing_name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "mobile_os_hardware_model",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "operating_system",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "operating_system_version",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "vendor_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "advertising_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "language",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "is_limited_ad_tracking",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "time_zone_offset_seconds",
+        "type": "INTEGER",
+        "mode": "NULLABLE"
+      }, {
+          "name": "browser",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "browser_version",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "web_info",
+        "type": "RECORD",
+        "mode": "NULLABLE",
+        "schema": {
+            "fields": [{
+              "name": "browser",
+            "type": "STRING",
+            "mode": "NULLABLE"
+          }, {
+              "name": "browser_version",
+            "type": "STRING",
+            "mode": "NULLABLE"
+          }, {
+              "name": "hostname",
+            "type": "STRING",
+            "mode": "NULLABLE"
+          }]
+        }
+      }]
+    }
+  }, {
+      "name": "geo",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "continent",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "country",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "region",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "city",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "sub_continent",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "metro",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }, {
+      "name": "app_info",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "version",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "install_store",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "firebase_app_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "install_source",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }, {
+      "name": "traffic_source",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "medium",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "source",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }, {
+      "name": "stream_id",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  }, {
+      "name": "platform",
+    "type": "STRING",
+    "mode": "NULLABLE"
+  }, {
+      "name": "event_dimensions",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "hostname",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }, {
+      "name": "ecommerce",
+    "type": "RECORD",
+    "mode": "NULLABLE",
+    "schema": {
+        "fields": [{
+          "name": "total_item_quantity",
+        "type": "INTEGER",
+        "mode": "NULLABLE"
+      }, {
+          "name": "purchase_revenue_in_usd",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "purchase_revenue",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "refund_value_in_usd",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "refund_value",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "shipping_value_in_usd",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "shipping_value",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "tax_value_in_usd",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "tax_value",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "unique_items",
+        "type": "INTEGER",
+        "mode": "NULLABLE"
+      }, {
+          "name": "transaction_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }, {
+      "name": "items",
+    "type": "RECORD",
+    "mode": "REPEATED",
+    "schema": {
+        "fields": [{
+          "name": "item_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_brand",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_variant",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_category",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_category2",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_category3",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_category4",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_category5",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "price_in_usd",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "price",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "quantity",
+        "type": "INTEGER",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_revenue_in_usd",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_revenue",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_refund_in_usd",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_refund",
+        "type": "FLOAT",
+        "mode": "NULLABLE"
+      }, {
+          "name": "coupon",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "affiliation",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "location_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_list_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_list_name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "item_list_index",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "promotion_id",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "promotion_name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "creative_name",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }, {
+          "name": "creative_slot",
+        "type": "STRING",
+        "mode": "NULLABLE"
+      }]
+    }
+  }]
+}
 
 SAMPLE_LOG_INTRADAY_TABLE_CREATED = {
     "protoPayload": {
@@ -65,7 +552,7 @@ SAMPLE_LOG_INTRADAY_TABLE_CREATED = {
                     },
                     "info": {},
                     "view": {},
-                    "schemaJson": "{\n  \"fields\": [{\n    \"name\": \"event_date\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_timestamp\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_name\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_params\",\n    \"type\": \"RECORD\",\n    \"mode\": \"REPEATED\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"key\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"value\",\n        \"type\": \"RECORD\",\n        \"mode\": \"NULLABLE\",\n        \"schema\": {\n          \"fields\": [{\n            \"name\": \"string_value\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"int_value\",\n            \"type\": \"INTEGER\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"float_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"double_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }]\n        }\n      }]\n    }\n  }, {\n    \"name\": \"event_previous_timestamp\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_value_in_usd\",\n    \"type\": \"FLOAT\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_bundle_sequence_id\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_server_timestamp_offset\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"user_id\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"user_pseudo_id\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"privacy_info\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"analytics_storage\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"ads_storage\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"uses_transient_token\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"user_properties\",\n    \"type\": \"RECORD\",\n    \"mode\": \"REPEATED\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"key\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"value\",\n        \"type\": \"RECORD\",\n        \"mode\": \"NULLABLE\",\n        \"schema\": {\n          \"fields\": [{\n            \"name\": \"string_value\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"int_value\",\n            \"type\": \"INTEGER\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"float_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"double_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"set_timestamp_micros\",\n            \"type\": \"INTEGER\",\n            \"mode\": \"NULLABLE\"\n          }]\n        }\n      }]\n    }\n  }, {\n    \"name\": \"user_first_touch_timestamp\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"user_ltv\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"revenue\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"currency\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"device\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"category\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_brand_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_model_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_marketing_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_os_hardware_model\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"operating_system\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"operating_system_version\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"vendor_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"advertising_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"language\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"is_limited_ad_tracking\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"time_zone_offset_seconds\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"browser\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"browser_version\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"web_info\",\n        \"type\": \"RECORD\",\n        \"mode\": \"NULLABLE\",\n        \"schema\": {\n          \"fields\": [{\n            \"name\": \"browser\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"browser_version\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"hostname\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }]\n        }\n      }]\n    }\n  }, {\n    \"name\": \"geo\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"continent\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"country\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"region\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"city\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"sub_continent\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"metro\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"app_info\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"version\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"install_store\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"firebase_app_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"install_source\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"traffic_source\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"medium\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"source\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"stream_id\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"platform\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_dimensions\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"hostname\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"ecommerce\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"total_item_quantity\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"purchase_revenue_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"purchase_revenue\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"refund_value_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"refund_value\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"shipping_value_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"shipping_value\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"tax_value_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"tax_value\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"unique_items\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"transaction_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"items\",\n    \"type\": \"RECORD\",\n    \"mode\": \"REPEATED\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"item_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_brand\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_variant\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category2\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category3\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category4\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category5\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"price_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"price\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"quantity\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_revenue_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_revenue\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_refund_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_refund\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"coupon\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"affiliation\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"location_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_list_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_list_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_list_index\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"promotion_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"promotion_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"creative_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"creative_slot\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }]\n}"
+                    "schemaJson": json.dumps(json_schema_dict),
                 }
             },
             "tableInsertResponse": {
@@ -78,7 +565,7 @@ SAMPLE_LOG_INTRADAY_TABLE_CREATED = {
                     "info": {},
                     "view": {},
                     "createTime": "2021-10-11T07:00:17.787Z",
-                    "schemaJson": "{\n  \"fields\": [{\n    \"name\": \"event_date\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_timestamp\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_name\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_params\",\n    \"type\": \"RECORD\",\n    \"mode\": \"REPEATED\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"key\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"value\",\n        \"type\": \"RECORD\",\n        \"mode\": \"NULLABLE\",\n        \"schema\": {\n          \"fields\": [{\n            \"name\": \"string_value\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"int_value\",\n            \"type\": \"INTEGER\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"float_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"double_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }]\n        }\n      }]\n    }\n  }, {\n    \"name\": \"event_previous_timestamp\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_value_in_usd\",\n    \"type\": \"FLOAT\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_bundle_sequence_id\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_server_timestamp_offset\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"user_id\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"user_pseudo_id\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"privacy_info\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"analytics_storage\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"ads_storage\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"uses_transient_token\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"user_properties\",\n    \"type\": \"RECORD\",\n    \"mode\": \"REPEATED\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"key\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"value\",\n        \"type\": \"RECORD\",\n        \"mode\": \"NULLABLE\",\n        \"schema\": {\n          \"fields\": [{\n            \"name\": \"string_value\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"int_value\",\n            \"type\": \"INTEGER\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"float_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"double_value\",\n            \"type\": \"FLOAT\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"set_timestamp_micros\",\n            \"type\": \"INTEGER\",\n            \"mode\": \"NULLABLE\"\n          }]\n        }\n      }]\n    }\n  }, {\n    \"name\": \"user_first_touch_timestamp\",\n    \"type\": \"INTEGER\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"user_ltv\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"revenue\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"currency\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"device\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"category\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_brand_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_model_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_marketing_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"mobile_os_hardware_model\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"operating_system\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"operating_system_version\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"vendor_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"advertising_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"language\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"is_limited_ad_tracking\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"time_zone_offset_seconds\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"browser\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"browser_version\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"web_info\",\n        \"type\": \"RECORD\",\n        \"mode\": \"NULLABLE\",\n        \"schema\": {\n          \"fields\": [{\n            \"name\": \"browser\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"browser_version\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }, {\n            \"name\": \"hostname\",\n            \"type\": \"STRING\",\n            \"mode\": \"NULLABLE\"\n          }]\n        }\n      }]\n    }\n  }, {\n    \"name\": \"geo\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"continent\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"country\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"region\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"city\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"sub_continent\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"metro\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"app_info\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"version\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"install_store\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"firebase_app_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"install_source\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"traffic_source\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"medium\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"source\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"stream_id\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"platform\",\n    \"type\": \"STRING\",\n    \"mode\": \"NULLABLE\"\n  }, {\n    \"name\": \"event_dimensions\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"hostname\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"ecommerce\",\n    \"type\": \"RECORD\",\n    \"mode\": \"NULLABLE\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"total_item_quantity\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"purchase_revenue_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"purchase_revenue\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"refund_value_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"refund_value\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"shipping_value_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"shipping_value\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"tax_value_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"tax_value\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"unique_items\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"transaction_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }, {\n    \"name\": \"items\",\n    \"type\": \"RECORD\",\n    \"mode\": \"REPEATED\",\n    \"schema\": {\n      \"fields\": [{\n        \"name\": \"item_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_brand\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_variant\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category2\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category3\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category4\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_category5\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"price_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"price\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"quantity\",\n        \"type\": \"INTEGER\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_revenue_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_revenue\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_refund_in_usd\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_refund\",\n        \"type\": \"FLOAT\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"coupon\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"affiliation\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"location_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_list_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_list_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"item_list_index\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"promotion_id\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"promotion_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"creative_name\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }, {\n        \"name\": \"creative_slot\",\n        \"type\": \"STRING\",\n        \"mode\": \"NULLABLE\"\n      }]\n    }\n  }]\n}",
+                    "schemaJson":  json.dumps(json_schema_dict),
                     "updateTime": "2021-10-11T07:00:17.844Z"
                 }
             }
