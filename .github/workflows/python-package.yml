@@ -63,10 +63,10 @@ jobs:
           
           # install 
           gcloud deployment-manager deployments create "$DEPLOYMENT_NAME" --config ga_flattener.yaml
-#      - name: Test with pytest
-#        run: |
-#          # test
-#          pytest --verbose
+      - name: Test with pytest
+        run: |          
+          # test   
+          pytest --verbose
       - name: Clean up
         run: |
           # clean up
