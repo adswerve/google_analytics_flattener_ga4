@@ -9,8 +9,6 @@ import logging
 from datetime import datetime
 from http import HTTPStatus
 
-#TODO: should we use list comprehension in 2 dynamic queries?
-#TODO: instead of concatenating IFNULLs, use COALESCE function
 class InputValidator(object):
     def __init__(self, event):
         try:
@@ -251,7 +249,7 @@ class GaExportedNestedDataStorage(object):
         qry = f"""SELECT 
         PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name},
         {self.get_unique_event_id(self.unique_event_id_fields)}"""
-        
+        # should we use list comprehension in 2 dynamic queries? It might be less readable and it's also harder to implement
         for field in self.items_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
