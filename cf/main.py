@@ -247,7 +247,7 @@ class GaExportedNestedDataStorage(object):
         for field in self.items_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f"""FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+        qry += f""" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
         ,UNNEST (items) AS items"""
 
         return qry
