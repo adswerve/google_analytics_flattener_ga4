@@ -13,7 +13,7 @@ class TestCFFlattenMethods(BaseUnitTest):
                                             )
 
 
-    client = bigquery.Client(ga_source.gcp_project)
+    client = bigquery.Client()
 
     def tbl_exists(self, client, dataset, table_name):
         """
