@@ -4,7 +4,7 @@ class DeploymentConfiguration(object):
         From
         https://cloud.google.com/deployment-manager/docs/configuration/templates/use-environment-variables
 
-        Keys allowed for built in environment variables related to deployment using deployment manager
+        Keys allowed for built-in environment variables related to deployment using deployment manager
 
         deployment:	The name of the deployment.
         name:	The name declared in the configuration that is using the template. This can be useful if you want the
@@ -119,9 +119,9 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             Sink name can be up to 100 chars long.
         '''
         if intraday:
-            return '{d}-sink-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-sink-intraday"
         else:
-            return '{d}-sink'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-sink"
 
     def get_topic_id(self, intraday=False):
         '''
@@ -132,9 +132,9 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             Pub/Sub topic id can be up to 255 chars long.
         '''
         if intraday:
-            return '{d}-topic-intraday'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-topic-intraday"
         else:
-            return '{d}-topic'.format(d=self._create_valid_gcp_resource_name(self.deployment))
+            return f"{self._create_valid_gcp_resource_name(self.deployment)}-topic"
 
     def get_cf_name(self, code_location):
         """
@@ -150,7 +150,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         # -1 because of delimiter hyphen
         trunc_deployment_name_length = self.gcp_resource_name_limit - len(fn) - 1
 
-        return "{d}-{fn}".format(d=self.deployment[:trunc_deployment_name_length], fn=fn)
+        return f"{self.deployment[:trunc_deployment_name_length]}-{fn}"
 
     def get_bucket_name(self):
         """
@@ -169,8 +169,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
 
         deployment = self._create_valid_gcp_resource_name(self.deployment)[:trunc_deployment_name_length]
 
-        return '{d}-{n}-{suffix}'.format(d=deployment,
-                                         n=number, suffix=suffix)
+        return f"{deployment}-{number}-{suffix}"
 
     def _create_valid_gcp_resource_name(self, p_field):
         '''

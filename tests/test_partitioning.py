@@ -3,8 +3,6 @@
 # test backfill with diff config options (sharding vs partitioning vs both)
 # have done this manually and documented results
 
-#TODO: test with the intraday feature
-# tested this manually and documented results - passed
 
 from google.cloud import bigquery
 from google.cloud.bigquery import SchemaField
@@ -28,33 +26,47 @@ class TestPartitioning(BaseUnitTest):
 
     # SIMPLE TESTS
     def test_flatten_ga_data_config_output_type_partitioned_only(self):
-        self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
-                                     sharded_output_required=False, partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(),
+                                     table_type="flat_event_params",
+                                     sharded_output_required=False,
+                                     partitioned_output_required=True)
 
-        self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type="flat_events",
-                                     sharded_output_required=False, partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_events_query(),
+                                     table_type="flat_events",
+                                     sharded_output_required=False,
+                                     partitioned_output_required=True)
 
-        self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
-                                     sharded_output_required=False, partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_items_query(),
+                                     table_type="flat_items",
+                                     sharded_output_required=False,
+                                     partitioned_output_required=True)
 
         self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-                                     table_type="flat_user_properties", sharded_output_required=False,
+                                     table_type="flat_user_properties",
+                                     sharded_output_required=False,
                                      partitioned_output_required=True)
 
         self.assertTrue(True)
 
     def test_flatten_ga_data_config_output_type_sharded_and_partitioned(self):
-        self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type="flat_event_params",
-                                     sharded_output_required=True, partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(),
+                                     table_type="flat_event_params",
+                                     sharded_output_required=True,
+                                     partitioned_output_required=True)
 
-        self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type="flat_events",
-                                     sharded_output_required=True, partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_events_query(),
+                                     table_type="flat_events",
+                                     sharded_output_required=True,
+                                     partitioned_output_required=True)
 
-        self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type="flat_items",
-                                     sharded_output_required=True, partitioned_output_required=True)
+        self.ga_source.run_query_job(query=self.ga_source.get_items_query(),
+                                     table_type="flat_items",
+                                     sharded_output_required=True,
+                                     partitioned_output_required=True)
 
         self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-                                     table_type="flat_user_properties", sharded_output_required=True,
+                                     table_type="flat_user_properties",
+                                     sharded_output_required=True,
                                      partitioned_output_required=True)
 
         self.assertTrue(True)
@@ -89,12 +101,12 @@ class TestPartitioning(BaseUnitTest):
     # HELPER FUNCTIONS
     def drop_partitioned_table(self, table_type="flat_events"):
 
-        client = bigquery.Client()
+        client = bigquery.Client(project=self.ga_source.gcp_project)
 
-        table_ref = client.dataset(self.ga_source.dataset).table(table_type)
+        table_path = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}"
 
         try:
-            client.delete_table(table_ref)
+            client.delete_table(table_path)
         except Exception as e:
             if e.code == HTTPStatus.NOT_FOUND:  # 404 Not found
                 logging.warning(f"Cannot delete the partition because the table doesn't exist yet: {e}")
@@ -108,13 +120,12 @@ class TestPartitioning(BaseUnitTest):
             number of rows is correct
             idempotence of append operation
         """
-        client = bigquery.Client()
+        client = bigquery.Client(project=self.ga_source.gcp_project)
         # drop partitioned table if it exists
         self.drop_partitioned_table(table_type=table_type)
 
         # we need to do it, because we need to check number of rows later
-        table_name_partitioned = "{p}.{ds}.{t}" \
-            .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
+        table_name_partitioned = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}"
         table_id_partitioned = bigquery.Table(table_name_partitioned)
 
         # flatten data
@@ -124,16 +135,15 @@ class TestPartitioning(BaseUnitTest):
         table_partitioned = client.get_table(table_id_partitioned)  # Make an API request.
 
         # verify partitioning
-        self.assertIsNotNone(table_partitioned.partitioning_type)
-        self.assertEqual("DAY", table_partitioned.time_partitioning._properties['type'])
+        self.assertIsNotNone(table_partitioned.time_partitioning)
+        self.assertEqual("DAY", table_partitioned.time_partitioning.type_)
         self.assertEqual("event_date", table_partitioned.time_partitioning._properties['field'])
 
         # verify date field
         self.assertEqual(SchemaField('event_date', 'DATE', 'NULLABLE', None, (), None), table_partitioned.schema[0])
 
         # extract info about sharded output
-        table_name_sharded = "{p}.{ds}.{t}_{d}" \
-            .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type, d=self.ga_source.date_shard)
+        table_name_sharded = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_{self.ga_source.date_shard}"
 
         table_id_sharded = bigquery.Table(table_name_sharded)
         table_sharded = client.get_table(table_id_sharded)
@@ -161,22 +171,35 @@ class TestPartitioning(BaseUnitTest):
     def flatten_ga_data(self, table_type="flat_events"):
 
         # flatten data
+        # we will wait for the job to complete, or else the unit test fails
+        # (we need to wait for the correct output to be produced before we verify/check the output)
         if table_type == "flat_event_params":
-            self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(), table_type=table_type,
-                                         sharded_output_required=True, partitioned_output_required=True)
+            self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(),
+                                         table_type=table_type,
+                                         sharded_output_required=True,
+                                         partitioned_output_required=True,
+                                         wait_for_the_query_job_to_complete=True)
 
         elif table_type == "flat_events":
-            self.ga_source.run_query_job(query=self.ga_source.get_events_query(), table_type=table_type,
-                                         sharded_output_required=True, partitioned_output_required=True)
+            self.ga_source.run_query_job(query=self.ga_source.get_events_query(),
+                                         table_type=table_type,
+                                         sharded_output_required=True,
+                                         partitioned_output_required=True,
+                                         wait_for_the_query_job_to_complete=True)
 
         elif table_type == "flat_items":
-            self.ga_source.run_query_job(query=self.ga_source.get_items_query(), table_type=table_type,
-                                         sharded_output_required=True, partitioned_output_required=True)
+            self.ga_source.run_query_job(query=self.ga_source.get_items_query(),
+                                         table_type=table_type,
+                                         sharded_output_required=True,
+                                         partitioned_output_required=True,
+                                         wait_for_the_query_job_to_complete=True)
 
         elif table_type == "flat_user_properties":
             self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-                                         table_type=table_type, sharded_output_required=True,
-                                         partitioned_output_required=True)
+                                         table_type=table_type,
+                                         sharded_output_required=True,
+                                         partitioned_output_required=True,
+                                         wait_for_the_query_job_to_complete=True)
 
     def flatten_ga_data_check_number_of_rows(self, dates_list=["20211201", "20211202"],
                                              table_type="flat_events"):
@@ -189,7 +212,7 @@ class TestPartitioning(BaseUnitTest):
                 - partitioned table number of rows is equal to sharded tables total number of rows
                 - breakdown of rows by date is the same in sharded vs partitioned data
         """
-        client = bigquery.Client()
+        client = bigquery.Client(project=self.ga_source.gcp_project)
         # drop partitioned table if it exists
         # we need to do it, because we need to check number of rows later
         # drop partitioned table if it exists
@@ -210,17 +233,13 @@ class TestPartitioning(BaseUnitTest):
             self.flatten_ga_data(table_type=table_type)
 
             # keep track of number of sharded rows
-            table_name_sharded = "{p}.{ds}.{t}_{d}" \
-                .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type,
-                        d=self.ga_source.date_shard)
-
+            table_name_sharded = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_{self.ga_source.date_shard}"
             table_id_sharded = bigquery.Table(table_name_sharded)
             table_sharded = client.get_table(table_id_sharded)
             num_rows_sharded = num_rows_sharded + table_sharded.num_rows
 
         # count partitioned rows
-        table_name_partitioned = "{p}.{ds}.{t}" \
-            .format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
+        table_name_partitioned = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}"
         table_id_partitioned = bigquery.Table(table_name_partitioned)
         table_partitioned = client.get_table(table_id_partitioned)
         num_rows_partitioned = table_partitioned.num_rows
@@ -228,11 +247,11 @@ class TestPartitioning(BaseUnitTest):
         self.assertEqual(num_rows_sharded, num_rows_partitioned)
 
         # make sure that breakdown of rows by date is the same in sharded vs partitioned data
-        query_string_partitioned = """
-            SELECT event_date, count(*) nrow FROM `{p}.{ds}.{t}`
+        query_string_partitioned = f"""
+            SELECT event_date, count(*) nrow FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}`
             GROUP BY 1
             ORDER BY 1 
-        """.format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type)
+        """
 
         dataframe_partitioned = (
             client.query(query_string_partitioned)
@@ -241,14 +260,13 @@ class TestPartitioning(BaseUnitTest):
             )
         )
 
-        query_string_sharded = """
+        query_string_sharded = f"""
             SELECT _TABLE_SUFFIX as event_date, count(*) nrow
-            FROM `{p}.{ds}.{t}_*`
-            WHERE _TABLE_SUFFIX BETWEEN "{start}" AND "{end}"
+            FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_*`
+            WHERE _TABLE_SUFFIX BETWEEN "{dates_list[0]}" AND "{dates_list[1]}"
             GROUP BY 1
             ORDER BY 1
-        """.format(p=self.ga_source.gcp_project, ds=self.ga_source.dataset, t=table_type, start=dates_list[0],
-                   end=dates_list[1])
+        """
 
         dataframe_sharded = (
             client.query(query_string_sharded)

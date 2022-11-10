@@ -38,7 +38,7 @@ class InputValidatorIntraday(object):
                 self.table_name = re.search(r'(events_intraday)_20\d\d\d\d\d\d$', bq_destination_table).group(1)
 
         except AttributeError or KeyError as e:
-            logging.critical(f'invalid message: {message_payload}')
+            logging.critical(f"invalid message: {message_payload}")
             logging.critical(e)
         try:
             storage_client = storage.Client()
@@ -49,7 +49,7 @@ class InputValidatorIntraday(object):
             with open(downloaded_file, "r") as config_json:
                 self.config = json.load(config_json)
         except Exception as e:
-            logging.critical(f'flattener configuration error: {e}')
+            logging.critical(f"flattener configuration error: {e}")
 
     def valid_dataset(self):
         """is the BQ dataset (representing GA4 property) configured for flattening?"""
@@ -75,10 +75,10 @@ class InputValidatorIntraday(object):
         if type(config_intraday_schedule_frequency) == int:
             if config_intraday_schedule_units == "minutes":
                 assert config_intraday_schedule_frequency >= 1 and config_intraday_schedule_frequency <= 59, "Config file error: if intraday schedule units are minutes, then the frequency should be between 1 and 59"
-                cron_schedule = f'*/{config_intraday_schedule_frequency} * * * *'
+                cron_schedule = f"*/{config_intraday_schedule_frequency} * * * *"
 
             elif config_intraday_schedule_units == "hours":
-                cron_schedule = f'0 */{config_intraday_schedule_frequency} * * *'
+                cron_schedule = f"0 */{config_intraday_schedule_frequency} * * *"
 
             return cron_schedule
 
@@ -178,7 +178,7 @@ def manage_intraday_schedule(event, context="context"):
                     "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                         "datasetId": input_event.dataset
                         , "projectId": input_event.gcp_project
-                        , "tableId": "events_intraday_%s" % input_event.table_date_shard
+                        , "tableId": f"events_intraday_{input_event.table_date_shard}"
                     }}}}}}}}
 
                 topic_name = os.environ["TOPIC_NAME"]
@@ -213,7 +213,7 @@ def manage_intraday_schedule(event, context="context"):
                             "name": job_id_full_path
                         })
 
-                    logging.info('Created Scheduler job: {}'.format(response.name))
+                    logging.info(f"Created Scheduler job: {response.name}")
                     return response
 
                 # if it already exists, it doesn't need to be created
@@ -223,7 +223,7 @@ def manage_intraday_schedule(event, context="context"):
                         f"Error creating a Scheduler job {job_id_full_path} (the job probably already exists): {e}")
 
             else:
-                logging.warning(f'Dataset {input_event.dataset} is not configured for intraday flattening')
+                logging.warning(f"Dataset {input_event.dataset} is not configured for intraday flattening")
 
         # did an intraday table get deleted?
         elif input_event.method_name == "tableservice.delete":
@@ -243,7 +243,7 @@ def manage_intraday_schedule(event, context="context"):
                     f"Error deleting a Scheduler job {job_id_full_path} (the job probably doesn't exist): {e}")
 
     else:
-        logging.warning(f'Dataset {input_event.dataset} is not configured for flattening')
+        logging.warning(f"Dataset {input_event.dataset} is not configured for flattening")
 
 #TODO: when running on GCP, this error means that job already exists (can't create it) or doesn’t exist yet (can't delete it)
 # "NoneType" object has no attribute "Call"

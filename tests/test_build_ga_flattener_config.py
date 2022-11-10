@@ -3,7 +3,21 @@ from cfconfigbuilder.main import FlattenerDatasetConfig
 from cfconfigbuilder.main import FlattenerDatasetConfigStorage
 from cfconfigbuilderps.main import FlattenerDatasetConfig as FlattenerDatasetConfigPS
 from cfconfigbuilderps.main import FlattenerDatasetConfigStorage as FlattenerDatasetConfigStoragePS
+import json
+import logging
+import sys
 
+# display logs in console while running unit tests
+# https://stackoverflow.com/questions/14058453/making-python-loggers-output-all-messages-to-stdout-in-addition-to-log-file
+
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+root.addHandler(handler)
 
 # TODO: question: what's the diff between these two unit tests? test_build_flattener_ga_dataset_config vs test_build_flattener_ga_dataset_config_ps
 
@@ -20,6 +34,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         json_config = config.add_intraday_params_into_config(json_config)
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
+        logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
         self.assertIsInstance(json_config, dict)
         if json_config.keys():
@@ -50,6 +65,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         json_config = config.add_intraday_params_into_config(json_config)
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
+        logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
         self.assertIsInstance(json_config, dict)
         if json_config.keys():
@@ -67,6 +83,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                                                              intraday_schedule_units="minutes")
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
+        logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
 
         self.assertIsInstance(json_config, dict)
@@ -93,6 +110,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                                                              intraday_schedule_units="hours")
         json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
+        logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
 
         self.assertIsInstance(json_config, dict)
@@ -117,6 +135,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         json_config = config.add_output_params_into_config(json_config, output_sharded=False,
                                                            output_partitioned=True)
         store.upload_config(config=json_config)
+        logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
         self.assertIsInstance(json_config, dict)
         if json_config.keys():

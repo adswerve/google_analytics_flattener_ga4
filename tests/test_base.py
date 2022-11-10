@@ -76,11 +76,8 @@ class BaseUnitTest(unittest.TestCase):
         my_dataset_id = context.env['dataset']
 
         client = bigquery.Client(project=my_project_id)
-
-        dataset_ref = client.dataset(my_dataset_id)
-
         tables = list(
-            client.list_tables(dataset_ref))  # API request(s), now you have the list of tables in this dataset
+            client.list_tables(my_dataset_id))  # API request(s), now you have the list of tables in this dataset
         tables_to_delete = []
         logging.info("discovered flat tables:")
         for table in tables:
@@ -88,9 +85,9 @@ class BaseUnitTest(unittest.TestCase):
                 tables_to_delete.append(table.table_id)
                 logging.info(table.full_table_id)
         for table_id in tables_to_delete:
-            table_ref = client.dataset(my_dataset_id).table(table_id)
-            client.delete_table(table_ref)
-            logging.info("deleted table %s.%s.%s" % (table_ref.project, table_ref.dataset_id, table_ref.table_id))
+            table_path = f"{my_project_id}.{my_dataset_id}.{table_id}"
+            client.delete_table(table_path)
+            logging.info(f"deleted table {table_path}")
 
     def restore_default_config(self):
         # generate config and upload it to GCS

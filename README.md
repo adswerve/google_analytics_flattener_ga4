@@ -548,4 +548,5 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
   sets ```GOOGLE_APPLICATION_CREDENTIALS``` to the filepath.
 * Set the environment variables in `test_base.py`: `"deployment"`, `"project"` and `"username"`.
 * Unit tests run locally or via GitHub CI/CD workflow assume that GA4 flattener is installed into your GCP project.
-
+* To make sure BigQuery analysis cost is billed to the right project, activate the correct gcloud configuration: `gcloud config configurations activate {configuration_name}`
+* If necessary, create a new gcloud configuration: `gcloud init`

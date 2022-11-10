@@ -219,4 +219,4 @@ def build_ga_flattener_config(request):
     json_config = config.add_intraday_params_into_config(json_config)
     json_config = config.add_output_params_into_config(json_config)
     store.upload_config(config=json_config)  # upload config file to GCS bucket
-    logging.info("build_ga_flattener_config: {}".format(json.dumps(json_config)))
+    logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")

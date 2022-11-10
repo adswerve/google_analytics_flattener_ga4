@@ -46,9 +46,9 @@ resources:
     codeBucket: 464892960897-function-code-staging-ga4-flattener
     triggerType: pubsub
     location: us-east1
-    timeout: 60s
+    timeout: 540s
     runtime: python37
-    availableMemoryMb: 8192
+    availableMemoryMb: 512
     entryPoint: flatten_ga_data
 - name: httpfunction
   type: dmt_cloud_function.py

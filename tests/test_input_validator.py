@@ -22,7 +22,7 @@ class TestInputValidator(BaseUnitTest):
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
                 , "projectId": project_id
-                , "tableId": "{table_type}_{date_shard}".format(table_type=table_type, date_shard=date_shard)
+                , "tableId": f"{table_type}_{date_shard}"
             }}}}}}}}
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
@@ -45,7 +45,6 @@ class TestInputValidator(BaseUnitTest):
         c = Context()
         project_id = c.env["project"]
         dataset_id = c.env["dataset"]
-        date_shard = c.env["date"]
         table_type = c.env["table_type"]
 
         # input
@@ -53,7 +52,7 @@ class TestInputValidator(BaseUnitTest):
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
                 , "projectId": project_id
-                , "tableId": "{table_type}".format(table_type=table_type)
+                , "tableId": table_type
             }}}}}}}}
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
@@ -104,7 +103,7 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
             "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
                 "datasetId": dataset_id
                 , "projectId": project_id
-                , "tableId": "{table_type}_{date_shard}".format(table_type=table_type, date_shard=date_shard)
+                , "tableId": f"{table_type}_{date_shard}"
             }}}}}}}}
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
