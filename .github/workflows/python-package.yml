@@ -66,7 +66,7 @@ jobs:
       - name: Test with pytest
         run: |          
           # test   
-          pytest --verbose tests/test_flatten_ga_data.py
+          pytest --verbose
       - name: Clean up
         run: |
           # clean up
