@@ -52,21 +52,21 @@ jobs:
           gcloud auth activate-service-account --key-file "sandbox/sa.json"
           gcloud config set project "$GCP_PROJECT_ID"
           
-          # uninstall
-          # remove GCS config file
-          # if we cannot delete, continue with the script
-          # https://stackoverflow.com/questions/22009364/is-there-a-try-catch-command-in-bash
-          gsutil rm gs://ga-flattener-deployment-464892960897-adswerve-ga-flat-config/config_datasets.json || echo "ERROR: cannot delete GCS config file"
-          
-          gcloud deployment-manager deployments list
-          gcloud deployment-manager deployments delete "$DEPLOYMENT_NAME" -q || echo "ERROR: cannot delete deployment"
-          
-          # install 
-          gcloud deployment-manager deployments create "$DEPLOYMENT_NAME" --config ga_flattener.yaml
+#          # uninstall
+#          # remove GCS config file
+#          # if we cannot delete, continue with the script
+#          # https://stackoverflow.com/questions/22009364/is-there-a-try-catch-command-in-bash
+#          gsutil rm gs://ga-flattener-deployment-464892960897-adswerve-ga-flat-config/config_datasets.json || echo "ERROR: cannot delete GCS config file"
+#
+#          gcloud deployment-manager deployments list
+#          gcloud deployment-manager deployments delete "$DEPLOYMENT_NAME" -q || echo "ERROR: cannot delete deployment"
+#
+#          # install
+#          gcloud deployment-manager deployments create "$DEPLOYMENT_NAME" --config ga_flattener.yaml
       - name: Test with pytest
         run: |          
           # test   
-          pytest --verbose
+          pytest --verbose tests/test_flatten_ga_data.py
       - name: Clean up
         run: |
           # clean up
