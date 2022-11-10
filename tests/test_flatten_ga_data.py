@@ -18,11 +18,11 @@ class TestCFFlattenMethods(BaseUnitTest):
          https://stackoverflow.com/questions/28731102/bigquery-check-if-table-already-exists
          """
         client = bigquery.Client(project=self.ga_source.gcp_project)
-        dataset = client.dataset(dataset)
-        table_ref = dataset.table(table_name)
 
+        full_table_path = f"{self.ga_source.gcp_project}.{dataset}.{table_name}"
+        table_id = bigquery.Table(full_table_path)
         try:
-            client.get_table(table_ref)
+            client.get_table(table_id)
             return True
         except NotFound:
             return False
