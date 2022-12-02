@@ -11,7 +11,7 @@ class FlattenerDatasetConfigStorage(object):
         self.bucket_name = os.environ["CONFIG_BUCKET_NAME"]
 
     def upload_config(self, config):
-        storage_client = storage.Client()
+        storage_client = storage.Client()  # initialize the GCS client
         bucket = storage_client.bucket(self.bucket_name)
         blob = bucket.blob(os.environ["CONFIG_FILENAME"])
 
@@ -24,8 +24,8 @@ class FlattenerDatasetConfigStorage(object):
 class FlattenerDatasetConfig(object):
     def __init__(self):
         """
-       find ga4 datasets in project
-       """
+        find ga4 datasets in project
+        """
         self.query = """
         EXECUTE IMMEDIATE (
  WITH schemas AS (
@@ -59,6 +59,11 @@ FROM (
 """
 
     def get_ga_datasets(self):
+        """
+        Obtain a list of GA4 datasets available in the GCP project.
+        Build a configurations dict which lists GA4 datasets to flatten.
+        It'll be later uploaded to GCS as a JSON file.
+        """
         ret_val = {}
         client = bigquery.Client()
         query_job = client.query(self.query)
@@ -66,7 +71,7 @@ FROM (
         # the dictionary will list GA4 datasets
         # add tables information into dictionary
         # by default, all these 4 tables flat tables will be written by the flattener
-        for row in query_results:
+        for row in query_results:  # each row is a ga4 dataset
             ret_val[(row.dataset_id)] = [os.environ["EVENTS"]
                 , os.environ["EVENT_PARAMS"]
                 , os.environ["USER_PROPERTIES"]
@@ -77,7 +82,73 @@ FROM (
     def add_intraday_params_into_config(self, json_config, intraday_schedule_frequency=None,
                                       intraday_schedule_units="hours"):
         """
-        Adds cfintraday config params to config files.
+        Adds cfintraday config params to config file.
+
+        Args:
+            json_config:
+                {
+                  "analytics_222460912": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ],
+                  "analytics_251817041": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ]
+                }
+
+        Returns:
+            json_config:
+                {
+                  "analytics_222460912": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ],
+                        "frequency": null,
+                        "units": "hours"
+                        }
+                  },
+                  "analytics_251817041": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ],
+                    "frequency": null,
+                    "units": "hours"
+                        }
+                  }
+                }
+
+        Config file, after being transformed by this function, answers the following questions:
+            In what datasets do we want to flatten cfintraday data?
+
+            How often do we update flat cfintraday data (e.g., every X minutes/hours).
+                Default frequency is null (meaning we won't be flattening cfintraday data)
+                Default schedule unit is hours, but can be changed to minutes.
+
+        Example:
+            Config file contains this:
+                "analytics_222460912": {
+                    "tables_to_flatten": [
+                      ...
+                    ],
+                    "frequency": 15,
+                    "units": "minutes"
+                  }
+
+                It means we will be flattening cfintraday data for "analytics_222460912" every 15 minutes.
+
+                If the intraday schedule units is minutes, then intraday schedule frequency can only be a number between 1 and 59. It can't be 60+ (or else GCP with throw an invalid schedule error
+
         """
         json_config_updated = {}
 
@@ -93,6 +164,35 @@ FROM (
                                       output_partitioned=False):
         """
         Adds cfintraday config params to config file.
+
+        Args:
+            json_config:
+                {
+                  "analytics_222460912": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ]
+                }
+
+        Returns:
+            json_config:
+                {
+                  "analytics_222460912": [
+                    "events",
+                    "event_params",
+                    "user_properties",
+                    "items"
+                  ],
+                  "output": {
+                    "sharded": true,
+                    "partitioned": false
+                  }
+                }
+
+        Config file, after being transformed by this function, answers the following questions:
+            Do we want sharded, partitioned output, or both?
         """
         for dataset, config in json_config.items():
             config.update(
@@ -111,7 +211,7 @@ def build_ga_flattener_config(event, context):
     """
 
     config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
-    store = FlattenerDatasetConfigStorage()  # object with bucket_name as its property
+    store = FlattenerDatasetConfigStorage()  # object with the bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
     json_config = config.add_intraday_params_into_config(json_config)
     json_config = config.add_output_params_into_config(json_config)
