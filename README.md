@@ -540,13 +540,14 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
 * LICENSE: BSD 3-Clause open source license
 
 ## Running unit tests ##
+### local testing:
+* To make sure BigQuery analysis cost is billed to the right project and the SQL queries run in the correct project, activate the correct gcloud configuration: `gcloud config configurations activate {configuration_name}`
+* If necessary, create a new gcloud configuration: `gcloud init`
+* To run unit tests on your local machine, authenticate locally with ```gcloud auth application-default login```. You could also save a file **sa.json** with GCP account credentials in the **sandbox**
+  directory and specify path to it in `test_base.py`. 
+* Set the environment variables in `test_base.py`: `"deployment"`, `"project"` and `"username"`.
+* Unit tests run locally assume that GA4 flattener is installed into your GCP project.
 
-* To run unit tests on your local machine, save an **sa.json** with GCP account credentials in the **sandbox**
-  directory.
-* However, it's not necessary, you can also auth locally with ```gcloud auth application-default login```.
+### GitHub CI/CD:
 * GitHub CI/CD pipeline uses automatically saves **sa.json** into the **sandbox** directory and
   sets ```GOOGLE_APPLICATION_CREDENTIALS``` to the filepath.
-* Set the environment variables in `test_base.py`: `"deployment"`, `"project"` and `"username"`.
-* Unit tests run locally or via GitHub CI/CD workflow assume that GA4 flattener is installed into your GCP project.
-* To make sure BigQuery analysis cost is billed to the right project, activate the correct gcloud configuration: `gcloud config configurations activate {configuration_name}`
-* If necessary, create a new gcloud configuration: `gcloud init`
