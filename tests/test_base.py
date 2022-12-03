@@ -94,6 +94,7 @@ class BaseUnitTest(unittest.TestCase):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
+        json_config = config.reformat_config(json_config)
+        json_config = config.add_output_format_params_into_config(json_config)
         json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)

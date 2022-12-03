@@ -31,8 +31,9 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
+        json_config = config.reformat_config(json_config)
+        json_config = config.add_output_format_params_into_config(json_config)
         json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
         logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
@@ -43,15 +44,15 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
                 self.assertIsInstance(value, dict)
 
                 self.assertEqual({
-                    "frequency": None,
-                    "units": "hours"
+                    "intraday_flat_tables_schedule": None,
+                    "intraday_flat_views": True
                 },
-                    json_config[key]['intraday_schedule'])
+                    json_config[key]['intraday_flattening'])
 
                 self.assertEqual({
                     "sharded": True,
                     "partitioned": False
-                }, json_config[key]['output'])
+                }, json_config[key]['output_format'])
                 # assertEqual syntax is this: assertEqual(expected, actual)
                 # https://stackoverflow.com/questions/17920625/what-is-actually-assertequals-in-python
 
@@ -63,7 +64,7 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         store = FlattenerDatasetConfigStoragePS()
         json_config = config.get_ga_datasets()
         json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config)
+        json_config = config.add_output_format_params_into_config(json_config)
         store.upload_config(config=json_config)
         logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
@@ -79,9 +80,9 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
+        json_config = config.add_output_format_params_into_config(json_config)
         json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=30,
                                                              intraday_schedule_units="minutes")
-        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
         logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
@@ -106,9 +107,9 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
+        json_config = config.add_output_format_params_into_config(json_config)
         json_config = config.add_intraday_params_into_config(json_config, intraday_schedule_frequency=1,
                                                              intraday_schedule_units="hours")
-        json_config = config.add_output_params_into_config(json_config)
         store.upload_config(config=json_config)
         logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
@@ -131,9 +132,9 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
+        json_config = config.add_output_format_params_into_config(json_config, output_sharded=False,
+                                                                  output_partitioned=True)
         json_config = config.add_intraday_params_into_config(json_config)
-        json_config = config.add_output_params_into_config(json_config, output_sharded=False,
-                                                           output_partitioned=True)
         store.upload_config(config=json_config)
         logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
         # check
@@ -151,4 +152,5 @@ class TestCFBuildFlattenerGaDatasetConfig(BaseUnitTest):
         self.assertTrue(True)
 
     def tearDown(self):
+        pass
         self.restore_default_config()

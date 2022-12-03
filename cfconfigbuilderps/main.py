@@ -160,7 +160,7 @@ FROM (
                 }}})
         return json_config_updated
 
-    def add_output_params_into_config(self, json_config, output_sharded=True,
+    def add_output_format_params_into_config(self, json_config, output_sharded=True,
                                       output_partitioned=False):
         """
         Adds cfintraday config params to config file.
@@ -214,6 +214,6 @@ def build_ga_flattener_config(event, context):
     store = FlattenerDatasetConfigStorage()  # object with the bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
     json_config = config.add_intraday_params_into_config(json_config)
-    json_config = config.add_output_params_into_config(json_config)
+    json_config = config.add_output_format_params_into_config(json_config)
     store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
