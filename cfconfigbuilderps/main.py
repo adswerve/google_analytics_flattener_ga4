@@ -79,26 +79,35 @@ FROM (
                                          ]
         return ret_val
 
-    def add_intraday_params_into_config(self, json_config, intraday_schedule_frequency=None,
-                                      intraday_schedule_units="hours"):
+
+    def reformat_config(self, json_config):
+
+        """Slightly reformat the config file by adding "tables_to_flatten key"""
+        json_config_updated = {}
+
+        for dataset, list_of_tables in json_config.items():
+            json_config_updated.update(
+                {dataset: {"tables_to_flatten": list_of_tables}})
+        return json_config_updated
+
+
+
+    def add_output_format_params_into_config(self, json_config, output_sharded=True,
+                                      output_partitioned=False):
         """
-        Adds cfintraday config params to config file.
+        Adds output format config params to config file.
 
         Args:
             json_config:
                 {
-                  "analytics_222460912": [
-                    "events",
-                    "event_params",
-                    "user_properties",
-                    "items"
-                  ],
-                  "analytics_251817041": [
-                    "events",
-                    "event_params",
-                    "user_properties",
-                    "items"
-                  ]
+                  "analytics_222460912": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ]
+                  }
                 }
 
         Returns:
@@ -110,21 +119,65 @@ FROM (
                       "event_params",
                       "user_properties",
                       "items"
-                    ],
-                        "frequency": null,
-                        "units": "hours"
-                        }
+                    ]
                   },
-                  "analytics_251817041": {
+                  "output_format": {
+                    "sharded": true,
+                    "partitioned": true
+                  }
+                }
+
+        Config file, after being transformed by this function, answers the following questions:
+            Do we want sharded, partitioned output, or both?
+        """
+        for dataset, config in json_config.items():
+
+            config.update(
+                            {"output_format": {
+                                                "sharded": output_sharded,
+                                                "partitioned": output_partitioned
+                                              }
+                            })
+        return json_config
+
+    def add_intraday_params_into_config(self, json_config, intraday_flat_tables_schedule=None):
+        """
+        Adds cfintraday config params to config file.
+
+        Args:
+
+            json_config:
+                {
+                  "analytics_222460912": {
                     "tables_to_flatten": [
                       "events",
                       "event_params",
                       "user_properties",
                       "items"
-                    ],
-                    "frequency": null,
-                    "units": "hours"
-                        }
+                    ]
+                  }
+                }
+
+
+            intraday_flat_tables_schedule example: {
+                                                      "frequency": 1,
+                                                      "units": "hours"
+                                                    }
+
+        Returns:
+            json_config:
+                {
+                  "analytics_222460912": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ]
+                  },
+                  "intraday_flattening": {
+                    "intraday_flat_tables_schedule": null,
+                    "intraday_flat_views": true
                   }
                 }
 
@@ -133,74 +186,20 @@ FROM (
 
             How often do we update flat cfintraday data (e.g., every X minutes/hours).
                 Default frequency is null (meaning we won't be flattening cfintraday data)
-                Default schedule unit is hours, but can be changed to minutes.
 
-        Example:
-            Config file contains this:
-                "analytics_222460912": {
-                    "tables_to_flatten": [
-                      ...
-                    ],
-                    "frequency": 15,
-                    "units": "minutes"
-                  }
-
-                It means we will be flattening cfintraday data for "analytics_222460912" every 15 minutes.
-
-                If the intraday schedule units is minutes, then intraday schedule frequency can only be a number between 1 and 59. It can't be 60+ (or else GCP with throw an invalid schedule error
+            If the intraday schedule units is minutes, then intraday schedule frequency can only be a number between 1 and 59. It can't be 60+ (or else GCP with throw an invalid schedule error
 
         """
-        json_config_updated = {}
 
-        for dataset, list_of_tables in json_config.items():
-            json_config_updated.update(
-                {dataset: {"tables_to_flatten": list_of_tables, "intraday_schedule": {
-                    "frequency": intraday_schedule_frequency,
-                    "units": intraday_schedule_units
-                }}})
-        return json_config_updated
-
-    def add_output_format_params_into_config(self, json_config, output_sharded=True,
-                                      output_partitioned=False):
-        """
-        Adds cfintraday config params to config file.
-
-        Args:
-            json_config:
-                {
-                  "analytics_222460912": [
-                    "events",
-                    "event_params",
-                    "user_properties",
-                    "items"
-                  ]
-                }
-
-        Returns:
-            json_config:
-                {
-                  "analytics_222460912": [
-                    "events",
-                    "event_params",
-                    "user_properties",
-                    "items"
-                  ],
-                  "output": {
-                    "sharded": true,
-                    "partitioned": false
-                  }
-                }
-
-        Config file, after being transformed by this function, answers the following questions:
-            Do we want sharded, partitioned output, or both?
-        """
         for dataset, config in json_config.items():
             config.update(
-                            {"output": {
-                  "sharded": output_sharded,
-                  "partitioned": output_partitioned
-                }})
+                {"intraday_flattening": {
+                        "intraday_flat_tables_schedule": intraday_flat_tables_schedule,
+                        "intraday_flat_views": True
+                  }
+                })
         return json_config
+
 
 
 def build_ga_flattener_config(event, context):
@@ -213,7 +212,7 @@ def build_ga_flattener_config(event, context):
     config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
     store = FlattenerDatasetConfigStorage()  # object with the bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
-    json_config = config.add_intraday_params_into_config(json_config)
     json_config = config.add_output_format_params_into_config(json_config)
+    json_config = config.add_intraday_params_into_config(json_config)
     store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
