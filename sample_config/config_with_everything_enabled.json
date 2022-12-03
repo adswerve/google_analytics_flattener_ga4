@@ -1,0 +1,21 @@
+{
+  "analytics_222460912": {
+    "tables_to_flatten": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ]
+  },
+  "output_format": {
+    "sharded": true,
+    "partitioned": true
+  },
+  "intraday_flattening": {
+    "intraday_flat_tables_schedule": {
+      "frequency": 1,
+      "units": "hours"
+    },
+    "intraday_flat_views": true
+  }
+}

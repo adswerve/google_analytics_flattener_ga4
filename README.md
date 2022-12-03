@@ -461,7 +461,7 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
   - In both properties, we create both shaded and partitioned output.
 
 
-- See another example in ```./sample_config/config_datasets_sample.json``` in this repo.
+- See another example in ```./sample_config/*``` in this repo.
 
 ## Backfilling steps
 
