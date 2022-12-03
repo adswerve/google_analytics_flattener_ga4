@@ -82,6 +82,7 @@ FROM (
 
     def reformat_config(self, json_config):
 
+        """Slightly reformat the config file by adding "tables_to_flatten key"""
         json_config_updated = {}
 
         for dataset, list_of_tables in json_config.items():
@@ -89,6 +90,55 @@ FROM (
                 {dataset: {"tables_to_flatten": list_of_tables}})
         return json_config_updated
 
+
+
+    def add_output_format_params_into_config(self, json_config, output_sharded=True,
+                                      output_partitioned=False):
+        """
+        Adds output format config params to config file.
+
+        Args:
+            json_config:
+                {
+                  "analytics_222460912": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ]
+                  }
+                }
+
+        Returns:
+            json_config:
+                {
+                  "analytics_222460912": {
+                    "tables_to_flatten": [
+                      "events",
+                      "event_params",
+                      "user_properties",
+                      "items"
+                    ]
+                  },
+                  "output_format": {
+                    "sharded": true,
+                    "partitioned": true
+                  }
+                }
+
+        Config file, after being transformed by this function, answers the following questions:
+            Do we want sharded, partitioned output, or both?
+        """
+        for dataset, config in json_config.items():
+
+            config.update(
+                            {"output_format": {
+                                                "sharded": output_sharded,
+                                                "partitioned": output_partitioned
+                                              }
+                            })
+        return json_config
 
     def add_intraday_params_into_config(self, json_config, intraday_flat_tables_schedule=None):
         """
@@ -149,55 +199,6 @@ FROM (
                   }
                 })
         return json_config
-
-    def add_output_format_params_into_config(self, json_config, output_sharded=True,
-                                      output_partitioned=False):
-        """
-        Adds output format config params to config file.
-
-        Args:
-            json_config:
-                {
-                  "analytics_222460912": {
-                    "tables_to_flatten": [
-                      "events",
-                      "event_params",
-                      "user_properties",
-                      "items"
-                    ]
-                  }
-                }
-
-        Returns:
-            json_config:
-                {
-                  "analytics_222460912": {
-                    "tables_to_flatten": [
-                      "events",
-                      "event_params",
-                      "user_properties",
-                      "items"
-                    ]
-                  },
-                  "output_format": {
-                    "sharded": true,
-                    "partitioned": true
-                  }
-                }
-
-        Config file, after being transformed by this function, answers the following questions:
-            Do we want sharded, partitioned output, or both?
-        """
-        for dataset, config in json_config.items():
-
-            config.update(
-                            {"output_format": {
-                                                "sharded": output_sharded,
-                                                "partitioned": output_partitioned
-                                              }
-                            })
-        return json_config
-
 
 def build_ga_flattener_config(request):
     """HTTP Cloud Function.
