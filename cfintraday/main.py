@@ -68,7 +68,7 @@ class InputValidatorIntraday(object):
 
         config_intraday_schedule_frequency = config_intraday_schedule.get("frequency", None)
         config_intraday_schedule_units = config_intraday_schedule.get("units", 'hours')
-
+        # TODO: include/handle a situation when it's "hour" or "minute"
         assert config_intraday_schedule_units in ["hours",
                                                   "minutes"], "Config file error: intraday schedule units should be minutes or hours"
 
