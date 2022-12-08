@@ -15,7 +15,7 @@ class TestGenerateQuery(BaseUnitTest):
 
     ga_source_intraday = IntradaySQLView(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
-                                            table_name=c.env["table_type"],
+                                            table_name=c.env["table_type_intraday"],
                                             date_shard=c.env["date_intraday"],
                                             )
 

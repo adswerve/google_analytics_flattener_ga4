@@ -24,6 +24,7 @@ class Context(object):
                 , "type": "dmt_resource_type.py"
                 , "dataset": 'analytics_222460912'
                 , "table_type": 'events'
+                , "table_type_intraday": 'events_intraday'
                 , "date": '20211013'
                 , "date_intraday": '20221114'
                 # We need to also set GOOGLE_APPLICATION_CREDENTIALS on a Linux VM,
@@ -40,6 +41,7 @@ class Context(object):
                 , "type": "dmt_resource_type.py"
                 , "dataset": 'analytics_222460912'  # specific to your project
                 , "table_type": 'events'
+                , "table_type_intraday": 'events_intraday'
                 , "date": '20211013'
                 , "date_intraday": '20221114' # any historical date will suffice if that date shard exists in GA_EVENTS_YYYYMMDD
 

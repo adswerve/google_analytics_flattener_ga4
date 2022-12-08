@@ -1,4 +1,8 @@
-#TODO: unit test to do create and drop view based on input log
+# TODO: unit test to do create and drop view based on input log
+# create
+# delete
+# attempt to create when intraday flattening is not configured
+
 #TODO: refactor other code to account for the new config file
 #TODO: test existing features
 #TODO: GCP integrated testing
@@ -63,6 +67,9 @@ class InputValidatorIntraday(object):
 
     def flatten_nested_table(self, nested_table):
         return nested_table in self.config[self.dataset]["tables_to_flatten"]
+
+    def intraday_sql_view_configured(self):
+        return self.config[self.dataset]["intraday_flattening"]["intraday_flat_views"] == True
 
 class IntradaySQLView(object):
     def __init__(self, gcp_project, dataset, table_name, date_shard,
@@ -232,7 +239,7 @@ class IntradaySQLView(object):
                       CAST({self.event_params_fields[4]} AS STRING)
                   ) AS event_params_value
               FROM 
-                `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`
+                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
               ,UNNEST (event_params) AS event_params"""
 
         return qry
@@ -251,7 +258,7 @@ class IntradaySQLView(object):
                 ) AS user_properties_value,
                 {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}
             FROM 
-                `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`
+                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
             ,UNNEST (user_properties) AS user_properties"""
 
         return qry
@@ -264,7 +271,7 @@ class IntradaySQLView(object):
         for field in self.items_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f""" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`
+        qry += f""" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
         ,UNNEST (items) AS items"""
 
         return qry
@@ -276,7 +283,7 @@ class IntradaySQLView(object):
         for field in self.events_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`"
+        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
 
         return qry
 
@@ -321,16 +328,20 @@ def manage_intraday_sql_view(event, context="context"):
         # did a new intraday table get created?
         if input_event.method_name == "tableservice.insert":
 
-            # EVENT_PARAMS
-            if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
-                ga_source.create_view(query=ga_source.get_event_params_query(), table_type="flat_event_params", wait_for_the_query_job_to_complete=True)
+            if input_event.intraday_sql_view_configured():
 
-                logging.info(
-                    f"Created an {os.environ['EVENT_PARAMS']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+                # EVENT_PARAMS
+                if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
+                    ga_source.create_intraday_sql_views(query=ga_source.get_event_params_query(), table_type="flat_event_params", wait_for_the_query_job_to_complete=True)
+
+                    logging.info(
+                        f"Created an {os.environ['EVENT_PARAMS']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+                else:
+                    logging.info(
+                        f"{os.environ['EVENT_PARAMS']} flattening query for {input_event.dataset} not configured to run")
+
             else:
-                logging.info(
-                    f"{os.environ['EVENT_PARAMS']} flattening query for {input_event.dataset} not configured to run")
-
+                logging.info(f"Intraday SQL view for {input_event.dataset} is not configured")
         # did an intraday table get deleted?
         elif input_event.method_name == "tableservice.delete":
             pass
