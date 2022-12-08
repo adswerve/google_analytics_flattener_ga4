@@ -10,7 +10,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
     ga_source = IntradaySQLView(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
                                             table_name=c.env["table_type"],
-                                            date_shard=c.env["date"],
+                                            date_shard=c.env["date_intraday"],
                                             )
     def tbl_exists(self, dataset, table_name):
         """
@@ -35,5 +35,6 @@ class TestCFIntradaySQLView(BaseUnitTest):
                                table_name=f"view_flat_event_params_{self.ga_source.date_shard}")
 
     def tearDown(self):
-        self.delete_all_flat_views_from_dataset()
+        # self.delete_all_flat_views_from_dataset()
+        pass
 

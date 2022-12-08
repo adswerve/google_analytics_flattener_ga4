@@ -231,7 +231,7 @@ class IntradaySQLView(object):
                       CAST({self.event_params_fields[4]} AS STRING)
                   ) AS event_params_value
               FROM 
-                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+                `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`
               ,UNNEST (event_params) AS event_params"""
 
         return qry
@@ -250,7 +250,7 @@ class IntradaySQLView(object):
                 ) AS user_properties_value,
                 {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}
             FROM 
-                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+                `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`
             ,UNNEST (user_properties) AS user_properties"""
 
         return qry
@@ -263,7 +263,7 @@ class IntradaySQLView(object):
         for field in self.items_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f""" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+        qry += f""" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`
         ,UNNEST (items) AS items"""
 
         return qry
@@ -275,7 +275,7 @@ class IntradaySQLView(object):
         for field in self.events_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
+        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_intraday_{self.date_shard}`"
 
         return qry
 
