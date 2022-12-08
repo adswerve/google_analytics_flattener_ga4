@@ -1,7 +1,7 @@
-# TODO: unit test to create and drop view
 #TODO: unit test to do create and drop view based on input log
 #TODO: refactor other code to account for the new config file
-#TODO: test on GCP
+#TODO: test new feature on GCP
+#TODO: test existing features on GCP
 
 import base64
 import json
@@ -279,7 +279,7 @@ class IntradaySQLView(object):
 
         return qry
 
-    def create_view(self, query, table_type, wait_for_the_query_job_to_complete=False):
+    def create_intraday_sql_views(self, query, table_type, wait_for_the_query_job_to_complete=False):
 
         client = bigquery.Client(project=self.gcp_project)  # initialize BigQuery client
 
@@ -295,7 +295,7 @@ class IntradaySQLView(object):
         if wait_for_the_query_job_to_complete:
             query_job_result = query_job.result()  # Waits for job to complete.
 
-    def delete_view(self, table_type, wait_for_the_query_job_to_complete=False):
+    def delete_intraday_sql_views(self, table_type, wait_for_the_query_job_to_complete=False):
 
         client = bigquery.Client(project=self.gcp_project)  # initialize BigQuery client
 

@@ -26,15 +26,44 @@ class TestCFIntradaySQLView(BaseUnitTest):
         except NotFound:
             return False
 
+    # EVENT_PARAMS
     def test_create_sql_view_intraday_event_params(self):
-        self.ga_source.create_view(query=self.ga_source.get_event_params_query(),
+        self.ga_source.create_intraday_sql_views(query=self.ga_source.get_event_params_query(),
                                      table_type="flat_event_params",
                                      wait_for_the_query_job_to_complete=True)
 
         assert self.tbl_exists(dataset=self.ga_source.dataset,
                                table_name=f"view_flat_event_params_{self.ga_source.date_shard}")
 
+    # USER_PROPERTIES
+    def test_create_sql_view_intraday_user_properties(self):
+        self.ga_source.create_intraday_sql_views(query=self.ga_source.get_user_properties_query(),
+                                     table_type="flat_user_properties",
+                                     wait_for_the_query_job_to_complete=True)
+
+        assert self.tbl_exists(dataset=self.ga_source.dataset,
+                               table_name=f"view_flat_user_properties_{self.ga_source.date_shard}")
+
+    # ITEMS
+    def test_create_sql_view_intraday_items(self):
+        self.ga_source.create_intraday_sql_views(query=self.ga_source.get_items_query(),
+                                     table_type="flat_items",
+                                     wait_for_the_query_job_to_complete=True)
+
+        assert self.tbl_exists(dataset=self.ga_source.dataset,
+                               table_name=f"view_flat_items_{self.ga_source.date_shard}")
+
+    # EVENTS
+    def test_create_sql_view_intraday_events(self):
+        self.ga_source.create_intraday_sql_views(query=self.ga_source.get_events_query(),
+                                     table_type="flat_events",
+                                     wait_for_the_query_job_to_complete=True)
+
+        assert self.tbl_exists(dataset=self.ga_source.dataset,
+                               table_name=f"view_flat_events_{self.ga_source.date_shard}")
+
+
     def tearDown(self):
-        # self.delete_all_flat_views_from_dataset()
+        self.delete_all_flat_views_from_dataset()
         pass
 
