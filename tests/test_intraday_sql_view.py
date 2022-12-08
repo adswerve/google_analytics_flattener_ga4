@@ -213,7 +213,10 @@ class TestManageIntradaySQLView(BaseUnitTest):
         """
         self.delete_all_flat_views_from_dataset()
 
-        for partial_table_name in ["view_flat_events", "view_flat_event_params", "view_flat_items", "view_flat_user_properties_"]:
+        expected_views = ["view_flat_events", "view_flat_event_params", "view_flat_items", "view_flat_user_properties"]
+
+
+        for partial_table_name in expected_views:
 
             assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                    table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
@@ -228,9 +231,7 @@ class TestManageIntradaySQLView(BaseUnitTest):
 
         manage_intraday_sql_view(SAMPLE_PUBSUB_MESSAGE)
 
-        for partial_table_name in ["view_flat_event_params"
-            #, "view_flat_events", "view_flat_items", "view_flat_user_properties_"
-                                   ]:
+        for partial_table_name in expected_views:
 
             assert self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                    table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")

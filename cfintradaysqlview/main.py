@@ -340,6 +340,40 @@ def manage_intraday_sql_view(event, context="context"):
                     logging.info(
                         f"{os.environ['EVENT_PARAMS']} flattening query for {input_event.dataset} not configured to run")
 
+                # EVENTS
+                if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
+                    ga_source.create_intraday_sql_views(query=ga_source.get_events_query(), table_type="flat_events",
+                                                        wait_for_the_query_job_to_complete=True)
+
+                    logging.info(
+                        f"Created an {os.environ['EVENTS']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+                else:
+                    logging.info(
+                        f"{os.environ['EVENTS']} flattening query for {input_event.dataset} not configured to run")
+
+                # ITEMS
+                if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
+                    ga_source.create_intraday_sql_views(query=ga_source.get_items_query(), table_type="flat_items",
+                                                        wait_for_the_query_job_to_complete=True)
+
+                    logging.info(
+                        f"Created an {os.environ['ITEMS']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+                else:
+                    logging.info(
+                        f"{os.environ['ITEMS']} flattening query for {input_event.dataset} not configured to run")
+
+                # USER_PROPERTIES
+                if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
+                    ga_source.create_intraday_sql_views(query=ga_source.get_user_properties_query(),
+                                                        table_type="flat_user_properties",
+                                                        wait_for_the_query_job_to_complete=True)
+
+                    logging.info(
+                        f"Created an {os.environ['USER_PROPERTIES']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+                else:
+                    logging.info(
+                        f"{os.environ['USER_PROPERTIES']} flattening query for {input_event.dataset} not configured to run")
+
             else:
                 logging.info(f"Intraday SQL view for {input_event.dataset} is not configured")
         # did an intraday table get deleted?
