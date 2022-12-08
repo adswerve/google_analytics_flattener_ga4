@@ -72,6 +72,18 @@ class TestCFIntradaySQLView(BaseUnitTest):
         assert self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                table_name=f"view_flat_events_{self.ga_source_intraday.date_shard}")
 
+
+    def test_create_and_delete_sql_views_intraday(self):
+
+        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_events_query(),
+                                     table_type="flat_events",
+                                     wait_for_the_query_job_to_complete=True)
+
+        self.ga_source_intraday.delete_intraday_sql_views(table_type="flat_events", wait_for_the_query_job_to_complete=True)
+
+        assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
+                               table_name=f"view_flat_events_{self.ga_source_intraday.date_shard}")
+
     def tearDown(self):
         self.delete_all_flat_views_from_dataset()
 
@@ -211,34 +223,38 @@ class TestManageIntradaySQLView(BaseUnitTest):
     def test_create_intraday_sql_view(self, logcapture):
         """
         - delete SQL views
-        - assert that it doesn't exist
+        - assert that views don't exist
         - generate DEFAULT config file
         - provide an input to the function which says an intraday table got created
-        - assert that view does exist
+        - assert that views exist
+        - check logs
         """
+        # delete SQL views
         self.delete_all_flat_views_from_dataset()
 
+        # assert that views don't exist
         expected_views = ["view_flat_events", "view_flat_event_params", "view_flat_items", "view_flat_user_properties"]
-
 
         for partial_table_name in expected_views:
 
             assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                    table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
 
+        # generate DEFAULT config file
         self.restore_default_config()
 
+        # provide an input to the function which says an intraday table got created
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
 
         manage_intraday_sql_view(SAMPLE_PUBSUB_MESSAGE)
 
+        # assert that views exist
         for partial_table_name in expected_views:
-
             assert self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                    table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
-
+        # check logs
         # https://testfixtures.readthedocs.io/en/latest/logging.html
         # https://testfixtures.readthedocs.io/en/latest/api.html#testfixtures.LogCapture.check_present
         expected_log_0 = ('root', 'INFO',
@@ -256,16 +272,19 @@ class TestManageIntradaySQLView(BaseUnitTest):
         logcapture.check_present(expected_log_0, expected_log_1, expected_log_2, expected_log_3)
 
     @log_capture()
-    def test_try_creating_intraday_sql_view_when_it_is_not_configured(self, logcapture):
+    def test_try_to_create_intraday_sql_view_when_it_is_not_configured(self, logcapture):
         """
         - delete SQL views
-        - assert that it doesn't exist
+        - assert that they don't exist
         - generate a NON-DEFAULT config file which disables intraday SQL view
         - provide an input to the function which says an intraday table got created
-        - assert that view does exist
+        - assert that views exist
+        check logs
         """
+        # delete SQL views
         self.delete_all_flat_views_from_dataset()
 
+        # assert that that views don't exist
         expected_views = ["view_flat_events", "view_flat_event_params", "view_flat_items", "view_flat_user_properties"]
 
         for partial_table_name in expected_views:
@@ -273,7 +292,7 @@ class TestManageIntradaySQLView(BaseUnitTest):
             assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                    table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
 
-        # generate config and upload it to GCS
+        # generate a NON-DEFAULT config file which disables intraday SQL view and upload it to GCS
         config = FlattenerDatasetConfig()
         store = FlattenerDatasetConfigStorage()
         json_config = config.get_ga_datasets()
@@ -282,18 +301,74 @@ class TestManageIntradaySQLView(BaseUnitTest):
         json_config = config.add_intraday_params_into_config(json_config, intraday_flat_views=False)
         store.upload_config(config=json_config)
 
+        # provide an input to the function which says an intraday table got created
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
 
         manage_intraday_sql_view(SAMPLE_PUBSUB_MESSAGE)
 
+        # assert that views don't exist - they shouldn't be created because they are turned off
+        for partial_table_name in expected_views:
+            assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
+                                       table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
+        # check logs
+        expected_log = ('root', 'INFO',
+                         f"Intraday SQL view for {self.ga_source_intraday.dataset} is not configured")
+
+        logcapture.check_present(expected_log)
+
+    @log_capture()
+    def test_delete_intraday_sql_view(self, logcapture):
+        """
+        - generate a DEFAULT config file
+        - create SQL views
+        - assert that they exist
+        - provide an input to the function which says an intraday table got deleted
+        - assert that views don't exist
+        """
+        # generate a DEFAULT config file
+        self.restore_default_config()
+
+        # create SQL views
+        SAMPLE_PUBSUB_MESSAGE_SOURCE_TABLE_CREATED = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+
+        manage_intraday_sql_view(SAMPLE_PUBSUB_MESSAGE_SOURCE_TABLE_CREATED)
+
+        # assert that SQL views exist
+        expected_views = ["view_flat_events", "view_flat_event_params", "view_flat_items", "view_flat_user_properties"]
+
+        for partial_table_name in expected_views:
+
+            assert self.tbl_exists(dataset=self.ga_source_intraday.dataset,
+                                   table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
+
+        # delete views
+        SAMPLE_PUBSUB_MESSAGE_SOURCE_TABLE_DELETED = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOAD_DATA_INTRADAY_TABLE_DELETED).encode('utf-8'))}
+        manage_intraday_sql_view(SAMPLE_PUBSUB_MESSAGE_SOURCE_TABLE_DELETED)
+
+        # assert that views don't exist
         for partial_table_name in expected_views:
 
             assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                        table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
 
-        expected_log = ('root', 'INFO',
-                         f"Intraday SQL view for {self.ga_source_intraday.dataset} is not configured")
+        # check logs
 
-        logcapture.check_present(expected_log)
+        expected_log_0 = ('root', 'INFO',
+                          f"Deleted an event_params intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        expected_log_1 = ('root', 'INFO',
+                          f"Deleted an events intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        expected_log_2 = ('root', 'INFO',
+                          f"Deleted an items intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        expected_log_3 = ('root', 'INFO',
+                          f"Deleted an user_properties intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        logcapture.check_present(expected_log_0, expected_log_1, expected_log_2, expected_log_3)

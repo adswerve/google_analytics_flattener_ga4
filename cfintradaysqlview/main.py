@@ -1,8 +1,3 @@
-# TODO: unit test to do create and drop view based on input log
-# create
-# delete
-# attempt to create when intraday flattening is not configured
-
 #TODO: refactor other code to account for the new config file
 #TODO: test existing features
 #TODO: GCP integrated testing
@@ -308,7 +303,7 @@ class IntradaySQLView(object):
         client = bigquery.Client(project=self.gcp_project)  # initialize BigQuery client
 
         query_delete_view = f"""
-                    DROP VIEW IF EXISTS `{self.ga_source.gcp_project}.{self.ga_source.dataset}.view_{table_type}_{self.date_shard}`
+                    DROP VIEW IF EXISTS `{self.gcp_project}.{self.dataset}.view_{table_type}_{self.date_shard}`
                     """
         # run the job
         query_job = client.query(query_delete_view)
@@ -376,9 +371,24 @@ def manage_intraday_sql_view(event, context="context"):
 
             else:
                 logging.info(f"Intraday SQL view for {input_event.dataset} is not configured")
+
         # did an intraday table get deleted?
         elif input_event.method_name == "tableservice.delete":
-            pass
+            ga_source.delete_intraday_sql_views(table_type="flat_event_params")
+            logging.info(
+                f"Deleted an {os.environ['EVENT_PARAMS']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+
+            ga_source.delete_intraday_sql_views(table_type="flat_events")
+            logging.info(
+                f"Deleted an {os.environ['EVENTS']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+
+            ga_source.delete_intraday_sql_views(table_type="flat_items")
+            logging.info(
+                f"Deleted an {os.environ['ITEMS']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
+
+            ga_source.delete_intraday_sql_views(table_type="flat_user_properties")
+            logging.info(
+                f"Deleted an {os.environ['USER_PROPERTIES']} intraday SQL view for {input_event.dataset} for {input_event.table_date_shard}")
 
     else:
         logging.warning(f"Dataset {input_event.dataset} is not configured for flattening")
