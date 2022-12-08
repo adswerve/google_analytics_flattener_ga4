@@ -115,7 +115,7 @@ def generate_config(ctx):
   if ctx.properties['triggerType'] == 'http':
       cloud_function['properties']['httpsTrigger']= {}
   elif ctx.properties['triggerType'] == 'pubsub':
-      if ctx.properties['codeLocation'] == "cfintraday/":
+      if ctx.properties['codeLocation'] in ["cfintraday/", "cfintradaysqlview/"]:
           cloud_function['properties']['eventTrigger'] = {
               'resource': f"projects/{config.get_project()}/topics/{config.get_topic_id(intraday=True)}{'config' if function_name.__contains__('config') else ''}",
               'eventType': 'providers/cloud.pubsub/eventTypes/topic.publish'}
