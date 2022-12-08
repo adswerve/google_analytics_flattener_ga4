@@ -1,7 +1,8 @@
 #TODO: unit test to do create and drop view based on input log
 #TODO: refactor other code to account for the new config file
-#TODO: test new feature on GCP
-#TODO: test existing features on GCP
+#TODO: test existing features
+#TODO: GCP integrated testing
+#TODO: test new feature on GCP, by building a config and sending a pub/sub message about table creation and deletion
 
 import base64
 import json

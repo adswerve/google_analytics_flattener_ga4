@@ -40,6 +40,7 @@ class Context(object):
                 , "type": "dmt_resource_type.py"
                 , "dataset": 'analytics_222460912'  # specific to your project
                 , "table_type": 'events'
+                , "date": '20211013'
                 , "date_intraday": '20221114' # any historical date will suffice if that date shard exists in GA_EVENTS_YYYYMMDD
 
             }

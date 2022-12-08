@@ -1,6 +1,7 @@
 from tests.test_base import BaseUnitTest
 from tests.test_base import Context
 from cf.main import GaExportedNestedDataStorage
+from cfintradaysqlview.main import IntradaySQLView
 from tests.rsc import sample_desired_queries
 
 
@@ -10,6 +11,12 @@ class TestGenerateQuery(BaseUnitTest):
                                             dataset=c.env["dataset"],
                                             table_name=c.env["table_type"],
                                             date_shard=c.env["date"],
+                                            )
+
+    ga_source_intraday = IntradaySQLView(gcp_project=c.env["project"],
+                                            dataset=c.env["dataset"],
+                                            table_name=c.env["table_type"],
+                                            date_shard=c.env["date_intraday"],
                                             )
 
     def helper_clean_up_query(self, query):
@@ -41,7 +48,14 @@ class TestGenerateQuery(BaseUnitTest):
         test_events_dynamic_query = self.ga_source.get_events_query()
         test_events_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_events_dynamic_query,
                                                                                      self.ga_source)
-        assert sample_hardcoded_events_query == test_events_dynamic_query
+
+        test_events_dynamic_query_intraday = self.ga_source_intraday.get_events_query()
+        test_events_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(test_events_dynamic_query_intraday,
+                                                                                     self.ga_source_intraday)
+
+        assert test_events_dynamic_query_intraday.endswith("FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`")
+
+        assert sample_hardcoded_events_query == test_events_dynamic_query == test_events_dynamic_query_intraday.replace("_INTRADAY_", "_")
 
     def test_check_sql_query_event_params(self):
         sample_hardcoded_event_params_query = sample_desired_queries.sample_event_params_query
@@ -51,7 +65,13 @@ class TestGenerateQuery(BaseUnitTest):
         test_event_params_dynamic_query = self.helper_clean_up_dynamically_generated_query(
             test_event_params_dynamic_query, self.ga_source)
 
-        assert sample_hardcoded_event_params_query == test_event_params_dynamic_query
+        test_event_params_dynamic_query_intraday = self.ga_source_intraday.get_event_params_query()
+        test_event_params_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(test_event_params_dynamic_query_intraday,
+                                                                                     self.ga_source_intraday)
+
+        assert test_event_params_dynamic_query_intraday.endswith("FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(EVENT_PARAMS)ASEVENT_PARAMS")
+
+        assert sample_hardcoded_event_params_query == test_event_params_dynamic_query == test_event_params_dynamic_query_intraday.replace("_INTRADAY_", "_")
 
     def test_check_sql_query_items(self):
         sample_hardcoded_items_query = sample_desired_queries.sample_items_query
@@ -60,7 +80,13 @@ class TestGenerateQuery(BaseUnitTest):
         test_items_dynamic_query = self.ga_source.get_items_query()
         test_items_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_items_dynamic_query, self.ga_source)
 
-        assert sample_hardcoded_items_query == test_items_dynamic_query
+        test_items_dynamic_query_intraday = self.ga_source_intraday.get_items_query()
+        test_items_dynamic_query_intraday_intraday = self.helper_clean_up_dynamically_generated_query(test_items_dynamic_query_intraday,
+                                                                                     self.ga_source_intraday)
+
+        assert test_items_dynamic_query_intraday_intraday.endswith("FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(ITEMS)ASITEMS")
+
+        assert sample_hardcoded_items_query == test_items_dynamic_query == test_items_dynamic_query_intraday_intraday.replace("_INTRADAY_", "_")
 
     def test_check_sql_query_user_properties(self):
         sample_hardcoded_user_properties_query = sample_desired_queries.sample_user_properties_query
@@ -70,7 +96,13 @@ class TestGenerateQuery(BaseUnitTest):
         test_user_properties_dynamic_query = self.helper_clean_up_dynamically_generated_query(
             test_user_properties_dynamic_query, self.ga_source)
 
-        assert sample_hardcoded_user_properties_query == test_user_properties_dynamic_query
+        test_user_properties_dynamic_query_intraday = self.ga_source_intraday.get_user_properties_query()
+        test_user_properties_dynamic_query_intraday_intraday = self.helper_clean_up_dynamically_generated_query(test_user_properties_dynamic_query_intraday,
+                                                                                     self.ga_source_intraday)
+
+        assert test_user_properties_dynamic_query_intraday_intraday.endswith("FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(USER_PROPERTIES)ASUSER_PROPERTIES")
+
+        assert sample_hardcoded_user_properties_query == test_user_properties_dynamic_query == test_user_properties_dynamic_query_intraday_intraday.replace("_INTRADAY_", "_")
 
     def tearDown(self):
         pass
