@@ -62,17 +62,23 @@ class InputValidatorIntraday(object):
         Every X hours OR every Y minutes
         """
 
-        config_intraday_schedule = self.config[self.dataset].get("intraday_schedule", {
-            "frequency": None,
-            "units": "hours"})
+        config_intraday_flattening = self.config[self.dataset].get("intraday_flattening", {
+                                                                                "intraday_flat_tables_schedule": None,
+                                                                                "intraday_flat_views": True
+                                                                              })
 
-        config_intraday_schedule_frequency = config_intraday_schedule.get("frequency", None)
-        config_intraday_schedule_units = config_intraday_schedule.get("units", 'hours')
-        # TODO: include/handle a situation when it's "hour" or "minute"
-        assert config_intraday_schedule_units in ["hours",
-                                                  "minutes"], "Config file error: intraday schedule units should be minutes or hours"
+        config_intraday_schedule = config_intraday_flattening['intraday_flat_tables_schedule']
 
-        if type(config_intraday_schedule_frequency) == int:
+        if config_intraday_flattening['intraday_flat_tables_schedule']:
+
+            config_intraday_schedule_frequency = config_intraday_schedule.get("frequency", None)
+            config_intraday_schedule_units = config_intraday_schedule.get("units", None)
+
+            # TODO: include/handle a situation when it's "hour" or "minute"
+            assert config_intraday_schedule_units in ["hours",
+                                                      "minutes"], "Config file error: intraday schedule units should be minutes or hours"
+
+
             if config_intraday_schedule_units == "minutes":
                 assert config_intraday_schedule_frequency >= 1 and config_intraday_schedule_frequency <= 59, "Config file error: if intraday schedule units are minutes, then the frequency should be between 1 and 59"
                 cron_schedule = f"*/{config_intraday_schedule_frequency} * * * *"
