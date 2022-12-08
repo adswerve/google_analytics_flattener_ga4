@@ -46,7 +46,7 @@ class InputValidator(object):
         Extract info from the config file on whether we want sharded output, partitioned output or both
         :return:
         """
-        config_output = self.config[self.dataset].get("output", {
+        config_output = self.config[self.dataset].get("output_format", {
             "sharded": True,
             "partitioned": False})
 

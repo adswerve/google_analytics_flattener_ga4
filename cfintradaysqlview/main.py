@@ -1,5 +1,3 @@
-#TODO: refactor other code to account for the new config file
-#TODO: test existing features
 #TODO: deployment
 #TODO: GCP integrated testing
 #TODO: test new feature on GCP, by building a config and sending a pub/sub message about table creation and deletion
