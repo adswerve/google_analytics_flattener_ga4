@@ -227,11 +227,25 @@ class TestManageIntradaySQLView(BaseUnitTest):
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
 
-        # iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
-
         manage_intraday_sql_view(SAMPLE_PUBSUB_MESSAGE)
 
         for partial_table_name in expected_views:
 
             assert self.tbl_exists(dataset=self.ga_source_intraday.dataset,
                                    table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
+
+        # https://testfixtures.readthedocs.io/en/latest/logging.html
+        # https://testfixtures.readthedocs.io/en/latest/api.html#testfixtures.LogCapture.check_present
+        expected_log_0 = ('root', 'INFO',
+                        f"Created an event_params intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        expected_log_1 = ('root', 'INFO',
+                        f"Created an events intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        expected_log_2 = ('root', 'INFO',
+                        f"Created an items intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        expected_log_3 = ('root', 'INFO',
+                        f"Created an user_properties intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
+
+        logcapture.check_present(expected_log_0, expected_log_1, expected_log_2, expected_log_3)
