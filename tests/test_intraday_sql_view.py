@@ -1,0 +1,39 @@
+from tests.test_base import BaseUnitTest
+from tests.test_base import Context
+from cfintradaysqlview.main import IntradaySQLView
+from google.cloud import bigquery
+from google.cloud.exceptions import NotFound
+
+
+class TestCFIntradaySQLView(BaseUnitTest):
+    c = Context()
+    ga_source = IntradaySQLView(gcp_project=c.env["project"],
+                                            dataset=c.env["dataset"],
+                                            table_name=c.env["table_type"],
+                                            date_shard=c.env["date"],
+                                            )
+    def tbl_exists(self, dataset, table_name):
+        """
+         https://stackoverflow.com/questions/28731102/bigquery-check-if-table-already-exists
+         """
+        client = bigquery.Client(project=self.ga_source.gcp_project)
+
+        full_table_path = f"{self.ga_source.gcp_project}.{dataset}.{table_name}"
+        table_id = bigquery.Table(full_table_path)
+        try:
+            client.get_table(table_id)
+            return True
+        except NotFound:
+            return False
+
+    def test_create_sql_view_intraday_event_params(self):
+        self.ga_source.create_view(query=self.ga_source.get_event_params_query(),
+                                     table_type="flat_event_params",
+                                     wait_for_the_query_job_to_complete=True)
+
+        assert self.tbl_exists(dataset=self.ga_source.dataset,
+                               table_name=f"view_flat_event_params_{self.ga_source.date_shard}")
+
+    def tearDown(self):
+        self.delete_all_flat_views_from_dataset()
+

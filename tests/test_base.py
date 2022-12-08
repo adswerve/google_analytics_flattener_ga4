@@ -89,6 +89,27 @@ class BaseUnitTest(unittest.TestCase):
             client.delete_table(table_path)
             logging.info(f"deleted table {table_path}")
 
+
+    def delete_all_flat_views_from_dataset(self):
+
+        logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
+        context = Context()
+        my_project_id = context.env['project']
+        my_dataset_id = context.env['dataset']
+
+        client = bigquery.Client(project=my_project_id)
+        tables = list(
+            client.list_tables(my_dataset_id))  # API request(s), now you have the list of tables in this dataset
+        tables_to_delete = []
+        logging.info("discovered flat views:")
+        for table in tables:
+            if table.table_id.startswith("view_flat_"):  # will perform the action only if the table has the desired prefix
+                tables_to_delete.append(table.table_id)
+                logging.info(table.full_table_id)
+        for table_id in tables_to_delete:
+            table_path = f"{my_project_id}.{my_dataset_id}.{table_id}"
+            client.delete_table(table_path)
+            logging.info(f"deleted view {table_path}")
     def restore_default_config(self):
         # generate config and upload it to GCS
         config = FlattenerDatasetConfig()
