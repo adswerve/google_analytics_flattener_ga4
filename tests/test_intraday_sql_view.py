@@ -1,11 +1,16 @@
-from tests.test_base import BaseUnitTest
-from tests.test_base import Context
-from cfintradaysqlview.main import InputValidatorIntraday, IntradaySQLView, manage_intraday_sql_view
 from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 from testfixtures import log_capture
 import json
 import base64
+
+from cfintradaysqlview.main import InputValidatorIntraday, IntradaySQLView, manage_intraday_sql_view
+from cfconfigbuilder.main import FlattenerDatasetConfig
+from cfconfigbuilder.main import FlattenerDatasetConfigStorage
+
+from tests.test_base import BaseUnitTest
+from tests.test_base import Context
+
 class TestCFIntradaySQLView(BaseUnitTest):
     c = Context()
     ga_source_intraday = IntradaySQLView(gcp_project=c.env["project"],
@@ -208,7 +213,7 @@ class TestManageIntradaySQLView(BaseUnitTest):
         - delete SQL views
         - assert that it doesn't exist
         - generate DEFAULT config file
-        - send input to function which says an intraday
+        - provide an input to the function which says an intraday table got created
         - assert that view does exist
         """
         self.delete_all_flat_views_from_dataset()
@@ -249,3 +254,46 @@ class TestManageIntradaySQLView(BaseUnitTest):
                         f"Created an user_properties intraday SQL view for {self.ga_source_intraday.dataset} for {self.ga_source_intraday.date_shard}")
 
         logcapture.check_present(expected_log_0, expected_log_1, expected_log_2, expected_log_3)
+
+    @log_capture()
+    def test_try_creating_intraday_sql_view_when_it_is_not_configured(self, logcapture):
+        """
+        - delete SQL views
+        - assert that it doesn't exist
+        - generate a NON-DEFAULT config file which disables intraday SQL view
+        - provide an input to the function which says an intraday table got created
+        - assert that view does exist
+        """
+        self.delete_all_flat_views_from_dataset()
+
+        expected_views = ["view_flat_events", "view_flat_event_params", "view_flat_items", "view_flat_user_properties"]
+
+        for partial_table_name in expected_views:
+
+            assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
+                                   table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
+
+        # generate config and upload it to GCS
+        config = FlattenerDatasetConfig()
+        store = FlattenerDatasetConfigStorage()
+        json_config = config.get_ga_datasets()
+        json_config = config.reformat_config(json_config)
+        json_config = config.add_output_format_params_into_config(json_config)
+        json_config = config.add_intraday_params_into_config(json_config, intraday_flat_views=False)
+        store.upload_config(config=json_config)
+
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+
+        manage_intraday_sql_view(SAMPLE_PUBSUB_MESSAGE)
+
+        for partial_table_name in expected_views:
+
+            assert not self.tbl_exists(dataset=self.ga_source_intraday.dataset,
+                                       table_name=f"{partial_table_name}_{self.ga_source_intraday.date_shard}")
+
+        expected_log = ('root', 'INFO',
+                         f"Intraday SQL view for {self.ga_source_intraday.dataset} is not configured")
+
+        logcapture.check_present(expected_log)

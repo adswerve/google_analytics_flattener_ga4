@@ -140,7 +140,7 @@ FROM (
                             })
         return json_config
 
-    def add_intraday_params_into_config(self, json_config, intraday_flat_tables_schedule=None):
+    def add_intraday_params_into_config(self, json_config, intraday_flat_tables_schedule=None, intraday_flat_views=True):
         """
         Adds cfintraday config params to config file.
 
@@ -195,7 +195,7 @@ FROM (
             config.update(
                 {"intraday_flattening": {
                         "intraday_flat_tables_schedule": intraday_flat_tables_schedule,
-                        "intraday_flat_views": True
+                        "intraday_flat_views": intraday_flat_views
                   }
                 })
         return json_config
