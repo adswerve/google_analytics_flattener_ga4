@@ -35,6 +35,7 @@ jobs:
           python -m pip install flake8 pytest
           pip install -r cf/requirements.txt
           pip install -r cfintraday/requirements.txt
+          pip install -r cfintradaysqlview/requirements.txt
           pip install -r tests/requirements-test.txt
       - name: Lint with flake8
         run: |
