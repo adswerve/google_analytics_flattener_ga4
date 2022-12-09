@@ -28,6 +28,8 @@ imports:
 - path: cfconfigbuilderps/requirements.txt
 - path: cfintraday/main.py
 - path: cfintraday/requirements.txt
+- path: cfintradaysqlview/main.py
+- path: cfintradaysqlview/requirements.txt
 
 resources:
 - name: y_resource_bucket_name
@@ -46,9 +48,9 @@ resources:
     codeBucket: 464892960897-function-code-staging-ga4-flattener
     triggerType: pubsub
     location: us-east1
-    timeout: 60s
+    timeout: 540s
     runtime: python37
-    availableMemoryMb: 128
+    availableMemoryMb: 512
     entryPoint: flatten_ga_data
 - name: httpfunction
   type: dmt_cloud_function.py
@@ -75,3 +77,16 @@ resources:
     runtime: python37
     availableMemoryMb: 128
     entryPoint: manage_intraday_schedule
+
+- name: function_intraday_sql_view
+  type: dmt_cloud_function.py
+  properties:
+    # All the files that start with this prefix will be packed in the Cloud Function that builds the cfintraday schedule
+    codeLocation: cfintradaysqlview/
+    codeBucket: 464892960897-function-code-staging-ga4-flattener
+    triggerType: pubsub
+    location: us-east1
+    timeout: 60s
+    runtime: python37
+    availableMemoryMb: 128
+    entryPoint: manage_intraday_sql_view
