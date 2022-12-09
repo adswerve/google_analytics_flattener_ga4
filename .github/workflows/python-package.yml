@@ -68,10 +68,10 @@ jobs:
           # check for the config file
           gsutil stat gs://ga-flattener-deployment-464892960897-adswerve-ga-flat-config/config_datasets.json || echo "ERROR: GCS config file not found"
 
-#      - name: Test with pytest
-#        run: |
-#          # test
-#          pytest --verbose
+      - name: Test with pytest
+        run: |
+          # test
+          pytest --verbose
       - name: Clean up
         run: |
           # clean up
