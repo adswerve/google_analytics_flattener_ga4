@@ -212,6 +212,7 @@ def build_ga_flattener_config(event, context):
     config = FlattenerDatasetConfig()  # object with the SQL query which finds GA4 datasets
     store = FlattenerDatasetConfigStorage()  # object with the bucket_name as its property
     json_config = config.get_ga_datasets()  # build a configurations dict which lists GA4 datasets to flatten
+    json_config = config.reformat_config(json_config)
     json_config = config.add_output_format_params_into_config(json_config)
     json_config = config.add_intraday_params_into_config(json_config)
     store.upload_config(config=json_config)  # upload config file to GCS bucket
