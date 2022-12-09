@@ -314,20 +314,35 @@ If you want non-default config file options, you need to do the following:
 
 - You can enable intraday flattening by editing the config file (see instructions below).
 
-- If you don't have have a daily table yet for a specific date (usually, today or yesterday), but you have an intraday table for that date, then the intraday table will be flattened. You will have flat tables, such as ```flat_events_yyyymmdd```, which are based on a specific date's intraday table ```events_intraday_yyyymmdd``.
+- There are two kinds of intraday table, you can have either of them, neither of them or both. The flattener can write flat intraday to a BigQuery table and/or to a BigQuery SQL view.
 
-- At night, Google deletes the intraday table for a specific date and writes a daily table for that date.
+- About intraday **table** flattening:
 
-- The flattener Cloud Function runs and ovewrites the flat table `flat_events_yyyymmdd`. Now you have flat tables based on **daily** table `events_yyyymmdd`.
+  - If you don't have have a daily table yet for a specific date (usually, today or yesterday), but you have an intraday table for that date, then the intraday table will be flattened. You will have flat tables, such as ```flat_events_yyyymmdd```, which are based on a specific date's intraday table ```events_intraday_yyyymmdd``.
 
+  - At night, Google deletes the intraday table for a specific date and writes a daily table for that date.
+
+  - The flattener Cloud Function runs and ovewrites the flat table `flat_events_yyyymmdd`. Now you have flat tables based on **daily** table `events_yyyymmdd`.
+
+- About intraday **view** flattening:
+  - If it is enabled, you will have SQL views, for example `view_flat_events_{todays_date}`. Such views will be automatically created and deleted based on the source intraday table `events_intraday_yyyymmdd`.
 
 ### How to enable intraday flattening in the config file
 
 
-- You can enable intraday flattening by editing the config file and supplying ```"intraday_schedule": {"frequency": "your_frequency", "units": "your_units"}```. 
+- You can enable intraday flattening by editing the config file and supplying the following part: 
+    ```
+    "intraday_flattening": {
+        "intraday_flat_tables_schedule": {
+          "frequency": 1,
+          "units": "hours"
+        },
+        "intraday_flat_views": true
+      }
+    ```
 
-  - ```"your_units"``` can be ```"hours"``` or ```"minutes"```
-  - ```"your_frequency"``` is an integer.
+  - ```"units"``` can be ```"hours"``` or ```"minutes"```
+  - ```"frequency"``` is an integer.
   - if your units are minutes, then the frequency should be between 1 and 59.
 
 - The flattened intraday tables will be overwritten at the specified frequency. 
@@ -366,20 +381,20 @@ Example 1 - default config
 
 ```
 {
-  "analytics_123456789": {
+  "analytics_222460912": {
     "tables_to_flatten": [
       "events",
       "event_params",
       "user_properties",
       "items"
     ],
-    "intraday_schedule": {
-      "frequency": null,
-      "units": "hours"
-    },
-    "output": {
+    "output_format": {
       "sharded": true,
       "partitioned": false
+    },
+    "intraday_flattening": {
+      "intraday_flat_tables_schedule": null,
+      "intraday_flat_views": true
     }
   }
 }
@@ -387,39 +402,57 @@ Example 1 - default config
 
   - This is the default config file. 
   - 4 flat tables will be created. 
-  - There will be no flattening of the intraday table. 
-  - You may notice that "intraday_schedule" is not necessary, but it provides a template in case you do want intraday flattening.
+  - There will be no flattening of the intraday table written to a BigQuery table, however, there will be an intraday SQL view. 
   - Only sharded output is produced.
 
 Example 2 - excluding tables from flattening.
 
  ```
- {
-  "analytics_123456789": {
+{
+  "analytics_222460912": {
     "tables_to_flatten": [
       "events",
       "event_params"
     ],
-    "intraday_schedule": {
-      "frequency": null,
-      "units": "hours"
-    },
-    "output": {
+    "output_format": {
       "sharded": true,
       "partitioned": false
+    },
+    "intraday_flattening": {
+      "intraday_flat_tables_schedule": null,
+      "intraday_flat_views": true
     }
   }
 }
  ``` 
 
   - This config file will only create 2 flat tables for one GA4 property. 
-  - There will be no intraday flattening.
-  - Only sharded output is produced.
+
 
 Example 3 - adding more datasets, intraday flattening and partitioned output.
 
  ```
 {
+  "analytics_222460912": {
+    "tables_to_flatten": [
+      "events",
+      "event_params",
+      "user_properties",
+      "items"
+    ],
+    "output_format": {
+      "sharded": true,
+      "partitioned": true
+    },
+    "intraday_flattening": {
+      "intraday_flat_tables_schedule": {
+        "frequency": 1,
+        "units": "hours"
+      },
+      "intraday_flat_views": true
+    }
+  },
+
   "analytics_123456789": {
     "tables_to_flatten": [
       "events",
@@ -427,41 +460,28 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
       "user_properties",
       "items"
     ],
-    "intraday_schedule": {
-      "frequency": 15,
-      "units": "minutes"
-    },
-    "output": {
+    "output_format": {
       "sharded": true,
       "partitioned": true
-    }
-  },
-  "analytics_987654321": {
-    "tables_to_flatten": [
-      "events",
-      "event_params",
-      "user_properties",
-      "items"
-    ],
-    "intraday_schedule": {
-      "frequency": 1,
-      "units": "hours"
     },
-    "output": {
-      "sharded": true,
-      "partitioned": true
+    "intraday_flattening": {
+      "intraday_flat_tables_schedule": {
+        "frequency": 30,
+        "units": "minutes"
+      },
+      "intraday_flat_views": true
     }
   }
+
 }
   ```
 
   - This config file will create all 4 flat tables for each of the 2 GA4 properties. 
   - In both properties, we will also do intraday flattening. 
-  - The flattened intraday tables will refresh every 15 minutes for the 1st dataset and every hour for the 2nd dataset.
   - In both properties, we create both shaded and partitioned output.
 
 
-- See another example in ```./sample_config/*``` in this repo.
+- See the examples in the ```./sample_config/*``` in this repo.
 
 ## Backfilling steps
 

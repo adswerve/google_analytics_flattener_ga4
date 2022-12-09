@@ -5,14 +5,14 @@
       "event_params",
       "user_properties",
       "items"
-    ]
-  },
-  "output_format": {
-    "sharded": true,
-    "partitioned": false
-  },
-  "intraday_flattening": {
-    "intraday_flat_tables_schedule": null,
-    "intraday_flat_views": true
+    ],
+    "output_format": {
+      "sharded": true,
+      "partitioned": false
+    },
+    "intraday_flattening": {
+      "intraday_flat_tables_schedule": null,
+      "intraday_flat_views": true
+    }
   }
 }

@@ -1,5 +1,3 @@
-#TODO: deployment
-#TODO: GCP integrated testing
 #TODO: test new feature on GCP, by building a config and sending a pub/sub message about table creation and deletion
 
 import base64
