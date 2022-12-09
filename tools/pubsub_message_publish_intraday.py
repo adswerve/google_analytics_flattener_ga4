@@ -626,7 +626,7 @@ publisher = pubsub_v1.PublisherClient()
 
 topic_path = publisher.topic_path(project_id, topic_id)
 
-logging.info('Publishing intraday message to topic %s for %s.%s.events_%s' % (topic_id, project_id, dataset_id, date_shard))
+logging.info(f"Publishing a {message_type} intraday message to topic {topic_id} for {project_id}.{dataset_id}.events_{date_shard}")
 
 if not dry_run:
     if message_type == "CREATE":
