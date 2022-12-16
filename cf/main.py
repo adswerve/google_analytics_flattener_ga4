@@ -52,10 +52,8 @@ class InputValidator(object):
 
         return config_output
 
-
 class GaExportedNestedDataStorage(object):
-    def __init__(self, gcp_project, dataset, table_name, date_shard,
-                 type='DAILY'):  # TODO: set this to INTRADAY for intraday flattening. Right now this type parameter is not being used at all, daily vs intraday is set somewhere else
+    def __init__(self, gcp_project, dataset, table_name, date_shard):  # TODO: set this to INTRADAY for intraday flattening. Right now this type parameter is not being used at all, daily vs intraday is set somewhere else
 
         # main configurations
         self.gcp_project = gcp_project
@@ -63,7 +61,6 @@ class GaExportedNestedDataStorage(object):
         self.date_shard = date_shard
         self.date = datetime.strptime(self.date_shard, '%Y%m%d')
         self.table_name = table_name
-        self.type = type
 
         # The next several properties will correspond to GA4 fields
 
@@ -203,6 +200,9 @@ class GaExportedNestedDataStorage(object):
 
         self.partitioning_column = "event_date"
 
+    def source_table_is_intraday(self):
+        return "intraday" in self.table_name
+
     def get_unique_event_id(self, unique_event_id_fields):
         """
         build unique event id
@@ -210,6 +210,7 @@ class GaExportedNestedDataStorage(object):
         return f"CONCAT({unique_event_id_fields[0]}, '_', {unique_event_id_fields[1]}, '_', {unique_event_id_fields[2]}, '_', {unique_event_id_fields[3]}) as event_id"
 
     def get_event_params_query(self):
+        source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
         qry = f"""
               SELECT 
                   PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name}, 
@@ -219,7 +220,8 @@ class GaExportedNestedDataStorage(object):
                       CAST({self.event_params_fields[2]} AS STRING), 
                       CAST({self.event_params_fields[3]} AS STRING), 
                       CAST({self.event_params_fields[4]} AS STRING)
-                  ) AS event_params_value
+                  ) AS event_params_value,
+                  {source_table_type} AS source_table_type
               FROM 
                 `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
               ,UNNEST (event_params) AS event_params"""
