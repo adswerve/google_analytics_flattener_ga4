@@ -61,6 +61,7 @@ class GaExportedNestedDataStorage(object):
         self.date_shard = date_shard
         self.date = datetime.strptime(self.date_shard, '%Y%m%d')
         self.table_name = table_name
+        self.source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
 
         # The next several properties will correspond to GA4 fields
 
@@ -210,7 +211,7 @@ class GaExportedNestedDataStorage(object):
         return f"CONCAT({unique_event_id_fields[0]}, '_', {unique_event_id_fields[1]}, '_', {unique_event_id_fields[2]}, '_', {unique_event_id_fields[3]}) as event_id"
 
     def get_event_params_query(self):
-        source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
+
         qry = f"""
               SELECT 
                   PARSE_DATE('%Y%m%d', {self.date_field_name}) AS {self.date_field_name}, 
@@ -221,7 +222,7 @@ class GaExportedNestedDataStorage(object):
                       CAST({self.event_params_fields[3]} AS STRING), 
                       CAST({self.event_params_fields[4]} AS STRING)
                   ) AS event_params_value,
-                  {source_table_type} AS source_table_type
+                  {self.source_table_type} AS source_table_type
               FROM 
                 `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
               ,UNNEST (event_params) AS event_params"""
@@ -240,7 +241,8 @@ class GaExportedNestedDataStorage(object):
                     CAST({self.user_properties_fields[3]} AS STRING), 
                     CAST({self.user_properties_fields[4]} AS STRING)
                 ) AS user_properties_value,
-                {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}
+                {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")},
+                {self.source_table_type} AS source_table_type
             FROM 
                 `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
             ,UNNEST (user_properties) AS user_properties"""
@@ -255,7 +257,9 @@ class GaExportedNestedDataStorage(object):
         for field in self.items_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f""" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+        qry += f""" 
+        ,{self.source_table_type} AS source_table_type
+        FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
         ,UNNEST (items) AS items"""
 
         return qry
@@ -267,7 +271,8 @@ class GaExportedNestedDataStorage(object):
         for field in self.events_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
+        qry += f""" ,{self.source_table_type} AS source_table_type 
+        FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"""
 
         return qry
 

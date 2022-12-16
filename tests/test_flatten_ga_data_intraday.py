@@ -9,8 +9,8 @@ class TestCFFlattenMethods(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
-                                            table_name=c.env["table_type"],
-                                            date_shard=c.env["date"],
+                                            table_name=c.env["table_type_intraday"],
+                                            date_shard=c.env["date_intraday"],
                                             )
 
     def tbl_exists(self, dataset, table_name):
