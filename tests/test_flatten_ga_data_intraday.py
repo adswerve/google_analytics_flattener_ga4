@@ -5,7 +5,7 @@ from google.cloud import bigquery
 from google.cloud.exceptions import NotFound
 
 
-class TestCFFlattenMethods(BaseUnitTest):
+class TestCFFlattenMethodsIntraday(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
@@ -61,5 +61,4 @@ class TestCFFlattenMethods(BaseUnitTest):
         # TODO: test intraday flattening
 
     def tearDown(self):
-        pass
-        # self.delete_all_flat_tables_from_dataset()
+        self.delete_all_flat_tables_from_dataset()

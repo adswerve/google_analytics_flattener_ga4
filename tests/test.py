@@ -1,6 +1,7 @@
 import unittest
 from tests.test_build_ga_flattener_config import TestCFBuildFlattenerGaDatasetConfig
 from tests.test_flatten_ga_data import TestCFFlattenMethods
+from tests.test_flatten_ga_data_intraday import TestCFFlattenMethodsIntraday
 from tests.test_generate_config_b import TestGenerateConfigB
 from tests.test_generate_config_cf import TestGenerateConfigCf
 from tests.test_generate_config_lm import TestGenerateConfigLm
@@ -19,6 +20,7 @@ if __name__ == '__main__':
     # tests
     test_suite.addTest(unittest.makeSuite(TestCFBuildFlattenerGaDatasetConfig))
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethods))
+    test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsIntraday))
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigB))
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigCf))
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigLm))

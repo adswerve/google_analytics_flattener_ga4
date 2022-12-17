@@ -61,5 +61,4 @@ class TestCFFlattenMethods(BaseUnitTest):
         # TODO: test intraday flattening
 
     def tearDown(self):
-        pass
-        # self.delete_all_flat_tables_from_dataset()
+        self.delete_all_flat_tables_from_dataset()
