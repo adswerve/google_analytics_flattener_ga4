@@ -10,7 +10,7 @@ env:
 
 on:
   push:
-    branches: [ master, staging , feature/intraday-sql-view]
+    branches: [ master, staging , feature/intraday-sql-view, feature/intraday-vs-daily-column-in-flat-data]
   pull_request:
     branches: [ master ]
 
