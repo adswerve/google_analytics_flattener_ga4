@@ -62,8 +62,7 @@ class InputValidatorIntraday(object):
         return self.config[self.dataset]["intraday_flattening"]["intraday_flat_views"] == True
 
 class IntradaySQLView(object):
-    def __init__(self, gcp_project, dataset, table_name, date_shard,
-                 type='INTRADAY'):  # TODO: set this to INTRADAY for intraday flattening. Right now this type parameter is not being used at all, daily vs intraday is set somewhere else
+    def __init__(self, gcp_project, dataset, table_name, date_shard):
 
         # main configurations
         self.gcp_project = gcp_project
@@ -71,7 +70,7 @@ class IntradaySQLView(object):
         self.date_shard = date_shard
         self.date = datetime.strptime(self.date_shard, '%Y%m%d')
         self.table_name = table_name
-        self.type = type
+        self.source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
 
         # The next several properties will correspond to GA4 fields
 
@@ -211,6 +210,9 @@ class IntradaySQLView(object):
 
         self.partitioning_column = "event_date"
 
+    def source_table_is_intraday(self):
+        return "intraday" in self.table_name
+
     def get_unique_event_id(self, unique_event_id_fields):
         """
         build unique event id
@@ -227,7 +229,8 @@ class IntradaySQLView(object):
                       CAST({self.event_params_fields[2]} AS STRING), 
                       CAST({self.event_params_fields[3]} AS STRING), 
                       CAST({self.event_params_fields[4]} AS STRING)
-                  ) AS event_params_value
+                  ) AS event_params_value,
+                  {self.source_table_type} AS source_table_type
               FROM 
                 `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
               ,UNNEST (event_params) AS event_params"""
@@ -246,7 +249,8 @@ class IntradaySQLView(object):
                     CAST({self.user_properties_fields[3]} AS STRING), 
                     CAST({self.user_properties_fields[4]} AS STRING)
                 ) AS user_properties_value,
-                {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")}
+                {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")},
+                {self.source_table_type} AS source_table_type
             FROM 
                 `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
             ,UNNEST (user_properties) AS user_properties"""
@@ -261,7 +265,9 @@ class IntradaySQLView(object):
         for field in self.items_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f""" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+        qry += f""" 
+        ,{self.source_table_type} AS source_table_type
+        FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
         ,UNNEST (items) AS items"""
 
         return qry
@@ -273,7 +279,8 @@ class IntradaySQLView(object):
         for field in self.events_fields:
             qry += f",{field} as {field.replace('.', '_')}"
 
-        qry += f" FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"
+        qry += f""" ,{self.source_table_type} AS source_table_type 
+        FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"""
 
         return qry
 

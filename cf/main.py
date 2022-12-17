@@ -53,7 +53,7 @@ class InputValidator(object):
         return config_output
 
 class GaExportedNestedDataStorage(object):
-    def __init__(self, gcp_project, dataset, table_name, date_shard):  # TODO: set this to INTRADAY for intraday flattening. Right now this type parameter is not being used at all, daily vs intraday is set somewhere else
+    def __init__(self, gcp_project, dataset, table_name, date_shard):
 
         # main configurations
         self.gcp_project = gcp_project
