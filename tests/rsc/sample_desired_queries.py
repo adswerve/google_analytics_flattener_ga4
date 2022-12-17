@@ -1,15 +1,3 @@
-# TODO: maybe store them .sql files and read them as string
-# example: https://cloud.google.com/blog/products/application-development/how-to-schedule-a-recurring-python-script-on-gcp
-# def file_to_string(sql_path):
-#     """Converts a SQL file holding a SQL query to a string.
-#     Args:
-#         sql_path: String containing a file path
-#     Returns:
-#         String representation of a file's contents
-#     """
-#     with open(sql_path, 'r') as sql_file:
-#         return sql_file.read()
-
 sample_events_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
@@ -82,7 +70,10 @@ SELECT
     ecommerce.tax_value_in_usd AS ecommerce_tax_value_in_usd,
     ecommerce.tax_value AS ecommerce_tax_value,
     ecommerce.unique_items AS ecommerce_unique_items,
-    ecommerce.transaction_id AS ecommerce_transaction_id
+    ecommerce.transaction_id AS ecommerce_transaction_id,
+    
+    'daily' AS source_table_type
+    
  FROM `gcp-project.dataset.events_date_shard` 
 """
 
@@ -95,7 +86,10 @@ SELECT
         CAST(event_params.value.int_value AS STRING),
         CAST(event_params.value.float_value AS STRING),
         CAST(event_params.value.double_value AS STRING) 
-    ) AS event_params_value                        
+    ) AS event_params_value,
+    
+    'daily' AS source_table_type
+                            
 FROM `gcp-project.dataset.events_date_shard` 
 ,UNNEST (event_params) AS event_params
 """
@@ -112,7 +106,10 @@ SELECT
         CAST(user_properties.value.double_value AS STRING) 
     ) AS user_properties_value,
                 
-    user_properties.value.set_timestamp_micros AS user_properties_value_set_timestamp_micros
+    user_properties.value.set_timestamp_micros AS user_properties_value_set_timestamp_micros,
+    
+    'daily' AS source_table_type
+    
  FROM `gcp-project.dataset.events_date_shard` 
   ,UNNEST (user_properties) AS user_properties
 """
@@ -148,7 +145,9 @@ SELECT
     items.promotion_id AS items_promotion_id,
     items.promotion_name AS items_promotion_name,
     items.creative_name AS items_creative_name,
-    items.creative_slot AS items_creative_slot
+    items.creative_slot AS items_creative_slot,
+    
+    'daily' AS source_table_type
 
  FROM `gcp-project.dataset.events_date_shard` 
   ,UNNEST(items) AS items
