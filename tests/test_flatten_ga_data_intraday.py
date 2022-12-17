@@ -58,7 +58,6 @@ class TestCFFlattenMethodsIntraday(BaseUnitTest):
 
         assert self.tbl_exists(dataset=self.ga_source.dataset,
                                table_name=f"flat_user_properties_{self.ga_source.date_shard}")
-        # TODO: test intraday flattening
 
     def tearDown(self):
         self.delete_all_flat_tables_from_dataset()
