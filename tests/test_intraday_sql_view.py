@@ -204,6 +204,36 @@ class TestManageIntradaySQLView(BaseUnitTest):
         "receiveTimestamp": "2021-10-11T16:55:00.433230860Z"
     }
 
+
+    def test_intraday_input_validator_table_created(self):
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOG_INTRADAY_TABLE_CREATED).encode('utf-8'))}
+
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+
+        self.assertEqual(self.date_shard, iv.table_date_shard)
+        self.assertEqual(self.project_id, iv.gcp_project)
+        self.assertEqual(self.dataset_id, iv.dataset)
+        self.assertEqual(self.table_type, iv.table_name)
+        assert isinstance(iv.valid_dataset(), bool)
+        self.assertTrue(True)
+
+    def test_intraday_input_validator_table_deleted(self):
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(self.SAMPLE_LOAD_DATA_INTRADAY_TABLE_DELETED).encode('utf-8'))}
+
+        iv = InputValidatorIntraday(SAMPLE_PUBSUB_MESSAGE)
+
+        self.assertEqual(self.date_shard, iv.table_date_shard)
+        self.assertEqual(self.project_id, iv.gcp_project)
+        self.assertEqual(self.dataset_id, iv.dataset)
+        self.assertEqual(self.table_type, iv.table_name)
+        assert isinstance(iv.valid_dataset(), bool)
+        self.assertTrue(True)
+
+
     #TODO: remove repetition, store tbl_exists in a helper module
     def tbl_exists(self, dataset, table_name):
         """
