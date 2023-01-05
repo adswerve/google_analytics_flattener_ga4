@@ -26,11 +26,15 @@ class InputValidatorIntraday(object):
                     1)
 
             elif self.method_name == "tableservice.delete":
+                # we assume that there's only 1 element in the array. It is true, because for each deleted intraday table there will be a separate log
+                # nevertheless, let's check the assumption on an off-chance that there are many elements in the array
+                assert len(message_payload['protoPayload'][
+                               "authorizationInfo"]) == 1, f"more than 1 element in the log array message_payload['protoPayload']['authorizationInfo']: {message_payload['protoPayload']['authorizationInfo']}"
                 bq_destination_table = message_payload['protoPayload']["authorizationInfo"][0]["resource"]
                 #  https://www.kite.com/python/answers/how-to-get-the-substring-between-two-markers-in-python
 
                 self.gcp_project = re.search(
-                    r'projects\/(.*?)\/datasets\/analytics_\d\d\d\d\d\d\d\d\d\/tables\/events_intraday_20\d\d\d\d\d\d$',
+                    r'^projects\/(.*?)\/datasets\/analytics_\d\d\d\d\d\d\d\d\d\/tables\/events_intraday_20\d\d\d\d\d\d$',
                     bq_destination_table).group(1)
 
                 self.dataset = re.search(r'(analytics_\d\d\d\d\d\d\d\d\d)', bq_destination_table).group(1)
