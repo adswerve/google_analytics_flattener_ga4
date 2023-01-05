@@ -262,7 +262,7 @@ class TestManageIntradayFlatteningSchedule(BaseUnitTest):
 
         # check log
         expected_log = ('root', 'WARNING',
-                        f"Dataset {self.dataset_id} is not configured for intraday flattening")
+                        f"Dataset {self.dataset_id} is not configured for intraday table flattening")
 
         logcapture.check_present(expected_log, )
 
