@@ -233,7 +233,7 @@ def manage_intraday_schedule(event, context="context"):
                         f"Error creating a Scheduler job {job_id_full_path} (the job probably already exists): {e}")
 
             else:
-                logging.warning(f"Dataset {input_event.dataset} is not configured for intraday flattening")
+                logging.warning(f"Dataset {input_event.dataset} is not configured for intraday table flattening")
 
         # did an intraday table get deleted?
         elif input_event.method_name == "tableservice.delete":
