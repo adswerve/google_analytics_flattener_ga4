@@ -3,3 +3,4 @@ google-cloud-storage==1.35.0
 google-cloud-bigquery==2.7.0
 google-cloud-pubsub==2.2.0
 google-cloud-bigquery-storage==2.10.1
+pytz~=2022.7.1
