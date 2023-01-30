@@ -486,8 +486,9 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
 ## Backfilling steps
 
 **The following steps are only required if you plan to backfill historical tables.**
+1. Make sure that you performed the steps from [backfilling prerequisites](#backfilling-prerequisites).
 
-2. Modify values in the configuration section of tools/pubsub_message_publish.py accordingly.  **Suggestion:** Use a
+2. Modify values in the configuration section of `tools/pubsub_message_publish.py` accordingly.  **Suggestion:** Use a
    small date range to start, like yesterday only.
 3. From a gcloud command prompt, authenticate the installing user using command:
    ```gcloud auth application-default login```
@@ -502,6 +503,46 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
     * flat_events_yyyymmdd
     * flat_items_yyyymmdd
     * flat_user_properties_yyyymmdd
+
+Tip: if you are having issues running the backfill locally (on your machine) due to some local environment peculiarities, try running the backfill on GCP using Cloud Shell.
+
+Activate GCP Cloud Shell and run the following commands:
+```
+
+git clone https://github.com/adswerve/google_analytics_flattener_ga4
+
+# go into root dir of the project
+cd google_analytics_flattener_ga4
+
+# make sure you're in the right directory:
+ls -a
+
+# Make the required changes to backfill Python script. Modify values in the configuration section of `tools/pubsub_message_publish.py` accordingly
+
+python3 -m pip install --upgrade pip
+
+python3 -m pip install --user virtualenv
+
+python3 -m venv venv_ga_flattener
+
+source venv_ga_flattener/bin/activate
+
+pip install -r cf/requirements.txt
+
+# you will only need this command on your machine. While using Cloud Shell, you can skip this command
+# gcloud auth application-default login
+
+# make sure we're inside the venv and inside the root flattener directory
+
+python -m tools.pubsub_message_publish
+
+# authorize the request in GCP UI if required
+
+# the backfill script will print something like this: 
+# INFO: Publishing backfill message to topic ga-flattener-deployment-topic for {project_id}.analytics_{ga4_property_id}.events_{date_shard}
+
+```
+
 
 ## Un-install steps ##
 
