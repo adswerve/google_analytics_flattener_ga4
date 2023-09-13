@@ -183,7 +183,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
     gcloud init 
 
     # activate the configuration
-    gcloud config congirations activate {configuration_name} 
+    gcloud config configurations activate {configuration_name} 
 
     # make sure you're in the right GCP project)
     gcloud config configurations list

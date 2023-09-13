@@ -382,12 +382,15 @@ def flatten_ga_data(event, context):
          event (dict): Event payload.
          context (google.cloud.functions.Context): Metadata for the event.
     """
+
     input_event = InputValidator(event)
-    output_config = input_event.get_output_configuration()
-    output_config_sharded = output_config["sharded"]
-    output_config_partitioned = output_config["partitioned"]
 
     if input_event.valid_dataset():
+
+        output_config = input_event.get_output_configuration()
+        output_config_sharded = output_config["sharded"]
+        output_config_partitioned = output_config["partitioned"]
+
         ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
                                                 dataset=input_event.dataset,
                                                 table_name=input_event.table_name,
