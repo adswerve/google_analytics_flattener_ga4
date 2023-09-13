@@ -15,7 +15,7 @@ class Context(object):
         # TODO: I put dataset, table_type and date under context env var, but probably they don't really belong here(?)
         if sys.platform.startswith('linux'):  # if we're on a GitHub CI/CD VM
             self.env = {
-                "deployment": "ga-flattener-deployment"
+                "deployment": "ga4-flattener-deployment"
                 , "project": "as-dev-ga4-flattener-320623"
                 , "current_time": 1626736965
                 , "project_number": "464892960897"
@@ -32,7 +32,7 @@ class Context(object):
             }
         else:  # if we are testing locally
             self.env = {
-                "deployment": "ga-flattener-deployment"
+                "deployment": "ga4-flattener-deployment"
                 , "project": "as-dev-ga4-flattener-320623"
                 , "current_time": 1626736965
                 , "project_number": "464892960897"

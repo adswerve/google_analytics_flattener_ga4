@@ -253,7 +253,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * An example of a valid
       name is in this command: 
       
-      ```gcloud deployment-manager deployments create ga-flattener-deployment --config ga_flattener.yaml```
+      ```gcloud deployment-manager deployments create ga4-flattener-deployment --config ga_flattener.yaml```
 
     * Please refer to the [documentation](https://cloud.google.com/deployment-manager/docs/deployments) for more examples of valid deployment names.
     
@@ -539,7 +539,7 @@ python -m tools.pubsub_message_publish
 # authorize the request in GCP UI if required
 
 # the backfill script will print something like this: 
-# INFO: Publishing backfill message to topic ga-flattener-deployment-topic for {project_id}.analytics_{ga4_property_id}.events_{date_shard}
+# INFO: Publishing backfill message to topic ga4-flattener-deployment-topic for {project_id}.analytics_{ga4_property_id}.events_{date_shard}
 
 ```
 

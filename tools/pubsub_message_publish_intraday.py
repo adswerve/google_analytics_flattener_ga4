@@ -17,7 +17,7 @@ c = Context()
 '''*****************************'''
 ''' Configuration Section Start '''
 '''*****************************'''
-topic_id = "ga-flattener-deployment-topic-intraday"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
+topic_id = "ga4-flattener-deployment-topic-intraday"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
 project_id = "as-dev-ga4-flattener-320623"  # GCP project ID, example:  [PROJECT_ID]
 project_number = "464892960897"
 dataset_id = "analytics_222460912"
