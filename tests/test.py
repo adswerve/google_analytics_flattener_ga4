@@ -13,6 +13,7 @@ from tests.test_manage_intraday_schedule import TestManageIntradayFlatteningSche
 from tests.test_partitioning import TestPartitioning
 from tests.test_valid_resource_names import TestValidResourceNames
 from tests.test_verify_queries import TestGenerateQuery
+from test_verify_queries_schema_change import TestGenerateQuerySchemaChange1, TestGenerateQuerySchemaChange2
 
 if __name__ == '__main__':
     test_suite = unittest.TestSuite()
@@ -34,6 +35,8 @@ if __name__ == '__main__':
     test_suite.addTest(unittest.makeSuite(TestPartitioning))
     test_suite.addTest(unittest.makeSuite(TestValidResourceNames))
     test_suite.addTest(unittest.makeSuite(TestGenerateQuery))
+    test_suite.addTest(unittest.makeSuite(TestGenerateQuerySchemaChange1))
+    test_suite.addTest(unittest.makeSuite(TestGenerateQuerySchemaChange2))
 
     # verbosity: 0 (quiet), 1 (default), 2 (verbose)
     runner = unittest.TextTestRunner(verbosity=2)
