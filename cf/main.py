@@ -197,7 +197,26 @@ class GaExportedNestedDataStorage(object):
             "ecommerce.tax_value",
             "ecommerce.unique_items",
             "ecommerce.transaction_id"
+
         ]
+
+        self.collected_traffic_source_fields = [
+        "collected_traffic_source.manual_campaign_id",
+        "collected_traffic_source.manual_campaign_name",
+        "collected_traffic_source.manual_source",
+        "collected_traffic_source.manual_medium",
+        "collected_traffic_source.manual_term",
+        "collected_traffic_source.manual_content",
+        "collected_traffic_source.gclid",
+        "collected_traffic_source.dclid",
+        "collected_traffic_source.srsltid"
+        ]
+
+        if self.date_shard >= '20230503':
+            self.events_fields.extend(self.collected_traffic_source_fields)
+
+        if self.date_shard >= "20230717":
+            self.events_fields.append("is_active_user")
 
         self.partitioning_column = "event_date"
 
