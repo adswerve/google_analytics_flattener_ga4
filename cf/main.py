@@ -15,13 +15,9 @@ class InputValidator(object):
             # validate input message
             # extract information from message payload
             message_payload = json.loads(base64.b64decode(event['data']).decode('utf-8'))
-            bq_destination_table = \
-                message_payload['protoPayload']['serviceData']['jobCompletedEvent']['job']['jobConfiguration']['load'][
-                    'destinationTable']
-            self.gcp_project = bq_destination_table['projectId']
-            self.dataset = bq_destination_table['datasetId']
-            self.table_date_shard = re.search(r'_(20\d\d\d\d\d\d)$', bq_destination_table['tableId']).group(1)
-            self.table_name = re.search(r'(events.*)_20\d\d\d\d\d\d$', bq_destination_table['tableId']).group(1)
+            bq_destination_table_path = \
+                message_payload['protoPayload']['metadata']['tableCreation']['table']['tableName']
+            self.gcp_project, self.dataset,  self.table_type, self.table_date_shard = self.extract_values(bq_destination_table_path)
         except AttributeError:
             logging.critical(f"invalid message: {message_payload}")
         try:
@@ -34,6 +30,15 @@ class InputValidator(object):
                 self.config = json.load(config_json)
         except Exception as e:
             logging.critical(f"flattener configuration error: {e}")
+
+    def extract_values(self, string):
+        pattern = re.compile(r'projects\/(.*?)\/datasets\/(.*?)\/tables\/(events.*?)_(20\d\d\d\d\d\d)$')
+        match = pattern.search(string)
+        if match:
+            project, dataset, table_type, shard = match.groups()
+            return project, dataset, table_type, shard
+        else:
+            raise ValueError("String format is incorrect")
 
     def valid_dataset(self):
         return self.dataset in self.config.keys()
@@ -53,14 +58,14 @@ class InputValidator(object):
         return config_output
 
 class GaExportedNestedDataStorage(object):
-    def __init__(self, gcp_project, dataset, table_name, date_shard):
+    def __init__(self, gcp_project, dataset, table_type, date_shard):
 
         # main configurations
         self.gcp_project = gcp_project
         self.dataset = dataset
         self.date_shard = date_shard
         self.date = datetime.strptime(self.date_shard, '%Y%m%d')
-        self.table_name = table_name
+        self.table_type = table_type
         self.source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
 
         # The next several properties will correspond to GA4 fields
@@ -221,7 +226,7 @@ class GaExportedNestedDataStorage(object):
         self.partitioning_column = "event_date"
 
     def source_table_is_intraday(self):
-        return "intraday" in self.table_name
+        return "intraday" in self.table_type
 
     def get_unique_event_id(self, unique_event_id_fields):
         """
@@ -243,7 +248,7 @@ class GaExportedNestedDataStorage(object):
                   ) AS event_params_value,
                   {self.source_table_type} AS source_table_type
               FROM 
-                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+                `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
               ,UNNEST (event_params) AS event_params"""
 
         return qry
@@ -263,7 +268,7 @@ class GaExportedNestedDataStorage(object):
                 {self.user_properties_fields[5]} as {self.user_properties_fields[5].replace(".", "_")},
                 {self.source_table_type} AS source_table_type
             FROM 
-                `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+                `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
             ,UNNEST (user_properties) AS user_properties"""
 
         return qry
@@ -278,7 +283,7 @@ class GaExportedNestedDataStorage(object):
 
         qry += f""" 
         ,{self.source_table_type} AS source_table_type
-        FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`
+        FROM `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
         ,UNNEST (items) AS items"""
 
         return qry
@@ -291,7 +296,7 @@ class GaExportedNestedDataStorage(object):
             qry += f",{field} as {field.replace('.', '_')}"
 
         qry += f""" ,{self.source_table_type} AS source_table_type 
-        FROM `{self.gcp_project}.{self.dataset}.{self.table_name}_{self.date_shard}`"""
+        FROM `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`"""
 
         return qry
 
@@ -412,7 +417,7 @@ def flatten_ga_data(event, context):
 
         ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
                                                 dataset=input_event.dataset,
-                                                table_name=input_event.table_name,
+                                                table_type=input_event.table_type,
                                                 date_shard=input_event.table_date_shard)
 
         # EVENT_PARAMS

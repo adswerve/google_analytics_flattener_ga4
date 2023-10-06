@@ -18,12 +18,18 @@ class TestInputValidator(BaseUnitTest):
         table_type = c.env["table_type"]
 
         # inputs
-        SAMPLE_LOAD_DATA = {"protoPayload": {
-            "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
-                "datasetId": dataset_id
-                , "projectId": project_id
-                , "tableId": f"{table_type}_{date_shard}"
-            }}}}}}}}
+        SAMPLE_LOAD_DATA = {
+            "protoPayload": {
+                "metadata": {
+                    "tableCreation": {
+                        "table": {
+                            "tableName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
+                        }
+                    }
+                }
+            }
+        }
+
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'))}
@@ -35,7 +41,7 @@ class TestInputValidator(BaseUnitTest):
         self.assertEqual(date_shard, iv.table_date_shard)
         self.assertEqual(project_id, iv.gcp_project)
         self.assertEqual(dataset_id, iv.dataset)
-        self.assertEqual(table_type, iv.table_name)
+        self.assertEqual(table_type, iv.table_type)
         assert isinstance(iv.valid_dataset(), bool)
         self.assertTrue(True)
 

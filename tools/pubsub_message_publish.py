@@ -20,6 +20,7 @@ dry_run = False  # set to False to Backfill.  Setting to True will not pubish an
 backfill_range_start = datetime.datetime(2021, 7, 20)
 backfill_range_end = datetime.datetime(2021, 7, 20)  # datetime.datetime.today()
 datasets_to_backfill = ["analytics_222460912"]  # GA properties to backfill, "analytics_222460912"
+table_type = "events"
 '''*****************************'''
 '''  Configuration Section End  '''
 '''*****************************'''
@@ -44,13 +45,17 @@ topic_path = publisher.topic_path(project_id, topic_id)
 for db in range(0, num_days_in_backfill_range):
     date_shard = (backfill_range_end - datetime.timedelta(days=db)).strftime('%Y%m%d')
     for dataset_id in datasets_to_backfill:
-        SAMPLE_LOAD_DATA = {"protoPayload": {
-            "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
-                "datasetId": dataset_id
-                , "projectId": project_id
-                , "tableId": f"events_{date_shard}"
-            }}}}}}}}
-
+        SAMPLE_LOAD_DATA = {
+            "protoPayload": {
+                "metadata": {
+                    "tableCreation": {
+                        "table": {
+                            "tableName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
+                        }
+                    }
+                }
+            }
+        }
         logging.info(f"Publishing backfill message to topic {topic_id} for {project_id}.{dataset_id}.events_{date_shard}")
         if not dry_run:
             publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'

@@ -52,10 +52,10 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
     def __init__(self, context_environment_vars):
         super(GaFlattenerDeploymentConfiguration, self).__init__(context_environment_vars)
         self.FILTER = '''
-        resource.type="bigquery_resource" 
-        protoPayload.methodName="jobservice.jobcompleted" 
-        protoPayload.serviceData.jobCompletedEvent.eventName="load_job_completed" 
+        resource.type="bigquery_dataset" 
+        protoPayload.methodName="google.cloud.bigquery.v2.JobService.InsertJob" 
         protoPayload.authenticationInfo.principalEmail="firebase-measurement@system.gserviceaccount.com" 
+        severity: "NOTICE"
         NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"events_intraday"
         '''
         self.FILTER_INTRADAY = '''
