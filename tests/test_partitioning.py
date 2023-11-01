@@ -140,7 +140,7 @@ class TestPartitioning(BaseUnitTest):
         self.assertEqual("event_date", table_partitioned.time_partitioning._properties['field'])
 
         # verify date field
-        self.assertEqual(SchemaField('event_date', 'DATE', 'NULLABLE', None, (), None), table_partitioned.schema[0])
+        self.assertEqual(SchemaField('event_date', 'DATE', 'NULLABLE', None, None, (), None), table_partitioned.schema[0])
 
         # extract info about sharded output
         table_name_sharded = f"{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_{self.ga_source.date_shard}"
