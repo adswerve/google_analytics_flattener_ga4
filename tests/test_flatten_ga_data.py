@@ -9,7 +9,7 @@ class TestCFFlattenMethods(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
-                                            table_name=c.env["table_type"],
+                                            table_type=c.env["table_type"],
                                             date_shard=c.env["date"],
                                             )
 
@@ -63,7 +63,7 @@ class TestCFFlattenMethodsSchemaChangeCollectedTrafficSource(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset_adswerve"],
-                                            table_name=c.env["table_type"],
+                                            table_type=c.env["table_type"],
                                             date_shard=c.env["date_collected_traffic_source_added"],
                                             )
 
@@ -90,7 +90,7 @@ class TestCFFlattenMethodsSchemaChangeIsActiveUser(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset_adswerve"],
-                                            table_name=c.env["table_type"],
+                                            table_type=c.env["table_type"],
                                             date_shard=c.env["date_is_active_user_added"],
                                             )
 

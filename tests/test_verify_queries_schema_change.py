@@ -9,7 +9,7 @@ class TestGenerateQuerySchemaChange1(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
-                                            table_name=c.env["table_type"],
+                                            table_type=c.env["table_type"],
                                             date_shard=c.env["date_collected_traffic_source_added"],
                                             )
 
@@ -65,7 +65,7 @@ class TestGenerateQuerySchemaChange2(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
-                                            table_name=c.env["table_type"],
+                                            table_type=c.env["table_type"],
                                             date_shard=c.env["date_is_active_user_added"],
                                             )
 
