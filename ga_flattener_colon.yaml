@@ -49,7 +49,7 @@ resources:
     triggerType: pubsub
     location: us-east1
     timeout: 540s
-    runtime: python37
+    runtime: python311
     availableMemoryMb: 512
     entryPoint: flatten_ga_data
 - name: httpfunction
@@ -61,7 +61,7 @@ resources:
     triggerType: pubsub
     location: us-east1
     timeout: 60s
-    runtime: python37
+    runtime: python311
     availableMemoryMb: 128
     entryPoint: build_ga_flattener_config
 
@@ -74,7 +74,7 @@ resources:
     triggerType: pubsub
     location: us-east1
     timeout: 60s
-    runtime: python37
+    runtime: python311
     availableMemoryMb: 128
     entryPoint: manage_intraday_schedule
 
@@ -87,6 +87,6 @@ resources:
     triggerType: pubsub
     location: us-east1
     timeout: 60s
-    runtime: python37
+    runtime: python311
     availableMemoryMb: 128
     entryPoint: manage_intraday_sql_view
