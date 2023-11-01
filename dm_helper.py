@@ -56,12 +56,13 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         protoPayload.methodName="google.cloud.bigquery.v2.JobService.InsertJob" 
         protoPayload.authenticationInfo.principalEmail="firebase-measurement@system.gserviceaccount.com" 
         severity: "NOTICE"
-        NOT protoPayload.serviceData.jobCompletedEvent.job.jobConfiguration.load.destinationTable.tableId:"events_intraday"
+        NOT "events_intraday_"
         '''
         self.FILTER_INTRADAY = '''
         resource.type="bigquery_resource" 
         protoPayload.methodName="tableservice.insert" OR protoPayload.methodName="tableservice.delete"
         "events_intraday_"
+        protoPayload.authenticationInfo.principalEmail="firebase-measurement@system.gserviceaccount.com"
         NOT severity="error"
         '''
         # we exclude severity="error" in intraday log filter, because we only want successful creations of intraday table

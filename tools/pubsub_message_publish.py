@@ -47,13 +47,7 @@ for db in range(0, num_days_in_backfill_range):
     for dataset_id in datasets_to_backfill:
         SAMPLE_LOAD_DATA = {
             "protoPayload": {
-                "metadata": {
-                    "tableCreation": {
-                        "table": {
-                            "tableName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
-                        }
-                    }
-                }
+                "resourceName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
             }
         }
         logging.info(f"Publishing backfill message to topic {topic_id} for {project_id}.{dataset_id}.events_{date_shard}")

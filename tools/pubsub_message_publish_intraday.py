@@ -18,10 +18,10 @@ c = Context()
 ''' Configuration Section Start '''
 '''*****************************'''
 topic_id = "ga4-flattener-deployment-topic-intraday"  # pubsub topic your cloud function is subscribed to Example: [Deployment Name]-topic
-project_id = "fannie-mae-data-hub"  # GCP project ID, example:  [PROJECT_ID]
-project_number = "498582061307"
-dataset_id = "analytics_350013737"
-date_shard = "20230921"
+project_id = "as-dev-ga4-flattener-320623"  # GCP project ID, example:  [PROJECT_ID]
+project_number = "464892960897"
+dataset_id = "analytics_222460912"
+date_shard = "20220531"
 
 table_type = "events_intraday"
 message_type = "CREATE" # "CREATE" or "DELETE"

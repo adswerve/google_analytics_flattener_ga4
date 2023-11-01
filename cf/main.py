@@ -16,9 +16,9 @@ class InputValidator(object):
             # extract information from message payload
             message_payload = json.loads(base64.b64decode(event['data']).decode('utf-8'))
             bq_destination_table_path = \
-                message_payload['protoPayload']['metadata']['tableCreation']['table']['tableName']
+                message_payload['protoPayload']['resourceName']
             self.gcp_project, self.dataset,  self.table_type, self.table_date_shard = self.extract_values(bq_destination_table_path)
-        except AttributeError:
+        except ValueError as e:
             logging.critical(f"invalid message: {message_payload}")
         try:
             storage_client = storage.Client(project=self.gcp_project)

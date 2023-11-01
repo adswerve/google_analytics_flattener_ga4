@@ -20,15 +20,8 @@ class TestInputValidator(BaseUnitTest):
         # inputs
         SAMPLE_LOAD_DATA = {
             "protoPayload": {
-                "metadata": {
-                    "tableCreation": {
-                        "table": {
-                            "tableName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
-                        }
-                    }
-                }
-            }
-        }
+                            "resourceName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
+        }}
 
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
@@ -46,7 +39,7 @@ class TestInputValidator(BaseUnitTest):
         self.assertTrue(True)
 
     @log_capture()
-    def test_input_validator_attribute_error(self, logcapture):
+    def test_input_validator_error(self, logcapture):
         # context and configuration
         c = Context()
         project_id = c.env["project"]
@@ -54,12 +47,10 @@ class TestInputValidator(BaseUnitTest):
         table_type = c.env["table_type"]
 
         # input
-        SAMPLE_LOAD_DATA_INVALID_MISSING_DATE_SHARD = {"protoPayload": {
-            "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
-                "datasetId": dataset_id
-                , "projectId": project_id
-                , "tableId": table_type
-            }}}}}}}}
+        SAMPLE_LOAD_DATA_INVALID_MISSING_DATE_SHARD = {
+            "protoPayload": {
+                            "resourceName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}"
+        }}
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(SAMPLE_LOAD_DATA_INVALID_MISSING_DATE_SHARD).encode('utf-8'))}
@@ -67,9 +58,7 @@ class TestInputValidator(BaseUnitTest):
         # validate input. Error is expected
         iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
 
-        message = "invalid message: {'protoPayload': {'serviceData': {'jobCompletedEvent': {'job': {'jobConfiguration': {'load': {'destinationTable': {'datasetId': '%s', 'projectId': '%s', 'tableId': 'events'}}}}}}}}" % (
-            dataset_id, project_id)
-
+        message = "invalid message: {'protoPayload': {'resourceName': 'projects/%s/datasets/%s/tables/events'}}" % (project_id, dataset_id)
         # check log
         # https://testfixtures.readthedocs.io/en/latest/logging.html
         expected_log = ('root', 'CRITICAL', message
@@ -105,12 +94,10 @@ class TestInputValidatorConfigurationError(BaseUnitTest):
         table_type = c.env["table_type"]
 
         # input
-        SAMPLE_LOAD_DATA = {"protoPayload": {
-            "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
-                "datasetId": dataset_id
-                , "projectId": project_id
-                , "tableId": f"{table_type}_{date_shard}"
-            }}}}}}}}
+        SAMPLE_LOAD_DATA = {
+            "protoPayload": {
+                            "resourceName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
+        }}
         SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
             {'origin': 'python-unit-test', 'username': 'gcp'}
             , 'data': base64.b64encode(json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'))}
