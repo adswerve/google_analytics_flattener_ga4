@@ -261,7 +261,7 @@ class TestPartitioning(BaseUnitTest):
         )
 
         query_string_sharded = f"""
-            SELECT _TABLE_SUFFIX as event_date, count(*) nrow
+            SELECT event_date, count(*) nrow
             FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.{table_type}_*`
             WHERE _TABLE_SUFFIX BETWEEN "{dates_list[0]}" AND "{dates_list[1]}"
             GROUP BY 1
@@ -274,10 +274,6 @@ class TestPartitioning(BaseUnitTest):
                 .to_dataframe(
             )
         )
-
-        dataframe_sharded['event_date'] = pd.to_datetime(dataframe_sharded['event_date'], format='%Y%m%d')
-
-        dataframe_sharded['event_date'] = dataframe_sharded['event_date'].dt.date
 
         assert dataframe_sharded.equals(dataframe_partitioned)
 

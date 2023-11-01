@@ -4,3 +4,4 @@ google-cloud-bigquery~=3.13.0
 google-cloud-pubsub~=2.2.0
 google-cloud-bigquery-storage~=2.10.1
 pytz~=2022.7.1
+db_dtypes~=1.1.1
