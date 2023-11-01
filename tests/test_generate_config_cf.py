@@ -12,7 +12,7 @@ class ContextCloudFunction(Context):
             , "entryPoint": "<entry_point_function_name_in_main>"
             , "triggerType": 'pubsub'  # also tried {}
             , "location": "us-east1"
-            , "runtime": "python37"
+            , "runtime": "python311"
             , "timeout": "60s"}
 
         self.imports = {"cf/requirements.txt": "file-contents"
