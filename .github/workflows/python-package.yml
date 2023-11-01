@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install flake8 pytest
+          python -m pip install --upgrade setuptools
           pip install -r cf/requirements.txt
           pip install -r cfintraday/requirements.txt
           pip install -r cfintradaysqlview/requirements.txt
