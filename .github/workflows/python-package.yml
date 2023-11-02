@@ -10,7 +10,7 @@ env:
 
 on:
   push:
-    branches: [ master, development-new-log-sink ]
+    branches: [ master ]
   pull_request:
     branches: [ master ]
 
