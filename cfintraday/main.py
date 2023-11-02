@@ -263,8 +263,6 @@ def manage_intraday_schedule(event, context="context"):
 
 # TODO: nice-to-have: link the Cloud Function directly to logs
 
-# TODO: nice-to-have: refactor f strings, so we use the same format (?)
-
 #TODO: Risk: there are two nested tables with yesterday's date shard: events_ and events_intraday_.
 # We need to ensure that the flattened tbls are based on daily tbls, not intraday.
 # Yesterday's intraday table flattening process might overwrite yesterday's daily flat table. How do we solve this?
