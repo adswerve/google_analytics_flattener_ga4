@@ -13,7 +13,6 @@ The GCP resources for the solutions are installed via Deployment Manager.
 * [Purpose](#purpose)
 * [Local dependencies](#local-dependencies)
 * [Prerequisites](#prerequisites)
-    + [Backfilling prerequisites](#backfilling-prerequisites)
 * [Installation steps](#installation-steps)
     + [Installation commands recap](#installation-commands-recap)
     + [Deployment naming conventions](#deployment-naming-conventions)
@@ -112,64 +111,6 @@ The GCP resources for the solutions are installed via Deployment Manager.
 
 7. Edit the _ga_flattener.yaml_ and _ga_flattener_colon.yaml_ files, specifically all occurrences of _properties-->
    codeBucket_ value. Set the value to **[BUCKET_NAME]** (see step above)
-
-### Backfilling prerequisites ###
-
-**The following steps are only required if you plan to backfill historical tables.**
-
-8. Install python >= 3.7 but < 3.10
-
-9. From Mac Terminal or Windows Command Prompt, upgrade pip:
-
-   Mac:
-
-   ```python3 -m pip install --upgrade pip```
-
-   Windows:
-
-   ```py -m pip install --upgrade pip```
-
-10. Navigate to the root directory of the source code that was downloaded or cloned in step 6 above.
-
-11. From a command prompt, install python virtual environments:
-
-    Mac:
-
-    ```python3 -m pip install --user virtualenv```
-
-    Windows:
-
-    ```py -m pip install --user virtualenv```
-
-12. Create a virtual environment for the source code in step 6:
-
-    Mac:
-
-    ```python3 -m venv venv_ga_flattener```
-
-    Windows:
-
-    ```py -m venv venv_ga_flattener```
-
-13. Activate the virtual environment in the step above:
-
-    Mac:
-
-    ```source venv_ga_flattener/bin/activate```
-
-    Windows:
-
-    ```.\venv_ga_flattener\Scripts\activate```
-
-14. Install the python dependent packages into the virtual environment:
-
-    Mac:
-
-    ```pip install -r cf/requirements.txt```
-
-    Windows:
-
-    ```pip install -r cf/requirements.txt```
 
 ## Installation steps ##
 
@@ -488,21 +429,75 @@ Example 3 - adding more datasets, intraday flattening and partitioned output.
 **The following steps are only required if you plan to backfill historical tables.**
 1. Make sure that you performed the steps from [backfilling prerequisites](#backfilling-prerequisites).
 
-2. Modify values in the configuration section of `tools/pubsub_message_publish.py` accordingly.  **Suggestion:** Use a
+
+2. Install Python >= 3.7
+
+3. From Mac Terminal or Windows Command Prompt, upgrade pip:
+
+   Mac:
+
+   ```python3 -m pip install --upgrade pip```
+
+   Windows:
+
+   ```py -m pip install --upgrade pip```
+
+4. Navigate to the root directory of the source code that was downloaded or cloned in step 6 above.
+
+5. From a command prompt, install python virtual environments:
+
+    Mac:
+
+    ```python3 -m pip install --user virtualenv```
+
+    Windows:
+
+    ```py -m pip install --user virtualenv```
+
+6. Create a virtual environment for the source code in step 6:
+
+    Mac:
+
+    ```python3 -m venv venv_ga_flattener```
+
+    Windows:
+
+    ```py -m venv venv_ga_flattener```
+
+7. Activate the virtual environment in the step above:
+
+    Mac:
+
+    ```source venv_ga_flattener/bin/activate```
+
+    Windows:
+
+    ```.\venv_ga_flattener\Scripts\activate```
+
+8. Install the python dependent packages into the virtual environment:
+
+    Mac:
+
+    ```pip install -r cf/requirements.txt```
+
+    Windows:
+
+    ```pip install -r cf/requirements.txt```
+
+
+9. Modify values in the configuration section of `tools/pubsub_message_publish.py` accordingly. Use a
    small date range to start, like yesterday only.
-3. From a gcloud command prompt, authenticate the installing user using command:
+
+10. From gcloud CLI, authenticate the installing user using command:
    ```gcloud auth application-default login```
-4. Run tools/pubsub_message_publish.py locally, for example from the package root:
+
+11. Run tools/pubsub_message_publish.py locally, for example from the package root:
     
     ```python -m tools.pubsub_message_publish```
 
-   which will publish a simulated logging event of GA4 data being ingested
+   This will publish a simulated logging event of GA4 data being ingested
    into BigQuery. Check dataset(s) that are configured for new date sharded tables such as (depending on what is
-   configured):
-    * flat_event_params_yyyymmdd
-    * flat_events_yyyymmdd
-    * flat_items_yyyymmdd
-    * flat_user_properties_yyyymmdd
+   configured): `flat_event_params_yyyymmdd`, `flat_events_yyyymmdd`, `flat_items_yyyymmdd`, `flat_user_properties_yyyymmdd`.
 
 Tip: if you are having issues running the backfill locally (on your machine) due to some local environment peculiarities, try running the backfill on GCP using Cloud Shell.
 
