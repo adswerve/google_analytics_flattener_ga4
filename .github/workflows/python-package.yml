@@ -38,6 +38,10 @@ jobs:
           
           pip install -r cf/requirements.txt
           pip install -r cfintraday/requirements.txt
+          
+          pip install -r cfconfigbuilder/requirements.txt
+          pip install -r cfconfigbuilderps/requirements.txt
+          
           pip install -r cfintradaysqlview/requirements.txt
           pip install -r tests/requirements-test.txt
       - name: Lint with flake8

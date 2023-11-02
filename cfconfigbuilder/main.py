@@ -4,7 +4,7 @@ import tempfile
 import json
 import os
 import logging
-
+from flask import make_response, jsonify
 
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
@@ -217,3 +217,7 @@ def build_ga_flattener_config(request):
     json_config = config.add_intraday_params_into_config(json_config)
     store.upload_config(config=json_config)  # upload config file to GCS bucket
     logging.info(f"build_ga_flattener_config: {json.dumps(json_config)}")
+
+    # Return a JSON response with a success message
+    response_data = {"message": "Configuration has been built and uploaded successfully."}
+    return make_response(jsonify(response_data), 200)
