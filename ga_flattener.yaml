@@ -62,7 +62,7 @@ resources:
     location: us-east1
     timeout: 60s
     runtime: python311
-    availableMemoryMb: 128
+    availableMemoryMb: 512
     entryPoint: build_ga_flattener_config
 
 - name: function_intraday
@@ -75,7 +75,7 @@ resources:
     location: us-east1
     timeout: 60s
     runtime: python311
-    availableMemoryMb: 128
+    availableMemoryMb: 512
     entryPoint: manage_intraday_schedule
 
 - name: function_intraday_sql_view
@@ -88,7 +88,7 @@ resources:
     location: us-east1
     timeout: 60s
     runtime: python311
-    availableMemoryMb: 128
+    availableMemoryMb: 512
     entryPoint: manage_intraday_sql_view
 
 - name: httpfunction-call
