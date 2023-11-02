@@ -7,7 +7,9 @@ import os
 import tempfile
 import logging
 import googleapiclient.discovery
+import sys
 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 class InputValidatorIntraday(object):
     def __init__(self, event):

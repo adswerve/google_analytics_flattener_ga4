@@ -5,7 +5,9 @@ import json
 import os
 import logging
 from flask import make_response, jsonify
+import sys
 
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 class FlattenerDatasetConfigStorage(object):
     def __init__(self):
         self.bucket_name = os.environ["CONFIG_BUCKET_NAME"]

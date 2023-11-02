@@ -7,6 +7,9 @@ import os
 import tempfile
 import logging
 from datetime import datetime
+import sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 class InputValidatorIntraday(object):
     def __init__(self, event):
