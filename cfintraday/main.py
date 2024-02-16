@@ -186,12 +186,11 @@ def manage_intraday_schedule(event, context="context"):
                 # Construct the request body.
                 cron_schedule = input_event.intraday_schedule()
 
-                MESSAGE_DATA = {"protoPayload": {
-                    "serviceData": {"jobCompletedEvent": {"job": {"jobConfiguration": {"load": {"destinationTable": {
-                        "datasetId": input_event.dataset
-                        , "projectId": input_event.gcp_project
-                        , "tableId": f"events_intraday_{input_event.table_date_shard}"
-                    }}}}}}}}
+                MESSAGE_DATA = {
+                    "protoPayload": {
+                        "resourceName": f"projects/{input_event.gcp_project}/datasets/{input_event.dataset}/tables/events_intraday_{input_event.table_date_shard}"
+                    }
+                }
 
                 topic_name = os.environ["TOPIC_NAME"]
 
