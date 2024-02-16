@@ -10,9 +10,9 @@ env:
 
 on:
   push:
-    branches: [ staging ]
+    branches: [ master, development ]
   pull_request:
-    branches: [ staging ]
+    branches: [ master ]
 
 jobs:
   build:
