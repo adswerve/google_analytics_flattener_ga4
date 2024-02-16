@@ -80,6 +80,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * Cloud Build API
     * Cloud Deployment Manager V2 API
     * Cloud Functions API
+    * Artifact Registry API 
     * Identity and Access Management (IAM) API
     * Cloud Scheduler API (if you need to flatten intraday tables)
 
