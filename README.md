@@ -74,7 +74,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
 1. Browse to https://console.cloud.google.com/ to create Google GCP project or use an existing project that has Google
    Analytics data flowing to it. Referred to as **[PROJECT_ID]**.
 
-2. Grant the installing user (you most likely) the basic IAM role of `Owner`.
+2. Grant the installing user (you most likely) the basic IAM role of `Editor`.
 
 3. As the installing user for **[PROJECT_ID]**, enable the following APIs
     * Cloud Build API
