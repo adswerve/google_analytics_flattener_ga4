@@ -213,7 +213,8 @@ class GaExportedNestedDataStorage(object):
                     {self.source_table_type} AS source_table_type
               FROM 
                 temp_events
-              ,UNNEST (event_params) AS event_params"""
+              ,UNNEST (event_params) AS event_params
+              ;"""
 
         return qry
 
@@ -233,7 +234,7 @@ class GaExportedNestedDataStorage(object):
                 {self.source_table_type} AS source_table_type
             FROM 
                 temp_events
-            ,UNNEST (user_properties) AS user_properties"""
+            ,UNNEST (user_properties) AS user_properties;"""
 
         return qry
 
@@ -270,10 +271,10 @@ class GaExportedNestedDataStorage(object):
                         items.promotion_name AS items_promotion_name,
                         items.creative_name AS items_creative_name,
                         items.creative_slot AS items_creative_slot,
-                        ,{self.source_table_type} AS source_table_type
+                        {self.source_table_type} AS source_table_type
                         
                 FROM temp_events
-                ,UNNEST (items) AS items"""
+                ,UNNEST (items) AS items;"""
 
         return qry
 

@@ -163,7 +163,7 @@ SELECT
 
     'daily' AS source_table_type
 
- FROM temp_events
+ FROM temp_events ; 
 """
 
 
@@ -255,7 +255,7 @@ SELECT
 
     'daily' AS source_table_type
 
- FROM temp_events
+ FROM temp_events ; 
 """
 
 sample_event_params_query = """
@@ -272,7 +272,7 @@ SELECT
     'daily' AS source_table_type
                             
 FROM temp_events 
-,UNNEST (event_params) AS event_params
+,UNNEST (event_params) AS event_params ; 
 """
 
 
@@ -292,7 +292,7 @@ SELECT
     'daily' AS source_table_type
     
  FROM temp_events
-  ,UNNEST (user_properties) AS user_properties
+  ,UNNEST (user_properties) AS user_properties ;
 """
 
 sample_items_query = """
@@ -331,5 +331,5 @@ SELECT
     'daily' AS source_table_type
 
  FROM temp_events
-  ,UNNEST(items) AS items
+  ,UNNEST(items) AS items ;
 """

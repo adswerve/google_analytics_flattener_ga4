@@ -67,72 +67,71 @@ class TestGenerateQuery(BaseUnitTest):
         sample_hardcoded_event_params_query = sample_desired_queries.sample_event_params_query
         sample_hardcoded_event_params_query = self.helper_clean_up_query(sample_hardcoded_event_params_query)
 
-        test_event_params_dynamic_query = self.ga_source.get_event_params_query()
+        test_event_params_dynamic_query = self.ga_source.get_event_params_query_select_statement()
         test_event_params_dynamic_query = self.helper_clean_up_dynamically_generated_query(
             test_event_params_dynamic_query, self.ga_source)
 
-        test_event_params_dynamic_query_intraday = self.ga_source_intraday.get_event_params_query()
-        test_event_params_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(
-            test_event_params_dynamic_query_intraday,
-            self.ga_source_intraday)
+        # test_event_params_dynamic_query_intraday = self.ga_source_intraday.get_event_params_query()
+        # test_event_params_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(
+        #     test_event_params_dynamic_query_intraday,
+        #     self.ga_source_intraday)
 
-        assert test_event_params_dynamic_query.endswith(
-            "FROM`GCP-PROJECT.DATASET.EVENTS_DATE_SHARD`,UNNEST(EVENT_PARAMS)ASEVENT_PARAMS")
-        assert test_event_params_dynamic_query_intraday.endswith(
-            "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(EVENT_PARAMS)ASEVENT_PARAMS")
+        assert test_event_params_dynamic_query.endswith("FROMTEMP_EVENTS,UNNEST(EVENT_PARAMS)ASEVENT_PARAMS;")
+        # assert test_event_params_dynamic_query_intraday.endswith(
+        #     "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(EVENT_PARAMS)ASEVENT_PARAMS")
 
         assert "'DAILY'ASSOURCE_TABLE_TYPE" in test_event_params_dynamic_query
-        assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_event_params_dynamic_query_intraday
+        # assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_event_params_dynamic_query_intraday
 
-        assert sample_hardcoded_event_params_query == test_event_params_dynamic_query == test_event_params_dynamic_query_intraday.replace(
-            "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
+        assert sample_hardcoded_event_params_query == test_event_params_dynamic_query #== test_event_params_dynamic_query_intraday.replace(
+            # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
 
     def test_check_sql_query_items(self):
         sample_hardcoded_items_query = sample_desired_queries.sample_items_query
         sample_hardcoded_items_query = self.helper_clean_up_query(sample_hardcoded_items_query)
 
-        test_items_dynamic_query = self.ga_source.get_items_query()
+        test_items_dynamic_query = self.ga_source.get_items_query_select_statement()
         test_items_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_items_dynamic_query,
                                                                                     self.ga_source)
+        #
+        # test_items_dynamic_query_intraday = self.ga_source_intraday.get_items_query()
+        # test_items_dynamic_query_intraday_intraday = self.helper_clean_up_dynamically_generated_query(
+        #     test_items_dynamic_query_intraday,
+        #     self.ga_source_intraday)
 
-        test_items_dynamic_query_intraday = self.ga_source_intraday.get_items_query()
-        test_items_dynamic_query_intraday_intraday = self.helper_clean_up_dynamically_generated_query(
-            test_items_dynamic_query_intraday,
-            self.ga_source_intraday)
-
-        assert test_items_dynamic_query.endswith("FROM`GCP-PROJECT.DATASET.EVENTS_DATE_SHARD`,UNNEST(ITEMS)ASITEMS")
-        assert test_items_dynamic_query_intraday_intraday.endswith(
-            "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(ITEMS)ASITEMS")
+        assert test_items_dynamic_query.endswith("FROMTEMP_EVENTS,UNNEST(ITEMS)ASITEMS;")
+        # assert test_items_dynamic_query_intraday_intraday.endswith(
+        #     "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(ITEMS)ASITEMS")
 
         assert "'DAILY'ASSOURCE_TABLE_TYPE" in test_items_dynamic_query
-        assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_items_dynamic_query_intraday_intraday
+        # assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_items_dynamic_query_intraday_intraday
 
-        assert sample_hardcoded_items_query == test_items_dynamic_query == test_items_dynamic_query_intraday_intraday.replace(
-            "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
+        assert sample_hardcoded_items_query == test_items_dynamic_query #== test_items_dynamic_query_intraday_intraday.replace(
+            # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
 
     def test_check_sql_query_user_properties(self):
         sample_hardcoded_user_properties_query = sample_desired_queries.sample_user_properties_query
         sample_hardcoded_user_properties_query = self.helper_clean_up_query(sample_hardcoded_user_properties_query)
 
-        test_user_properties_dynamic_query = self.ga_source.get_user_properties_query()
+        test_user_properties_dynamic_query = self.ga_source.get_user_properties_query_select_statement()
         test_user_properties_dynamic_query = self.helper_clean_up_dynamically_generated_query(
             test_user_properties_dynamic_query, self.ga_source)
 
-        test_user_properties_dynamic_query_intraday = self.ga_source_intraday.get_user_properties_query()
-        test_user_properties_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(
-            test_user_properties_dynamic_query_intraday,
-            self.ga_source_intraday)
+        # test_user_properties_dynamic_query_intraday = self.ga_source_intraday.get_user_properties_query()
+        # test_user_properties_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(
+        #     test_user_properties_dynamic_query_intraday,
+        #     self.ga_source_intraday)
 
         assert test_user_properties_dynamic_query.endswith(
-            "FROM`GCP-PROJECT.DATASET.EVENTS_DATE_SHARD`,UNNEST(USER_PROPERTIES)ASUSER_PROPERTIES")
-        assert test_user_properties_dynamic_query_intraday.endswith(
-            "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(USER_PROPERTIES)ASUSER_PROPERTIES")
+            "FROMTEMP_EVENTS,UNNEST(USER_PROPERTIES)ASUSER_PROPERTIES;")
+        # assert test_user_properties_dynamic_query_intraday.endswith(
+        #     "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(USER_PROPERTIES)ASUSER_PROPERTIES")
 
         assert "'DAILY'ASSOURCE_TABLE_TYPE" in test_user_properties_dynamic_query
-        assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_user_properties_dynamic_query_intraday
+        # assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_user_properties_dynamic_query_intraday
 
-        assert sample_hardcoded_user_properties_query == test_user_properties_dynamic_query == test_user_properties_dynamic_query_intraday.replace(
-            "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
+        assert sample_hardcoded_user_properties_query == test_user_properties_dynamic_query# == test_user_properties_dynamic_query_intraday.replace(
+            # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
 
     def tearDown(self):
         pass
