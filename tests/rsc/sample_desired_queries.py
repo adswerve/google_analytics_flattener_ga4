@@ -1,7 +1,7 @@
 sample_events_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     
     event_timestamp AS event_timestamp,
     event_name AS event_name,
@@ -74,13 +74,13 @@ SELECT
     
     'daily' AS source_table_type
     
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events ;
 """
 
 sample_events_query_on_and_after_20230503 = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
 
     event_timestamp AS event_timestamp,
     event_name AS event_name,
@@ -163,14 +163,14 @@ SELECT
 
     'daily' AS source_table_type
 
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events
 """
 
 
 sample_events_query_on_and_after_20230717 = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
 
     event_timestamp AS event_timestamp,
     event_name AS event_name,
@@ -255,13 +255,13 @@ SELECT
 
     'daily' AS source_table_type
 
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events
 """
 
 sample_event_params_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     event_params.key as event_params_key,     
     COALESCE(event_params.value.string_value,
         CAST(event_params.value.int_value AS STRING),
@@ -271,7 +271,7 @@ SELECT
     
     'daily' AS source_table_type
                             
-FROM `gcp-project.dataset.events_date_shard` 
+FROM temp_events 
 ,UNNEST (event_params) AS event_params
 """
 
@@ -279,7 +279,7 @@ FROM `gcp-project.dataset.events_date_shard`
 sample_user_properties_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     user_properties.key	AS user_properties_key,            
     COALESCE(user_properties.value.string_value,
         CAST(user_properties.value.int_value AS STRING),
@@ -291,7 +291,7 @@ SELECT
     
     'daily' AS source_table_type
     
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events
   ,UNNEST (user_properties) AS user_properties
 """
 
@@ -299,7 +299,7 @@ sample_items_query = """
 SELECT 
     
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     
     items.item_id AS items_item_id,
     items.item_name AS items_item_name,
@@ -330,6 +330,6 @@ SELECT
     
     'daily' AS source_table_type
 
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events
   ,UNNEST(items) AS items
 """

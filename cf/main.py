@@ -321,8 +321,7 @@ class GaExportedNestedDataStorage(object):
         return query
 
     def build_full_query(self, sharded_output_required=True, partitioned_output_required=False,
-                         list_of_flat_tables=[os.environ["EVENTS"], os.environ["EVENT_PARAMS"],
-                                              os.environ["USER_PROPERTIES"], os.environ["ITEMS"]]):
+                         list_of_flat_tables=["flat_events", "flat_event_parameters", "flat_user_properties", "flat_items"]):
 
         assert len(list_of_flat_tables) > 1, "At least 1 flat table needs to be included in the config file"
         query = ""
