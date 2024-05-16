@@ -304,25 +304,26 @@ class GaExportedNestedDataStorage(object):
 
     def get_select_statement(self, flat_table):
 
-        assert flat_table in [os.environ["EVENTS"], os.environ["EVENT_PARAMS"],
-                              os.environ["USER_PROPERTIES"], os.environ["ITEMS"]]
+        assert flat_table in ["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]
 
-        if flat_table == os.environ["EVENTS"]:
-            query = self.get_events_query_select_statement()
+        query = ""
 
-        elif flat_table == os.environ["EVENT_PARAMS"]:
-            query = self.get_event_params_query_select_statement()
+        if flat_table == "flat_events":
+            query += self.get_events_query_select_statement()
 
-        elif flat_table == os.environ["USER_PROPERTIES"]:
-            query = self.get_user_properties_query_select_statement()
+        elif flat_table == "flat_event_params":
+            query += self.get_event_params_query_select_statement()
 
-        elif flat_table == os.environ["ITEMS"]:
-            query = self.get_items_query_select_statement()
+        elif flat_table == "flat_user_properties":
+            query += self.get_user_properties_query_select_statement()
+
+        elif flat_table == "flat_items":
+            query += self.get_items_query_select_statement()
 
         return query
 
     def build_full_query(self, sharded_output_required=True, partitioned_output_required=False,
-                         list_of_flat_tables=["flat_events", "flat_event_parameters", "flat_user_properties", "flat_items"]):
+                         list_of_flat_tables=["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]):
 
         assert len(list_of_flat_tables) > 1, "At least 1 flat table needs to be included in the config file"
         query = ""
