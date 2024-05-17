@@ -1,5 +1,3 @@
-#TODO: flatten
-#TODO: deploy
 #TODO: (optional for now) - intraday
 #TODO: (optional for now) - remaining unit tests other than the most important ones
 import base64
