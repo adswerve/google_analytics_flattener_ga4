@@ -364,7 +364,6 @@ class GaExportedNestedDataStorage(object):
 
             # Run the query
             query_job = client.query(query, job_config=job_config)
-            logging.info("Query submitted")
 
             if wait_for_the_query_job_to_complete:
                 # Wait for the query to complete
