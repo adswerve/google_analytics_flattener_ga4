@@ -3,6 +3,8 @@ SELECT
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
     event_id,
     
+    CONCAT(user_pseudo_id, ".",(SELECT value.int_value from UNNEST(event_params) WHERE key = 'ga_session_number')) as session_id,
+
     event_timestamp AS event_timestamp,
     event_name AS event_name,
     event_previous_timestamp AS event_previous_timestamp,
