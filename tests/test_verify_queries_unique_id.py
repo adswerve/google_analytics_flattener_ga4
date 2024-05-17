@@ -243,5 +243,17 @@ class TestGenerateQuery(BaseUnitTest):
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
+
+    def test_run_query_job(self):
+        sharded_output_required = True
+        partitioned_output_required = False
+
+        query = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
+                                                 partitioned_output_required=partitioned_output_required,
+                                                 list_of_flat_tables=["flat_events", "flat_event_params",
+                                                                      "flat_user_properties",
+                                                                      "flat_items"])
+        self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
+
     def tearDown(self):
         pass
