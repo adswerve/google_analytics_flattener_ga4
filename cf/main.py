@@ -409,7 +409,7 @@ def flatten_ga_data(event, context):
         for table in tables:
             flat_tables.append(f"flat_{table}")
 
-        logging.info(f"Writing data to flat tables {flat_tables} in dataset {input_event.dataset}")
+        logging.info(f"GA4 flattener is writing data to flat tables {flat_tables} in dataset {input_event.dataset} for date {input_event.table_date_shard}")
 
         query = ga_source.build_full_query(sharded_output_required=sharded_output_required,
                                                  partitioned_output_required=partitioned_output_required,
