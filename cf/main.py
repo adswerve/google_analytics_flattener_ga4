@@ -50,8 +50,9 @@ class InputValidator(object):
     def valid_dataset(self):
         return self.dataset in self.config.keys()
 
-    def flatten_nested_table(self, nested_table):
-        return nested_table in self.config[self.dataset]["tables_to_flatten"]
+    def flatten_nested_tables(self):
+        tables = self.config[self.dataset]["tables_to_flatten"]
+        return tables
 
     def get_output_configuration(self):
         """
@@ -199,7 +200,7 @@ class GaExportedNestedDataStorage(object):
 
         return qry
 
-    def get_event_params_query_select_statement(self, sharded_output_required=True, partitioned_output_required=False):
+    def get_event_params_query_select_statement(self):
 
         qry = f"""
               SELECT 
@@ -219,7 +220,7 @@ class GaExportedNestedDataStorage(object):
 
         return qry
 
-    def get_user_properties_query_select_statement(self, sharded_output_required=True, partitioned_output_required=False):
+    def get_user_properties_query_select_statement(self):
 
         qry = f"""
             SELECT
@@ -239,7 +240,7 @@ class GaExportedNestedDataStorage(object):
 
         return qry
 
-    def get_items_query_select_statement(self, sharded_output_required=True, partitioned_output_required=False):
+    def get_items_query_select_statement(self):
 
         qry = f""" SELECT
 
@@ -395,51 +396,24 @@ def flatten_ga_data(event, context):
     if input_event.valid_dataset():
 
         output_config = input_event.get_output_configuration()
-        output_config_sharded = output_config["sharded"]
-        output_config_partitioned = output_config["partitioned"]
+        sharded_output_required = output_config["sharded"]
+        partitioned_output_required = output_config["partitioned"]
 
         ga_source = GaExportedNestedDataStorage(gcp_project=input_event.gcp_project,
                                                 dataset=input_event.dataset,
                                                 table_type=input_event.table_type,
                                                 date_shard=input_event.table_date_shard)
 
-        # EVENT_PARAMS
-        if input_event.flatten_nested_table(nested_table=os.environ["EVENT_PARAMS"]):
-            ga_source.run_query_job(query=ga_source.get_event_params_query(), table_type="flat_event_params",
-                                    sharded_output_required=output_config_sharded,
-                                    partitioned_output_required=output_config_partitioned)
-            logging.info(f"Ran {os.environ['EVENT_PARAMS']} flattening query for {input_event.dataset} for {input_event.table_date_shard}")
-        else:
-            logging.info(
-                f"{os.environ['EVENT_PARAMS']} flattening query for {input_event.dataset} not configured to run")
+        tables = input_event.flatten_nested_tables()
+        flat_tables = []
+        for table in tables:
+            flat_tables.append(f"flat_{table}")
 
-        # USER_PROPERTIES
-        if input_event.flatten_nested_table(nested_table=os.environ["USER_PROPERTIES"]):
-            ga_source.run_query_job(query=ga_source.get_user_properties_query(), table_type="flat_user_properties",
-                                    sharded_output_required=output_config_sharded,
-                                    partitioned_output_required=output_config_partitioned)
-            logging.info(f"Ran {os.environ['USER_PROPERTIES']} flattening query for {input_event.dataset} for {input_event.table_date_shard}")
-        else:
-            logging.info(
-                f"{os.environ['USER_PROPERTIES']} flattening query for {input_event.dataset} not configured to run")
+        query = ga_source.build_full_query(sharded_output_required=sharded_output_required,
+                                                 partitioned_output_required=partitioned_output_required,
+                                                 list_of_flat_tables=["flat_events", "flat_event_params",
+                                                                      "flat_user_properties",
+                                                                      "flat_items"])
 
-        # ITEMS
-        if input_event.flatten_nested_table(nested_table=os.environ["ITEMS"]):
-            ga_source.run_query_job(query=ga_source.get_items_query(), table_type="flat_items",
-                                    sharded_output_required=output_config_sharded,
-                                    partitioned_output_required=output_config_partitioned)
-            logging.info(f"Ran {os.environ['ITEMS']} flattening query for {input_event.dataset} for {input_event.table_date_shard}")
-        else:
-            logging.info(f"{os.environ['ITEMS']} flattening query for {input_event.dataset} not configured to run")
+        ga_source.run_query_job(query, wait_for_the_query_job_to_complete=False)
 
-        # EVENTS
-        if input_event.flatten_nested_table(nested_table=os.environ["EVENTS"]):
-            ga_source.run_query_job(query=ga_source.get_events_query(), table_type="flat_events",
-                                    sharded_output_required=output_config_sharded,
-                                    partitioned_output_required=output_config_partitioned)
-            logging.info(f"Ran {os.environ['EVENTS']} flattening query for {input_event.dataset} for {input_event.table_date_shard}")
-        else:
-            logging.info(f"{os.environ['EVENTS']} flattening query for {input_event.dataset} not configured to run")
-
-    else:
-        logging.warning(f"Dataset {input_event.dataset} not configured for flattening")
