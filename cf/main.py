@@ -366,7 +366,7 @@ class GaExportedNestedDataStorage(object):
 
             # Run the query
             query_job = client.query(query, job_config=job_config)
-            logging.info(f"Query submitted: {query}")
+            logging.info("Query submitted")
 
             if wait_for_the_query_job_to_complete:
                 # Wait for the query to complete
@@ -408,6 +408,8 @@ def flatten_ga_data(event, context):
         flat_tables = []
         for table in tables:
             flat_tables.append(f"flat_{table}")
+
+        logging.info(f"Writing data to flat tables {flat_tables} in dataset {input_event.dataset}")
 
         query = ga_source.build_full_query(sharded_output_required=sharded_output_required,
                                                  partitioned_output_required=partitioned_output_required,
