@@ -133,5 +133,70 @@ class TestGenerateQuery(BaseUnitTest):
         assert sample_hardcoded_user_properties_query == test_user_properties_dynamic_query# == test_user_properties_dynamic_query_intraday.replace(
             # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
 
+    def test_get_select_statement(self):
+        events = self.ga_source.get_select_statement(flat_table="flat_events")
+        event_params = self.ga_source.get_select_statement(flat_table="flat_event_params")
+        user_properties = self.ga_source.get_select_statement(flat_table="flat_user_properties")
+        items = self.ga_source.get_select_statement(flat_table="flat_items")
+
+        assert "event_name" in events
+        assert "event_params" in event_params
+        assert "user_properties" in user_properties
+        assert "items" in items
+
+
+    def test_get_flat_table_update_query_sharded_output_required(self):
+        select_statement = self.ga_source.get_select_statement(flat_table="flat_events")
+        result  =  self.ga_source.get_flat_table_update_query(select_statement=select_statement, flat_table="flat_events",
+                                              sharded_output_required=True, partitioned_output_required=False)
+
+        expected_query = f"""CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events_{self.ga_source.date_shard}`
+                            AS
+                            {select_statement}"""
+
+        self.assertEqual(result.replace(" ", "").replace("\n", "").upper(), expected_query.replace(" ", "").replace("\n", "").upper() )
+
+    def test_get_flat_table_update_query_partitioned_output_required(self):
+        select_statement = self.ga_source.get_select_statement(flat_table="flat_events")
+        result = self.ga_source.get_flat_table_update_query(select_statement=select_statement, flat_table="flat_events",
+                                                            sharded_output_required=False,
+                                                            partitioned_output_required=True)
+
+        expected_query = f"""DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events` WHERE event_date = '{self.ga_source.date_shard}';
+                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events`
+                          AS {select_statement}"""
+
+
+        self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
+                         expected_query.replace(" ", "").replace("\n", "").upper())
+
+    def test_get_flat_table_update_query_sharded_and_partitioned_output_required(self):
+        select_statement = self.ga_source.get_select_statement(flat_table="flat_events")
+        result = self.ga_source.get_flat_table_update_query(select_statement=select_statement, flat_table="flat_events",
+                                                            sharded_output_required=True,
+                                                            partitioned_output_required=True)
+
+        expected_query = f"""
+        CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events_{self.ga_source.date_shard}`
+                            AS
+                            {select_statement}
+                            
+        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events` WHERE event_date = '{self.ga_source.date_shard}';
+                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events`
+                          AS {select_statement}"""
+
+
+        self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
+                         expected_query.replace(" ", "").replace("\n", "").upper())
+
+
+
+    def test_build_full_query(self):
+        full_query = self.ga_source.build_full_query(sharded_output_required=True, partitioned_output_required=False,
+                         list_of_flat_tables=["flat_events", "flat_event_params", "flat_user_properties",
+                                              "flat_items"])
+
+        pass
+
     def tearDown(self):
         pass

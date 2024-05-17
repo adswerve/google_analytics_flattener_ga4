@@ -1,6 +1,8 @@
 #TODO: build full query
-#TODO: run
-#TODO: test
+#TODO: flatten
+#TODO: deploy
+#TODO: (optional for now) - intraday
+#TODO: (optional for now) - remaining unit tests other than the most important ones
 import base64
 import json
 from google.cloud import bigquery
@@ -278,21 +280,24 @@ class GaExportedNestedDataStorage(object):
 
         return qry
 
-    def get_flat_table_update_query(self, select_statement, sharded_output_required=True, partitioned_output_required=False):
+    def get_flat_table_update_query(self, select_statement, flat_table, sharded_output_required=True, partitioned_output_required=False):
+
+        assert flat_table in ["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]
+        assert "flat" in flat_table
 
         query = ""
 
         if sharded_output_required:
             # get table name
-            dest_table_name = f"{self.gcp_project}.{self.dataset}.flat_{self.table_type}_{self.date_shard}"
+            dest_table_name = f"{self.gcp_project}.{self.dataset}.{flat_table}_{self.date_shard}"
 
-            query += f"""CREATE OR REPLACE TABLE {dest_table_name}
+            query += f"""CREATE OR REPLACE TABLE `{dest_table_name}`
                     AS
                     """
             query += select_statement
 
         if partitioned_output_required:
-            dest_table_name = f"{self.gcp_project}.{self.dataset}.flat_{self.table_type}"
+            dest_table_name = f"{self.gcp_project}.{self.dataset}.{flat_table}"
 
             query += f"""DELETE FROM `{dest_table_name}` WHERE event_date = '{self.date_shard}';
                         INSERT INTO TABLE `{dest_table_name}`
@@ -323,7 +328,8 @@ class GaExportedNestedDataStorage(object):
         return query
 
     def build_full_query(self, sharded_output_required=True, partitioned_output_required=False,
-                         list_of_flat_tables=["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]):
+                         list_of_flat_tables=["flat_events", "flat_event_params", "flat_user_properties",
+                                              "flat_items"]):
 
         assert len(list_of_flat_tables) > 1, "At least 1 flat table needs to be included in the config file"
         query = ""
@@ -331,11 +337,12 @@ class GaExportedNestedDataStorage(object):
 
         for flat_table in list_of_flat_tables:
             query_select = self.get_select_statement(flat_table)
-            query_write_to_dest_table = self.get_flat_table_update_query(select_statement=query_select,
+            query_write_to_dest_table = self.get_flat_table_update_query(select_statement=query_select, flat_table=flat_table,
                                                                          sharded_output_required=sharded_output_required,
                                                                          partitioned_output_required=partitioned_output_required)
 
             query += query_write_to_dest_table
+            query += "\n"
 
         return query
 
