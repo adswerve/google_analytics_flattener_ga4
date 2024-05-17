@@ -417,3 +417,5 @@ def flatten_ga_data(event, context):
 
         ga_source.run_query_job(query, wait_for_the_query_job_to_complete=False)
 
+    else:
+        logging.warning(f"Dataset {input_event.dataset} not configured for flattening")
