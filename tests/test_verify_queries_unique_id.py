@@ -170,7 +170,7 @@ class TestGenerateQuery(BaseUnitTest):
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
-    def test_get_flat_table_update_query_sharded_and_partitioned_output_required(self):
+    def test_get_flat_table_update_query_sharded_and_partitioned_output_required_flat_events(self):
         select_statement = self.ga_source.get_select_statement(flat_table="flat_events")
         result = self.ga_source.get_flat_table_update_query(select_statement=select_statement, flat_table="flat_events",
                                                             sharded_output_required=True,
@@ -189,14 +189,59 @@ class TestGenerateQuery(BaseUnitTest):
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
+    def test_get_flat_table_update_query_sharded_and_partitioned_output_required_flat_event_params(self):
+        select_statement = self.ga_source.get_select_statement(flat_table="flat_event_params")
+        result = self.ga_source.get_flat_table_update_query(select_statement=select_statement, flat_table="flat_event_params",
+                                                            sharded_output_required=True,
+                                                            partitioned_output_required=True)
+
+        expected_query = f"""
+        CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params_{self.ga_source.date_shard}`
+                            AS
+                            {select_statement}
+
+        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params` WHERE event_date = '{self.ga_source.date_shard}';
+                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params`
+                          AS {select_statement}"""
+
+        self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
+                         expected_query.replace(" ", "").replace("\n", "").upper())
+
 
 
     def test_build_full_query(self):
-        full_query = self.ga_source.build_full_query(sharded_output_required=True, partitioned_output_required=False,
-                         list_of_flat_tables=["flat_events", "flat_event_params", "flat_user_properties",
-                                              "flat_items"])
+        sharded_output_required = True
+        partitioned_output_required = False
 
-        pass
+        _1 = self.ga_source.get_temp_table_query()
+        _2 = self.ga_source.get_flat_table_update_query(select_statement=self.ga_source.get_select_statement(flat_table="flat_events"), flat_table="flat_events",
+                                                            sharded_output_required=sharded_output_required,
+                                                            partitioned_output_required=partitioned_output_required)
+        _3 = self.ga_source.get_flat_table_update_query(select_statement=self.ga_source.get_select_statement(flat_table="flat_event_params"), flat_table="flat_event_params",
+                                                            sharded_output_required=sharded_output_required,
+                                                            partitioned_output_required=partitioned_output_required)
+        _4 = self.ga_source.get_flat_table_update_query(select_statement=self.ga_source.get_select_statement(flat_table="flat_user_properties"), flat_table="flat_user_properties",
+                                                            sharded_output_required=sharded_output_required,
+                                                            partitioned_output_required=partitioned_output_required)
+        _5 = self.ga_source.get_flat_table_update_query(select_statement=self.ga_source.get_select_statement(flat_table="flat_items"), flat_table="flat_items",
+                                                            sharded_output_required=sharded_output_required,
+                                                            partitioned_output_required=partitioned_output_required)
+
+
+        expected_query = f"""{_1}
+                            {_2}
+                            {_3}
+                            {_4}
+                            {_5}
+
+                            """
+        result = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
+                                                 partitioned_output_required=partitioned_output_required,
+                                                 list_of_flat_tables=["flat_events", "flat_event_params",
+                                                                      "flat_user_properties",
+                                                                      "flat_items"])
+        self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
+                         expected_query.replace(" ", "").replace("\n", "").upper())
 
     def tearDown(self):
         pass
