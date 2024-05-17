@@ -18,21 +18,21 @@ def generate_config(ctx):
                         'members': ["serviceAccount:cloud-logs@system.gserviceaccount.com"]
                     }]}
                 }
-        },
-            {
-                'name': 'topic-name-intraday',
-                'type': 'pubsub.v1.topic',
-                'properties': {
-                    'topic': config.get_topic_id(intraday=True)
-                },
-                'accessControl':
-                    {'gcpIamPolicy':
-                        {'bindings': [{
-                            'role': 'roles/pubsub.publisher',
-                            'members': ["serviceAccount:cloud-logs@system.gserviceaccount.com"]
-                        }]}
-                    }
-            }
+        }#,
+            # {
+            #     'name': 'topic-name-intraday',
+            #     'type': 'pubsub.v1.topic',
+            #     'properties': {
+            #         'topic': config.get_topic_id(intraday=True)
+            #     },
+            #     'accessControl':
+            #         {'gcpIamPolicy':
+            #             {'bindings': [{
+            #                 'role': 'roles/pubsub.publisher',
+            #                 'members': ["serviceAccount:cloud-logs@system.gserviceaccount.com"]
+            #             }]}
+            #         }
+            # }
         ]
     }
 

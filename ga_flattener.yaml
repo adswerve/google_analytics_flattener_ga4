@@ -26,10 +26,10 @@ imports:
 - path: cfconfigbuilder/requirements.txt
 - path: cfconfigbuilderps/main.py
 - path: cfconfigbuilderps/requirements.txt
-- path: cfintraday/main.py
-- path: cfintraday/requirements.txt
-- path: cfintradaysqlview/main.py
-- path: cfintradaysqlview/requirements.txt
+#- path: cfintraday/main.py
+#- path: cfintraday/requirements.txt
+#- path: cfintradaysqlview/main.py
+#- path: cfintradaysqlview/requirements.txt
 
 resources:
 - name: y_resource_bucket_name
@@ -65,31 +65,31 @@ resources:
     availableMemoryMb: 512
     entryPoint: build_ga_flattener_config
 
-- name: function_intraday
-  type: dmt_cloud_function.py
-  properties:
-    # All the files that start with this prefix will be packed in the Cloud Function that builds the cfintraday schedule
-    codeLocation: cfintraday/
-    codeBucket: 464892960897-function-code-staging-ga4-flattener
-    triggerType: pubsub
-    location: us-east1
-    timeout: 60s
-    runtime: python311
-    availableMemoryMb: 512
-    entryPoint: manage_intraday_schedule
+#- name: function_intraday
+#  type: dmt_cloud_function.py
+#  properties:
+#    # All the files that start with this prefix will be packed in the Cloud Function that builds the cfintraday schedule
+#    codeLocation: cfintraday/
+#    codeBucket: 464892960897-function-code-staging-ga4-flattener
+#    triggerType: pubsub
+#    location: us-east1
+#    timeout: 60s
+#    runtime: python311
+#    availableMemoryMb: 512
+#    entryPoint: manage_intraday_schedule
 
-- name: function_intraday_sql_view
-  type: dmt_cloud_function.py
-  properties:
-    # All the files that start with this prefix will be packed in the Cloud Function that builds the cfintraday schedule
-    codeLocation: cfintradaysqlview/
-    codeBucket: 464892960897-function-code-staging-ga4-flattener
-    triggerType: pubsub
-    location: us-east1
-    timeout: 60s
-    runtime: python311
-    availableMemoryMb: 512
-    entryPoint: manage_intraday_sql_view
+#- name: function_intraday_sql_view
+#  type: dmt_cloud_function.py
+#  properties:
+#    # All the files that start with this prefix will be packed in the Cloud Function that builds the cfintraday schedule
+#    codeLocation: cfintradaysqlview/
+#    codeBucket: 464892960897-function-code-staging-ga4-flattener
+#    triggerType: pubsub
+#    location: us-east1
+#    timeout: 60s
+#    runtime: python311
+#    availableMemoryMb: 512
+#    entryPoint: manage_intraday_sql_view
 
 - name: httpfunction-call
   action: gcp-types/cloudfunctions-v1:cloudfunctions.projects.locations.functions.call
