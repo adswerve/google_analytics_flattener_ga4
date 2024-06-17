@@ -279,6 +279,86 @@ class GaExportedNestedDataStorage(object):
 
         return qry
 
+
+    def get_pseudo_users_select_statement(self):
+
+        qry = f"""
+            SELECT
+              pseudo_user_id,
+              stream_id,
+            
+              user_info.last_active_timestamp_micros AS user_info_last_active_timestamp_micros,
+              user_info.user_first_touch_timestamp_micros AS user_info_user_first_touch_timestamp_micros,
+              user_info.first_purchase_date AS user_info_first_purchase_date,
+            
+              device.operating_system AS device_operating_system,
+              device.category AS device_category,
+              device.mobile_brand_name AS device_mobile_brand_name,
+              device.mobile_model_name AS device_mobile_model_name,
+              device.unified_screen_name AS device_unified_screen_name,
+            
+              geo.city AS geo_city,
+              geo.country AS geo_country,
+              geo.continent AS geo_continent,
+              geo.region AS geo_region,
+            
+              user_ltv.revenue_in_usd AS user_ltv_revenue_in_usd,
+              user_ltv.sessions AS user_ltv_sessions,
+              user_ltv.engagement_time_millis AS user_ltv_engagement_time_millis,
+              user_ltv.purchases AS user_ltv_purchases,
+              user_ltv.engaged_sessions AS user_ltv_engaged_sessions,
+              user_ltv.session_duration_micros AS user_ltv_session_duration_micros,
+            
+              predictions.in_app_purchase_score_7d AS predictions_in_app_purchase_score_7d,
+              predictions.purchase_score_7d AS predictions_purchase_score_7d,
+              predictions.churn_score_7d AS predictions_churn_score_7d,
+              predictions.revenue_28d_in_usd AS predictions_revenue_28d_in_usd,
+            
+              privacy_info.is_limited_ad_tracking AS privacy_info_is_limited_ad_tracking,
+              privacy_info.is_ads_personalization_allowed AS privacy_info_is_ads_personalization_allowed,
+            
+              occurrence_date,
+              last_updated_date
+            FROM
+               `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
+            ;"""
+
+        return qry
+
+
+    def get_pseudo_user_properties_select_statement(self):
+
+        qry = f"""
+            SELECT
+              pseudo_user_id,
+              up.key user_property_key,
+              up.value.string_value user_property_value,
+              up.value.set_timestamp_micros user_property_set_timestamp_micros,
+              up.value.user_property_name
+            FROM
+               `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
+              ,UNNEST(user_properties) up        
+            ;"""
+
+        return qry
+
+    def get_pseudo_user_audiences_select_statement(self):
+
+        qry = f"""
+            SELECT
+              pseudo_user_id,
+              a.id audience_id,
+              a.name audience_name,
+              a.membership_start_timestamp_micros audience_membership_start_timestamp_micros,
+              a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
+              a.npa audience_npa
+            FROM
+               `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
+              ,UNNEST(audiences) a        
+            ;"""
+
+        return qry
+
     def get_flat_table_update_query(self, select_statement, flat_table, sharded_output_required=True, partitioned_output_required=False):
 
         assert flat_table in ["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]
