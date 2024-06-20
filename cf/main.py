@@ -284,6 +284,8 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
+              _TABLE_SUFFIX `date`,
+              
               pseudo_user_id,
               stream_id,
             
@@ -330,6 +332,7 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
+              _TABLE_SUFFIX `date`,
               pseudo_user_id,
               up.key user_property_key,
               up.value.string_value user_property_value,
@@ -346,6 +349,7 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
+              _TABLE_SUFFIX `date`,
               pseudo_user_id,
               a.id audience_id,
               a.name audience_name,
@@ -361,7 +365,14 @@ class GaExportedNestedDataStorage(object):
 
     def get_flat_table_update_query(self, select_statement, flat_table, sharded_output_required=True, partitioned_output_required=False):
 
-        assert flat_table in ["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]
+        assert flat_table in ["flat_events",
+                              "flat_event_params",
+                              "flat_user_properties",
+                              "flat_items",
+                              "flat_pseudo_users",
+                              "flat_pseudo_user_properties",
+                              "flat_pseudo_user_audiences"]
+
         assert "flat" in flat_table
 
         query = ""
@@ -378,17 +389,35 @@ class GaExportedNestedDataStorage(object):
         if partitioned_output_required:
             dest_table_name = f"{self.gcp_project}.{self.dataset}.{flat_table}"
 
-            query += f"""DELETE FROM `{dest_table_name}` WHERE event_date = '{self.date_shard}';
+            if flat_table in ["flat_events",
+                           "flat_event_params",
+                           "flat_user_properties",
+                           "flat_items"]:
+
+                query += f"DELETE FROM `{dest_table_name}` WHERE event_date = '{self.date_shard}';"
+
+            elif flat_table in ["flat_pseudo_users",
+                              "flat_pseudo_user_properties",
+                              "flat_pseudo_user_audiences"]:
+
+                query += f"DELETE FROM `{dest_table_name}` WHERE `date` = '{self.date_shard}';"
+
+            query += f"""
                         INSERT INTO TABLE `{dest_table_name}`
                         AS """
             query += select_statement
-
 
         return query
 
     def get_select_statement(self, flat_table):
 
-        assert flat_table in ["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]
+        assert flat_table in ["flat_events",
+                              "flat_event_params",
+                              "flat_user_properties",
+                              "flat_items",
+                              "flat_pseudo_users",
+                              "flat_pseudo_user_properties",
+                              "flat_pseudo_user_audiences"]
 
         query = ""
 
@@ -404,11 +433,25 @@ class GaExportedNestedDataStorage(object):
         elif flat_table == "flat_items":
             query += self.get_items_query_select_statement()
 
+        elif flat_table == "flat_pseudo_users":
+            query += self.get_pseudo_users_select_statement()
+
+        elif flat_table == "flat_pseudo_user_properties":
+            query += self.get_pseudo_user_properties_select_statement()
+
+        elif flat_table == "flat_pseudo_user_audiences":
+            query += self.get_pseudo_user_audiences_select_statement()
+
         return query
 
     def build_full_query(self, sharded_output_required=True, partitioned_output_required=False,
-                         list_of_flat_tables=["flat_events", "flat_event_params", "flat_user_properties",
-                                              "flat_items"]):
+                         list_of_flat_tables=["flat_events",
+                                              "flat_event_params",
+                                              "flat_user_properties",
+                                              "flat_items",
+                                              "flat_pseudo_users",
+                                              "flat_pseudo_user_properties",
+                                              "flat_pseudo_user_audiences"]):
 
         assert len(list_of_flat_tables) > 1, "At least 1 flat table needs to be included in the config file"
         query = ""

@@ -338,6 +338,7 @@ SELECT
 
 sample_pseudo_users_query = """
 SELECT
+  _TABLE_SUFFIX `date`,
   pseudo_user_id,
   stream_id,
 
@@ -379,6 +380,8 @@ FROM
 
 sample_pseudo_user_properties_query = """
 SELECT
+  _TABLE_SUFFIX `date`,
+  
   pseudo_user_id,
   up.key user_property_key,
   up.value.string_value user_property_value,
@@ -391,6 +394,8 @@ FROM
 
 sample_pseudo_user_audiences_query = """
 SELECT
+  _TABLE_SUFFIX `date`,
+  
   pseudo_user_id,
   stream_id,
 
