@@ -1,3 +1,6 @@
+#TODO: partitioned table doesn't exist yet
+#TODO: config
+#TODO: integrated tests
 #TODO: (optional for now) - intraday
 #TODO: (optional for now) - remaining unit tests other than the most important ones
 import base64
@@ -37,7 +40,7 @@ class InputValidator(object):
             logging.critical(f"flattener configuration error: {e}")
 
     def extract_values(self, string):
-        pattern = re.compile(r'projects\/(.*?)\/datasets\/(.*?)\/tables\/(events.*?)_(20\d\d\d\d\d\d)$')
+        pattern = re.compile(r'projects\/(.*?)\/datasets\/(.*?)\/tables\/(events|pseudonymous_users.*?)_(20\d\d\d\d\d\d)$')
         match = pattern.search(string)
         if match:
             project, dataset, table_type, shard = match.groups()
@@ -49,7 +52,19 @@ class InputValidator(object):
         return self.dataset in self.config.keys()
 
     def flatten_nested_tables(self):
-        tables = self.config[self.dataset]["tables_to_flatten"]
+        tables_config = self.config[self.dataset]["tables_to_flatten"]
+        if self.table_type == "pseudonymous_users":
+
+            tables = list(set(tables_config) & set(["flat_pseudo_users",
+                                                    "flat_pseudo_user_properties",
+                                                    "flat_pseudo_user_audiences"]))
+        else:
+
+            tables = list(set(tables_config) & set(["flat_events",
+                                                    "flat_event_params",
+                                                    "flat_user_properties",
+                                                    "flat_items"]))
+
         return tables
 
     def get_output_configuration(self):
@@ -74,11 +89,10 @@ class GaExportedNestedDataStorage(object):
         self.table_type = table_type
         self.source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
 
-        # The next several properties will correspond to GA4 fields
-
-        self.date_field_name = "event_date"
-
-        self.partitioning_column = "event_date"
+        # # The next several properties will correspond to GA4 fields
+        #
+        # self.date_field_name = "event_date"
+        # self.partitioning_column = "event_date"
 
     def source_table_is_intraday(self):
         return "intraday" in self.table_type
@@ -322,7 +336,8 @@ class GaExportedNestedDataStorage(object):
               occurrence_date,
               last_updated_date
             FROM
-               `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
+               `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+            WHERE _TABLE_SUFFIX = "{self.date_shard}"              
             ;"""
 
         return qry
@@ -339,8 +354,9 @@ class GaExportedNestedDataStorage(object):
               up.value.set_timestamp_micros user_property_set_timestamp_micros,
               up.value.user_property_name
             FROM
-               `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
-              ,UNNEST(user_properties) up        
+             `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+              ,UNNEST(user_properties) up
+            WHERE _TABLE_SUFFIX = "{self.date_shard}"                         
             ;"""
 
         return qry
@@ -357,8 +373,9 @@ class GaExportedNestedDataStorage(object):
               a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
               a.npa audience_npa
             FROM
-               `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
-              ,UNNEST(audiences) a        
+            `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+              ,UNNEST(audiences) a
+             WHERE _TABLE_SUFFIX = "{self.date_shard}"        
             ;"""
 
         return qry
@@ -455,7 +472,13 @@ class GaExportedNestedDataStorage(object):
 
         assert len(list_of_flat_tables) > 1, "At least 1 flat table needs to be included in the config file"
         query = ""
-        query += self.get_temp_table_query()
+
+        if ("flat_events" in list_of_flat_tables
+            or "flat_event_params" in list_of_flat_tables
+            or "flat_user_properties" in list_of_flat_tables
+            or "flat_items" in list_of_flat_tables):
+
+            query += self.get_temp_table_query()
 
         for flat_table in list_of_flat_tables:
             query_select = self.get_select_statement(flat_table)

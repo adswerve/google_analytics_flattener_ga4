@@ -375,7 +375,8 @@ SELECT
   occurrence_date,
   last_updated_date
 FROM
-  `gcp-project.dataset.pseudonymous_users_date_shard`
+  `gcp-project.dataset.pseudonymous_users_*`
+WHERE _TABLE_SUFFIX = "date_shard"   
   ;
 """
 
@@ -389,8 +390,9 @@ SELECT
   up.value.set_timestamp_micros user_property_set_timestamp_micros,
   up.value.user_property_name
 FROM
-  `gcp-project.dataset.pseudonymous_users_date_shard`,
-  UNNEST(user_properties) up
+    `gcp-project.dataset.pseudonymous_users_*`,
+    UNNEST(user_properties) up
+WHERE _TABLE_SUFFIX = "date_shard"    
   ;
 """
 
@@ -404,7 +406,8 @@ SELECT
   a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
   a.npa audience_npa
 FROM
-  `gcp-project.dataset.pseudonymous_users_date_shard`,
+    `gcp-project.dataset.pseudonymous_users_*`,
   UNNEST(audiences) a
+WHERE _TABLE_SUFFIX = "date_shard" 
     ;
 """

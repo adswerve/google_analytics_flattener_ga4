@@ -247,7 +247,7 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
                                             table_type="pseudonymous_users",
-                                            date_shard=c.env["date"],
+                                            date_shard="20240611",
                                             )
 
     def helper_clean_up_query(self, query):
@@ -280,7 +280,7 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
         test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
                                                                                      self.ga_source)
 
-        assert test_dynamic_query.endswith("FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_DATE_SHARD`;")
+        assert test_dynamic_query.endswith('FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_*`WHERE_TABLE_SUFFIX="DATE_SHARD";')
 
         assert sample_hardcoded_query == test_dynamic_query
 
@@ -292,7 +292,7 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
         test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
                                                                                      self.ga_source)
 
-        assert test_dynamic_query.endswith("FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_DATE_SHARD`,UNNEST(USER_PROPERTIES)UP;")
+        assert test_dynamic_query.endswith('FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_*`,UNNEST(USER_PROPERTIES)UPWHERE_TABLE_SUFFIX="DATE_SHARD";')
 
         assert sample_hardcoded_query == test_dynamic_query
 
@@ -305,7 +305,7 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
         test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
                                                                                      self.ga_source)
 
-        assert test_dynamic_query.endswith("FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_DATE_SHARD`,UNNEST(AUDIENCES)A;")
+        assert test_dynamic_query.endswith('FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_*`,UNNEST(AUDIENCES)AWHERE_TABLE_SUFFIX="DATE_SHARD";')
 
         assert sample_hardcoded_query == test_dynamic_query
 
