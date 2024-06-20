@@ -17,10 +17,13 @@ topic_id = "ga4-flattener-deployment-topic"  # pubsub topic your cloud function 
 project_id = "as-dev-ga4-flattener-320623" # GCP project ID, example:  [PROJECT_ID]
 dry_run = False  # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
-backfill_range_start = datetime.datetime(2021, 7, 20)
-backfill_range_end = datetime.datetime(2021, 7, 20)  # datetime.datetime.today()
+# backfill_range_start = datetime.datetime(2021, 7, 20)
+# backfill_range_end = datetime.datetime(2021, 7, 20)  # datetime.datetime.today()
+backfill_range_start = datetime.datetime(2024, 6, 11)
+backfill_range_end = datetime.datetime(2024, 6, 11)  # datetime.datetime.today()
 datasets_to_backfill = ["analytics_222460912"]  # GA properties to backfill, "analytics_222460912"
-table_type = "events"
+# table_type = "events"
+table_type = "pseudonymous_users"
 '''*****************************'''
 '''  Configuration Section End  '''
 '''*****************************'''
@@ -50,7 +53,7 @@ for db in range(0, num_days_in_backfill_range):
                 "resourceName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
             }
         }
-        logging.info(f"Publishing backfill message to topic {topic_id} for {project_id}.{dataset_id}.events_{date_shard}")
+        logging.info(f"Publishing backfill message to topic {topic_id} for {project_id}.{dataset_id}.{table_type}_{date_shard}")
         if not dry_run:
             publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
                               , username='gcp')

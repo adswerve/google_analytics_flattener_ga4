@@ -86,14 +86,10 @@ class GaExportedNestedDataStorage(object):
         self.table_type = table_type
         self.source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
 
-        # # The next several properties will correspond to GA4 fields
-        #
-        # self.date_field_name = "event_date"
         if self.table_type == "pseudonymous_users":
-            self.partitioning_column = "`date`"
+            self.date_field_name = "`date`"
         else:
-            self.partitioning_column = "event_date"
-        # pass
+            self.date_field_name = "event_date"
 
     def source_table_is_intraday(self):
         return "intraday" in self.table_type
@@ -410,12 +406,12 @@ class GaExportedNestedDataStorage(object):
             dest_table_name = f"{self.gcp_project}.{self.dataset}.{flat_table}"
 
             query += f"""CREATE TABLE IF NOT EXISTS `{self.gcp_project}.{self.dataset}.{flat_table}` 
-                     PARTITION BY {self.partitioning_column} 
+                     PARTITION BY {self.date_field_name} 
                      AS {select_statement}
                      """
 
             query += f"""DELETE FROM `{dest_table_name}` 
-                        WHERE {self.partitioning_column} = PARSE_DATE('%Y%m%d', '{self.date_shard}');"""
+                        WHERE {self.date_field_name} = PARSE_DATE('%Y%m%d', '{self.date_shard}');"""
 
             query += f"""
                         INSERT INTO `{dest_table_name}`
