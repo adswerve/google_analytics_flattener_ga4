@@ -282,106 +282,51 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
 
         assert test_dynamic_query.endswith("FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_DATE_SHARD`;")
 
+        assert sample_hardcoded_query == test_dynamic_query
+
+    def test_check_sql_query_pseudo_user_properties(self):
+        sample_hardcoded_query = sample_desired_queries.sample_pseudo_user_properties_query
+        sample_hardcoded_query = self.helper_clean_up_query(sample_hardcoded_query)
+
+        test_dynamic_query = self.ga_source.get_pseudo_user_properties_select_statement()
+        test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
+                                                                                     self.ga_source)
+
+        assert test_dynamic_query.endswith("FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_DATE_SHARD`,UNNEST(USER_PROPERTIES)UP;")
 
         assert sample_hardcoded_query == test_dynamic_query
 
-    def test_check_sql_query_event_params(self):
-        sample_hardcoded_event_params_query = sample_desired_queries.sample_event_params_query
-        sample_hardcoded_event_params_query = self.helper_clean_up_query(sample_hardcoded_event_params_query)
 
-        test_event_params_dynamic_query = self.ga_source.get_event_params_query_select_statement()
-        test_event_params_dynamic_query = self.helper_clean_up_dynamically_generated_query(
-            test_event_params_dynamic_query, self.ga_source)
+    def test_check_sql_query_pseudo_user_audiences(self):
+        sample_hardcoded_query = sample_desired_queries.sample_pseudo_user_audiences_query
+        sample_hardcoded_query = self.helper_clean_up_query(sample_hardcoded_query)
 
-        # test_event_params_dynamic_query_intraday = self.ga_source_intraday.get_event_params_query()
-        # test_event_params_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(
-        #     test_event_params_dynamic_query_intraday,
-        #     self.ga_source_intraday)
+        test_dynamic_query = self.ga_source.get_pseudo_user_audiences_select_statement()
+        test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
+                                                                                     self.ga_source)
 
-        assert test_event_params_dynamic_query.endswith("FROMTEMP_EVENTS,UNNEST(EVENT_PARAMS)ASEVENT_PARAMS;")
-        # assert test_event_params_dynamic_query_intraday.endswith(
-        #     "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(EVENT_PARAMS)ASEVENT_PARAMS")
+        assert test_dynamic_query.endswith("FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_DATE_SHARD`,UNNEST(AUDIENCES)A;")
 
-        assert "'DAILY'ASSOURCE_TABLE_TYPE" in test_event_params_dynamic_query
-        # assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_event_params_dynamic_query_intraday
-
-        assert sample_hardcoded_event_params_query == test_event_params_dynamic_query  # == test_event_params_dynamic_query_intraday.replace(
-        # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
-
-    def test_check_sql_query_items(self):
-        sample_hardcoded_items_query = sample_desired_queries.sample_items_query
-        sample_hardcoded_items_query = self.helper_clean_up_query(sample_hardcoded_items_query)
-
-        test_items_dynamic_query = self.ga_source.get_items_query_select_statement()
-        test_items_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_items_dynamic_query,
-                                                                                    self.ga_source)
-        #
-        # test_items_dynamic_query_intraday = self.ga_source_intraday.get_items_query()
-        # test_items_dynamic_query_intraday_intraday = self.helper_clean_up_dynamically_generated_query(
-        #     test_items_dynamic_query_intraday,
-        #     self.ga_source_intraday)
-
-        assert test_items_dynamic_query.endswith("FROMTEMP_EVENTS,UNNEST(ITEMS)ASITEMS;")
-        # assert test_items_dynamic_query_intraday_intraday.endswith(
-        #     "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(ITEMS)ASITEMS")
-
-        assert "'DAILY'ASSOURCE_TABLE_TYPE" in test_items_dynamic_query
-        # assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_items_dynamic_query_intraday_intraday
-
-        assert sample_hardcoded_items_query == test_items_dynamic_query  # == test_items_dynamic_query_intraday_intraday.replace(
-        # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
-
-    def test_check_sql_query_user_properties(self):
-        sample_hardcoded_user_properties_query = sample_desired_queries.sample_user_properties_query
-        sample_hardcoded_user_properties_query = self.helper_clean_up_query(sample_hardcoded_user_properties_query)
-
-        test_user_properties_dynamic_query = self.ga_source.get_user_properties_query_select_statement()
-        test_user_properties_dynamic_query = self.helper_clean_up_dynamically_generated_query(
-            test_user_properties_dynamic_query, self.ga_source)
-
-        # test_user_properties_dynamic_query_intraday = self.ga_source_intraday.get_user_properties_query()
-        # test_user_properties_dynamic_query_intraday = self.helper_clean_up_dynamically_generated_query(
-        #     test_user_properties_dynamic_query_intraday,
-        #     self.ga_source_intraday)
-
-        assert test_user_properties_dynamic_query.endswith(
-            "FROMTEMP_EVENTS,UNNEST(USER_PROPERTIES)ASUSER_PROPERTIES;")
-        # assert test_user_properties_dynamic_query_intraday.endswith(
-        #     "FROM`GCP-PROJECT.DATASET.EVENTS_INTRADAY_DATE_SHARD`,UNNEST(USER_PROPERTIES)ASUSER_PROPERTIES")
-
-        assert "'DAILY'ASSOURCE_TABLE_TYPE" in test_user_properties_dynamic_query
-        # assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_user_properties_dynamic_query_intraday
-
-        assert sample_hardcoded_user_properties_query == test_user_properties_dynamic_query  # == test_user_properties_dynamic_query_intraday.replace(
-        # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
+        assert sample_hardcoded_query == test_dynamic_query
 
     def test_get_select_statement(self):
-        events = self.ga_source.get_select_statement(flat_table="flat_events")
-        event_params = self.ga_source.get_select_statement(flat_table="flat_event_params")
-        user_properties = self.ga_source.get_select_statement(flat_table="flat_user_properties")
-        items = self.ga_source.get_select_statement(flat_table="flat_items")
 
         pseudo_users = self.ga_source.get_select_statement(flat_table="flat_pseudo_users")
         pseudo_user_properties = self.ga_source.get_select_statement(flat_table="flat_pseudo_user_properties")
         pseudo_user_audiences = self.ga_source.get_select_statement(flat_table="flat_pseudo_user_audiences")
-
-        assert "event_name" in events
-        assert "event_params" in event_params
-        assert "user_properties" in user_properties
-        assert "items" in items
 
         assert "pseudo_user_id" in pseudo_users
         assert "user_properties" in pseudo_user_properties and "pseudo_user_id" in pseudo_user_properties
         assert "audiences" in pseudo_user_audiences and "pseudo_user_id" in pseudo_users
 
     def test_get_flat_table_update_query_sharded_output_required(self):
-        select_statement = self.ga_source.get_select_statement(flat_table="flat_events")
+        select_statement = self.ga_source.get_select_statement(flat_table="flat_pseudo_users")
         result = self.ga_source.get_flat_table_update_query(select_statement=select_statement,
-                                                            flat_table="flat_events",
+                                                            flat_table="flat_pseudo_users",
                                                             sharded_output_required=True,
                                                             partitioned_output_required=False)
 
-        expected_query = f"""CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events_{self.ga_source.date_shard}`
+        expected_query = f"""CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users_{self.ga_source.date_shard}`
                             AS
                             {select_statement}"""
 
@@ -389,94 +334,71 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
     def test_get_flat_table_update_query_partitioned_output_required(self):
-        select_statement = self.ga_source.get_select_statement(flat_table="flat_events")
+        select_statement = self.ga_source.get_select_statement(flat_table="flat_pseudo_users")
         result = self.ga_source.get_flat_table_update_query(select_statement=select_statement,
-                                                            flat_table="flat_events",
+                                                            flat_table="flat_pseudo_users",
                                                             sharded_output_required=False,
                                                             partitioned_output_required=True)
 
-        expected_query = f"""DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events` WHERE event_date = '{self.ga_source.date_shard}';
-                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events`
+        expected_query = f"""DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users` WHERE `date` = '{self.ga_source.date_shard}';
+                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users`
                           AS {select_statement}"""
 
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
-    def test_get_flat_table_update_query_sharded_and_partitioned_output_required_flat_events(self):
-        select_statement = self.ga_source.get_select_statement(flat_table="flat_events")
+    def test_get_flat_table_update_query_sharded_and_partitioned_output_required_flat_pseudo_users(self):
+        select_statement = self.ga_source.get_select_statement(flat_table="flat_pseudo_users")
         result = self.ga_source.get_flat_table_update_query(select_statement=select_statement,
-                                                            flat_table="flat_events",
+                                                            flat_table="flat_pseudo_users",
                                                             sharded_output_required=True,
                                                             partitioned_output_required=True)
 
         expected_query = f"""
-        CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events_{self.ga_source.date_shard}`
+        CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users_{self.ga_source.date_shard}`
                             AS
                             {select_statement}
 
-        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events` WHERE event_date = '{self.ga_source.date_shard}';
-                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events`
+        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users` WHERE `date` = '{self.ga_source.date_shard}';
+                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users`
                           AS {select_statement}"""
 
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
-    def test_get_flat_table_update_query_sharded_and_partitioned_output_required_flat_event_params(self):
-        select_statement = self.ga_source.get_select_statement(flat_table="flat_event_params")
-        result = self.ga_source.get_flat_table_update_query(select_statement=select_statement,
-                                                            flat_table="flat_event_params",
-                                                            sharded_output_required=True,
-                                                            partitioned_output_required=True)
-
-        expected_query = f"""
-        CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params_{self.ga_source.date_shard}`
-                            AS
-                            {select_statement}
-
-        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params` WHERE event_date = '{self.ga_source.date_shard}';
-                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params`
-                          AS {select_statement}"""
-
-        self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
-                         expected_query.replace(" ", "").replace("\n", "").upper())
 
     def test_build_full_query(self):
         sharded_output_required = True
         partitioned_output_required = False
 
-        _1 = self.ga_source.get_temp_table_query()
+        _1 = self.ga_source.get_flat_table_update_query(
+            select_statement=self.ga_source.get_select_statement(flat_table="flat_pseudo_users"),
+            flat_table="flat_pseudo_users",
+            sharded_output_required=sharded_output_required,
+            partitioned_output_required=partitioned_output_required)
+
         _2 = self.ga_source.get_flat_table_update_query(
-            select_statement=self.ga_source.get_select_statement(flat_table="flat_events"),
-            flat_table="flat_events",
+            select_statement=self.ga_source.get_select_statement(flat_table="flat_pseudo_user_properties"),
+            flat_table="flat_pseudo_user_properties",
             sharded_output_required=sharded_output_required,
             partitioned_output_required=partitioned_output_required)
+
         _3 = self.ga_source.get_flat_table_update_query(
-            select_statement=self.ga_source.get_select_statement(flat_table="flat_event_params"),
-            flat_table="flat_event_params",
+            select_statement=self.ga_source.get_select_statement(flat_table="flat_pseudo_user_audiences"),
+            flat_table="flat_pseudo_user_audiences",
             sharded_output_required=sharded_output_required,
             partitioned_output_required=partitioned_output_required)
-        _4 = self.ga_source.get_flat_table_update_query(
-            select_statement=self.ga_source.get_select_statement(flat_table="flat_user_properties"),
-            flat_table="flat_user_properties",
-            sharded_output_required=sharded_output_required,
-            partitioned_output_required=partitioned_output_required)
-        _5 = self.ga_source.get_flat_table_update_query(
-            select_statement=self.ga_source.get_select_statement(flat_table="flat_items"), flat_table="flat_items",
-            sharded_output_required=sharded_output_required,
-            partitioned_output_required=partitioned_output_required)
+
 
         expected_query = f"""{_1}
                             {_2}
                             {_3}
-                            {_4}
-                            {_5}
-
                             """
         result = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
                                                  partitioned_output_required=partitioned_output_required,
-                                                 list_of_flat_tables=["flat_events", "flat_event_params",
-                                                                      "flat_user_properties",
-                                                                      "flat_items"])
+                                                 list_of_flat_tables=["flat_pseudo_users",
+                                                                      "flat_pseudo_user_properties",
+                                                                      "flat_pseudo_user_audiences"])
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
