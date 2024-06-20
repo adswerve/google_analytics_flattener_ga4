@@ -11,6 +11,8 @@ import logging
 from datetime import datetime
 from http import HTTPStatus
 import sys
+from google.cloud.exceptions import NotFound
+
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -486,6 +488,22 @@ class GaExportedNestedDataStorage(object):
 
         return query
 
+    def source_table_exists(self):
+        """
+         https://stackoverflow.com/questions/28731102/bigquery-check-if-table-already-exists
+         """
+
+        client = bigquery.Client(project=self.gcp_project)
+
+        full_table_path = f"{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}"
+        table_id = bigquery.Table(full_table_path)
+        try:
+            client.get_table(table_id)
+            return True
+        except NotFound:
+            logging.info(f"table {full_table_path} does not exist.")
+            return False
+
     def run_query_job(self, query, wait_for_the_query_job_to_complete=True):
         """
         Submits a BQ SQL query and optionally waits for the query to complete.
@@ -497,28 +515,30 @@ class GaExportedNestedDataStorage(object):
 
         client = bigquery.Client(project=self.gcp_project)  # initialize BigQuery client
 
-        try:
-            # Configure the query job
-            job_config = bigquery.QueryJobConfig(
-                use_query_cache=True,  # Use cached results if available
-                labels={"queryfunction": "ga4flattener"}  # Add labels for the query job
-            )
+        if self.source_table_exists():
 
-            # Run the query
-            query_job = client.query(query, job_config=job_config)
+            try:
+                # Configure the query job
+                job_config = bigquery.QueryJobConfig(
+                    use_query_cache=True,  # Use cached results if available
+                    labels={"queryfunction": "ga4flattener"}  # Add labels for the query job
+                )
 
-            if wait_for_the_query_job_to_complete:
-                # Wait for the query to complete
-                query_job.result()
-                logging.info("Query completed.")
-                return query_job
-            else:
-                logging.info("Query submitted, not waiting for completion.")
-                return query_job
+                # Run the query
+                query_job = client.query(query, job_config=job_config)
 
-        except Exception as e:
-            logging.error(f"An error occurred while submitting the query: {e}")
-            raise
+                if wait_for_the_query_job_to_complete:
+                    # Wait for the query to complete
+                    query_job.result()
+                    logging.info("Query completed.")
+                    return query_job
+                else:
+                    logging.info("Query submitted, not waiting for completion.")
+                    return query_job
+
+            except Exception as e:
+                logging.error(f"An error occurred while submitting the query: {e}")
+                raise
 
 
 def flatten_ga_data(event, context):
