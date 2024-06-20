@@ -171,15 +171,13 @@ class TestCFFlattenMethodsUsers(BaseUnitTest):
         except NotFound:
             return False
 
-    def test_flatten_ga_data(self):
+    def test_flatten_ga_data_sharded(self):
         sharded_output_required = True
         partitioned_output_required = False
 
         query = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
                                                 partitioned_output_required=partitioned_output_required,
-                                                list_of_flat_tables=["flat_pseudo_users",
-                              "flat_pseudo_user_properties",
-                              "flat_pseudo_user_audiences"])
+                                                list_of_flat_tables=["flat_pseudo_users", "flat_pseudo_user_properties", "flat_pseudo_user_audiences"])
 
         self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
 
@@ -191,6 +189,19 @@ class TestCFFlattenMethodsUsers(BaseUnitTest):
 
         assert self.tbl_exists(dataset=self.ga_source.dataset,
                                table_name=f"flat_pseudo_user_audiences_{self.ga_source.date_shard}")
+
+    def test_flatten_ga_data_partitioned(self):
+        sharded_output_required = False
+        partitioned_output_required = True
+
+        query = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
+                                                partitioned_output_required=partitioned_output_required,
+                                                list_of_flat_tables=["flat_pseudo_users"])
+
+        self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
+
+        assert self.tbl_exists(dataset=self.ga_source.dataset,
+                               table_name=f"flat_pseudo_users")
 
 
     def tearDown(self):

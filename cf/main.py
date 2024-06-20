@@ -92,7 +92,11 @@ class GaExportedNestedDataStorage(object):
         # # The next several properties will correspond to GA4 fields
         #
         # self.date_field_name = "event_date"
-        # self.partitioning_column = "event_date"
+        if self.table_type == "pseudonymous_users":
+            self.partitioning_column = "`date`"
+        else:
+            self.partitioning_column = "event_date"
+        # pass
 
     def source_table_is_intraday(self):
         return "intraday" in self.table_type
@@ -298,8 +302,8 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
-              _TABLE_SUFFIX `date`,
-              
+               PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+
               pseudo_user_id,
               stream_id,
             
@@ -347,7 +351,8 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
-              _TABLE_SUFFIX `date`,
+                PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+
               pseudo_user_id,
               up.key user_property_key,
               up.value.string_value user_property_value,
@@ -365,7 +370,8 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
-              _TABLE_SUFFIX `date`,
+                PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+
               pseudo_user_id,
               a.id audience_id,
               a.name audience_name,
@@ -406,22 +412,17 @@ class GaExportedNestedDataStorage(object):
         if partitioned_output_required:
             dest_table_name = f"{self.gcp_project}.{self.dataset}.{flat_table}"
 
-            if flat_table in ["flat_events",
-                           "flat_event_params",
-                           "flat_user_properties",
-                           "flat_items"]:
+            query += f"""CREATE TABLE IF NOT EXISTS `{self.gcp_project}.{self.dataset}.{flat_table}` 
+                     PARTITION BY {self.partitioning_column} 
+                     AS {select_statement}
+                     """
 
-                query += f"DELETE FROM `{dest_table_name}` WHERE event_date = '{self.date_shard}';"
-
-            elif flat_table in ["flat_pseudo_users",
-                              "flat_pseudo_user_properties",
-                              "flat_pseudo_user_audiences"]:
-
-                query += f"DELETE FROM `{dest_table_name}` WHERE `date` = '{self.date_shard}';"
+            query += f"""DELETE FROM `{dest_table_name}` 
+                        WHERE {self.partitioning_column} = PARSE_DATE('%Y%m%d', '{self.date_shard}');"""
 
             query += f"""
-                        INSERT INTO TABLE `{dest_table_name}`
-                        AS """
+                        INSERT INTO `{dest_table_name}`
+                        """
             query += select_statement
 
         return query
@@ -470,8 +471,9 @@ class GaExportedNestedDataStorage(object):
                                               "flat_pseudo_user_properties",
                                               "flat_pseudo_user_audiences"]):
 
-        assert len(list_of_flat_tables) > 1, "At least 1 flat table needs to be included in the config file"
+        assert len(list_of_flat_tables) >= 1, "At least 1 flat table needs to be included in the config file"
         query = ""
+
 
         if ("flat_events" in list_of_flat_tables
             or "flat_event_params" in list_of_flat_tables

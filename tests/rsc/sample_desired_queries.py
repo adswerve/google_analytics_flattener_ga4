@@ -338,7 +338,7 @@ SELECT
 
 sample_pseudo_users_query = """
 SELECT
-  _TABLE_SUFFIX `date`,
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
   pseudo_user_id,
   stream_id,
 
@@ -382,7 +382,7 @@ WHERE _TABLE_SUFFIX = "date_shard"
 
 sample_pseudo_user_properties_query = """
 SELECT
-  _TABLE_SUFFIX `date`,
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
   
   pseudo_user_id,
   up.key user_property_key,
@@ -398,7 +398,7 @@ WHERE _TABLE_SUFFIX = "date_shard"
 
 sample_pseudo_user_audiences_query = """
 SELECT
-  _TABLE_SUFFIX `date`,  
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
   pseudo_user_id,
   a.id audience_id,
   a.name audience_name,
