@@ -1,6 +1,3 @@
-#TODO: partitioned table doesn't exist yet
-#TODO: config
-#TODO: integrated tests
 #TODO: (optional for now) - intraday
 #TODO: (optional for now) - remaining unit tests other than the most important ones
 import base64
@@ -55,15 +52,15 @@ class InputValidator(object):
         tables_config = self.config[self.dataset]["tables_to_flatten"]
         if self.table_type == "pseudonymous_users":
 
-            tables = list(set(tables_config) & set(["flat_pseudo_users",
-                                                    "flat_pseudo_user_properties",
-                                                    "flat_pseudo_user_audiences"]))
+            tables = list(set(tables_config) & set(["pseudo_users",
+                                                    "pseudo_user_properties",
+                                                    "pseudo_user_audiences"]))
         else:
 
-            tables = list(set(tables_config) & set(["flat_events",
-                                                    "flat_event_params",
-                                                    "flat_user_properties",
-                                                    "flat_items"]))
+            tables = list(set(tables_config) & set(["events",
+                                                    "event_params",
+                                                    "user_properties",
+                                                    "items"]))
 
         return tables
 

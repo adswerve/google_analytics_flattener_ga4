@@ -79,6 +79,9 @@ FROM (
                 , os.environ["EVENT_PARAMS"]
                 , os.environ["USER_PROPERTIES"]
                 , os.environ["ITEMS"]
+            , os.environ["PSEUDO_USERS"]
+            , os.environ["PSEUDO_USER_PROPERTIES"]
+            , os.environ["PSEUDO_USER_AUDIENCES"]
                                          ]
         return ret_val
 
