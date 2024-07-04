@@ -14,7 +14,7 @@ logging.basicConfig(level=logging.INFO, format='%(levelname)s:%(message)s')
 ''' Configuration Section Start '''
 '''*****************************'''
 my_project_id = "as-dev-ga4-flattener-320623"
-my_dataset_id = 'analytics_222460912'
+my_dataset_id = 'analytics_251817041'
 table_prefix = "flat_" # will perform the deletion only if the table has the desired prefix
 delete = True
 '''*****************************'''

@@ -13,6 +13,7 @@ from http import HTTPStatus
 import sys
 from google.cloud.exceptions import NotFound
 
+
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 class InputValidator(object):
@@ -38,7 +39,7 @@ class InputValidator(object):
             logging.critical(f"flattener configuration error: {e}")
 
     def extract_values(self, string):
-        pattern = re.compile(r'projects\/(.*?)\/datasets\/(.*?)\/tables\/(events.*?)_(20\d\d\d\d\d\d)$')
+        pattern = re.compile(r'projects\/(.*?)\/datasets\/(.*?)\/tables\/(events|pseudonymous_users.*?)_(20\d\d\d\d\d\d)$')
         match = pattern.search(string)
         if match:
             project, dataset, table_type, shard = match.groups()
@@ -50,7 +51,19 @@ class InputValidator(object):
         return self.dataset in self.config.keys()
 
     def flatten_nested_tables(self):
-        tables = self.config[self.dataset]["tables_to_flatten"]
+        tables_config = self.config[self.dataset]["tables_to_flatten"]
+        if self.table_type == "pseudonymous_users":
+
+            tables = list(set(tables_config) & set(["pseudo_users",
+                                                    "pseudo_user_properties",
+                                                    "pseudo_user_audiences"]))
+        else:
+
+            tables = list(set(tables_config) & set(["events",
+                                                    "event_params",
+                                                    "user_properties",
+                                                    "items"]))
+
         return tables
 
     def get_output_configuration(self):
@@ -75,11 +88,10 @@ class GaExportedNestedDataStorage(object):
         self.table_type = table_type
         self.source_table_type = "'intraday'" if self.source_table_is_intraday() else "'daily'"
 
-        # The next several properties will correspond to GA4 fields
-
-        self.date_field_name = "event_date"
-
-        self.partitioning_column = "event_date"
+        if self.table_type == "pseudonymous_users":
+            self.date_field_name = "`date`"
+        else:
+            self.date_field_name = "event_date"
 
     def source_table_is_intraday(self):
         return "intraday" in self.table_type
@@ -297,9 +309,105 @@ class GaExportedNestedDataStorage(object):
 
         return qry
 
+
+    def get_pseudo_users_select_statement(self):
+
+        qry = f"""
+            SELECT
+               PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+
+              pseudo_user_id,
+              stream_id,
+            
+              user_info.last_active_timestamp_micros AS user_info_last_active_timestamp_micros,
+              user_info.user_first_touch_timestamp_micros AS user_info_user_first_touch_timestamp_micros,
+              user_info.first_purchase_date AS user_info_first_purchase_date,
+            
+              device.operating_system AS device_operating_system,
+              device.category AS device_category,
+              device.mobile_brand_name AS device_mobile_brand_name,
+              device.mobile_model_name AS device_mobile_model_name,
+              device.unified_screen_name AS device_unified_screen_name,
+            
+              geo.city AS geo_city,
+              geo.country AS geo_country,
+              geo.continent AS geo_continent,
+              geo.region AS geo_region,
+            
+              user_ltv.revenue_in_usd AS user_ltv_revenue_in_usd,
+              user_ltv.sessions AS user_ltv_sessions,
+              user_ltv.engagement_time_millis AS user_ltv_engagement_time_millis,
+              user_ltv.purchases AS user_ltv_purchases,
+              user_ltv.engaged_sessions AS user_ltv_engaged_sessions,
+              user_ltv.session_duration_micros AS user_ltv_session_duration_micros,
+            
+              predictions.in_app_purchase_score_7d AS predictions_in_app_purchase_score_7d,
+              predictions.purchase_score_7d AS predictions_purchase_score_7d,
+              predictions.churn_score_7d AS predictions_churn_score_7d,
+              predictions.revenue_28d_in_usd AS predictions_revenue_28d_in_usd,
+            
+              privacy_info.is_limited_ad_tracking AS privacy_info_is_limited_ad_tracking,
+              privacy_info.is_ads_personalization_allowed AS privacy_info_is_ads_personalization_allowed,
+            
+              occurrence_date,
+              last_updated_date
+            FROM
+               `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+            WHERE _TABLE_SUFFIX = "{self.date_shard}"              
+            ;"""
+
+        return qry
+
+
+    def get_pseudo_user_properties_select_statement(self):
+
+        qry = f"""
+            SELECT
+                PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+
+              pseudo_user_id,
+              up.key user_property_key,
+              up.value.string_value user_property_value,
+              up.value.set_timestamp_micros user_property_set_timestamp_micros,
+              up.value.user_property_name
+            FROM
+             `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+              ,UNNEST(user_properties) up
+            WHERE _TABLE_SUFFIX = "{self.date_shard}"                         
+            ;"""
+
+        return qry
+
+    def get_pseudo_user_audiences_select_statement(self):
+
+        qry = f"""
+            SELECT
+                PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+
+              pseudo_user_id,
+              a.id audience_id,
+              a.name audience_name,
+              a.membership_start_timestamp_micros audience_membership_start_timestamp_micros,
+              a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
+              a.npa audience_npa
+            FROM
+            `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+              ,UNNEST(audiences) a
+             WHERE _TABLE_SUFFIX = "{self.date_shard}"        
+            ;"""
+
+        return qry
+
     def get_flat_table_update_query(self, select_statement, flat_table, sharded_output_required=True, partitioned_output_required=False):
 
-        assert flat_table in ["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]
+        assert flat_table in ["flat_events",
+                              "flat_event_params",
+                              "flat_user_properties",
+                              "flat_items",
+                              "flat_pseudo_users",
+                              "flat_pseudo_user_properties",
+                              "flat_pseudo_user_audiences"]
+
         assert "flat" in flat_table
 
         query = ""
@@ -316,17 +424,30 @@ class GaExportedNestedDataStorage(object):
         if partitioned_output_required:
             dest_table_name = f"{self.gcp_project}.{self.dataset}.{flat_table}"
 
-            query += f"""DELETE FROM `{dest_table_name}` WHERE event_date = '{self.date_shard}';
-                        INSERT INTO TABLE `{dest_table_name}`
-                        AS """
-            query += select_statement
+            query += f"""CREATE TABLE IF NOT EXISTS `{self.gcp_project}.{self.dataset}.{flat_table}` 
+                     PARTITION BY {self.date_field_name} 
+                     AS {select_statement}
+                     """
 
+            query += f"""DELETE FROM `{dest_table_name}` 
+                        WHERE {self.date_field_name} = PARSE_DATE('%Y%m%d', '{self.date_shard}');"""
+
+            query += f"""
+                        INSERT INTO `{dest_table_name}`
+                        """
+            query += select_statement
 
         return query
 
     def get_select_statement(self, flat_table):
 
-        assert flat_table in ["flat_events", "flat_event_params", "flat_user_properties", "flat_items"]
+        assert flat_table in ["flat_events",
+                              "flat_event_params",
+                              "flat_user_properties",
+                              "flat_items",
+                              "flat_pseudo_users",
+                              "flat_pseudo_user_properties",
+                              "flat_pseudo_user_audiences"]
 
         query = ""
 
@@ -342,15 +463,36 @@ class GaExportedNestedDataStorage(object):
         elif flat_table == "flat_items":
             query += self.get_items_query_select_statement()
 
+        elif flat_table == "flat_pseudo_users":
+            query += self.get_pseudo_users_select_statement()
+
+        elif flat_table == "flat_pseudo_user_properties":
+            query += self.get_pseudo_user_properties_select_statement()
+
+        elif flat_table == "flat_pseudo_user_audiences":
+            query += self.get_pseudo_user_audiences_select_statement()
+
         return query
 
     def build_full_query(self, sharded_output_required=True, partitioned_output_required=False,
-                         list_of_flat_tables=["flat_events", "flat_event_params", "flat_user_properties",
-                                              "flat_items"]):
+                         list_of_flat_tables=["flat_events",
+                                              "flat_event_params",
+                                              "flat_user_properties",
+                                              "flat_items",
+                                              "flat_pseudo_users",
+                                              "flat_pseudo_user_properties",
+                                              "flat_pseudo_user_audiences"]):
 
-        assert len(list_of_flat_tables) > 1, "At least 1 flat table needs to be included in the config file"
+        assert len(list_of_flat_tables) >= 1, "At least 1 flat table needs to be included in the config file"
         query = ""
-        query += self.get_temp_table_query()
+
+
+        if ("flat_events" in list_of_flat_tables
+            or "flat_event_params" in list_of_flat_tables
+            or "flat_user_properties" in list_of_flat_tables
+            or "flat_items" in list_of_flat_tables):
+
+            query += self.get_temp_table_query()
 
         for flat_table in list_of_flat_tables:
             query_select = self.get_select_statement(flat_table)
@@ -384,28 +526,29 @@ class GaExportedNestedDataStorage(object):
                     f"Skipping execution")
                 return
 
-        try:
-            # Configure the query job
-            job_config = bigquery.QueryJobConfig(
-                use_query_cache=True,  # Use cached results if available
-                labels={"queryfunction": "ga4flattener"}  # Add labels for the query job
-            )
+        if self.source_table_exists(self.table_type):
+            try:
+                # Configure the query job
+                job_config = bigquery.QueryJobConfig(
+                    use_query_cache=True,  # Use cached results if available
+                    labels={"queryfunction": "ga4flattener"}  # Add labels for the query job
+                )
 
-            # Run the query
-            query_job = client.query(query, job_config=job_config)
+                # Run the query
+                query_job = client.query(query, job_config=job_config)
 
-            if wait_for_the_query_job_to_complete:
-                # Wait for the query to complete
-                query_job.result()
-                logging.info("Query completed.")
-                return query_job
-            else:
-                logging.info("Query submitted, not waiting for completion.")
-                return query_job
+                if wait_for_the_query_job_to_complete:
+                    # Wait for the query to complete
+                    query_job.result()
+                    logging.info("Query completed.")
+                    return query_job
+                else:
+                    logging.info("Query submitted, not waiting for completion.")
+                    return query_job
 
-        except Exception as e:
-            logging.error(f"An error occurred while submitting the query: {e}")
-            raise
+            except Exception as e:
+                logging.error(f"An error occurred while submitting the query: {e}")
+                raise
 
 
 def flatten_ga_data(event, context):
