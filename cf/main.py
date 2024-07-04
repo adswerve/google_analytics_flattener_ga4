@@ -11,6 +11,7 @@ import logging
 from datetime import datetime
 from http import HTTPStatus
 import sys
+from google.cloud.exceptions import NotFound
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -82,6 +83,22 @@ class GaExportedNestedDataStorage(object):
 
     def source_table_is_intraday(self):
         return "intraday" in self.table_type
+
+    def source_table_exists(self, table_type_param):
+        """
+         https://stackoverflow.com/questions/28731102/bigquery-check-if-table-already-exists
+         """
+
+        client = bigquery.Client(project=self.gcp_project)
+
+        full_table_path = f"{self.gcp_project}.{self.dataset}.{table_type_param}_{self.date_shard}"
+        table_id = bigquery.Table(full_table_path)
+        try:
+            client.get_table(table_id)
+            return True
+        except NotFound:
+            logging.info(f"table {full_table_path} does not exist.")
+            return False
 
     def get_temp_table_query(self):
         """
@@ -356,6 +373,16 @@ class GaExportedNestedDataStorage(object):
         """
 
         client = bigquery.Client(project=self.gcp_project)  # initialize BigQuery client
+
+        if self.source_table_is_intraday():
+            logging.info(
+                f"Requested flattening of intraday table: {self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`")
+            if self.source_table_exists("events"):
+                logging.warning(
+                    f"Daily table for that date exists: {self.gcp_project}.{self.dataset}.events_{self.date_shard}`")
+                logging.warning(
+                    f"Skipping execution")
+                return
 
         try:
             # Configure the query job
