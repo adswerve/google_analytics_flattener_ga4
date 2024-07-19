@@ -21,6 +21,7 @@ backfill_range_start = datetime.datetime(2021, 7, 20)
 backfill_range_end = datetime.datetime(2021, 7, 20)  # datetime.datetime.today()
 datasets_to_backfill = ["analytics_222460912"]  # GA properties to backfill, "analytics_222460912"
 table_type = "events"
+# table_type = "pseudonymous_users"
 '''*****************************'''
 '''  Configuration Section End  '''
 '''*****************************'''
@@ -50,7 +51,8 @@ for db in range(0, num_days_in_backfill_range):
                 "resourceName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
             }
         }
-        logging.info(f"Publishing backfill message to topic {topic_id} for {project_id}.{dataset_id}.events_{date_shard}")
+        logging.info(
+            f"Publishing backfill message to topic {topic_id} for {project_id}.{dataset_id}.{table_type}_{date_shard}")
         if not dry_run:
             publisher.publish(topic_path, json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'), origin='python-unit-test'
                               , username='gcp')
