@@ -20,8 +20,8 @@ class TestCFIntradaySQLView(BaseUnitTest):
                                             )
 
     def setUp(self):
-        # self.delete_all_flat_views_from_dataset()
-        pass
+        self.delete_all_flat_views_from_dataset()
+        # pass
 
     def tbl_exists(self, dataset, table_name):
         """
@@ -86,8 +86,8 @@ class TestCFIntradaySQLView(BaseUnitTest):
                                table_name=f"view_flat_events_{self.ga_source_intraday.date_shard}")
 
     def tearDown(self):
-        # self.delete_all_flat_views_from_dataset()
-        pass
+        self.delete_all_flat_views_from_dataset()
+        # pass
 
 class TestManageIntradaySQLView(BaseUnitTest):
 
