@@ -376,13 +376,24 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
         CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users_{self.ga_source.date_shard}`
                             AS
                             {select_statement}
+                            
+        CREATE TABLE IF NOT EXISTS   `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users` 
+        
+        PARTITION BY `date`
+        
+        AS {select_statement}
+        
+                                            
+        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users` WHERE `date` = PARSE_DATE('%Y%m%d','{self.ga_source.date_shard}');
+        
+      INSERT INTO `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users`
+      {select_statement}"""
 
-        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users` WHERE `date` = '{self.ga_source.date_shard}';
-                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_pseudo_users`
-                          AS {select_statement}"""
+        expected_query_cleaned =  expected_query.replace(" ", "").replace("\n", "").upper()
+        result_cleaned = result.replace(" ", "").replace("\n", "").upper()
 
-        self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
-                         expected_query.replace(" ", "").replace("\n", "").upper())
+
+        self.assertEqual(expected_query_cleaned, result_cleaned)
 
 
     def test_build_full_query(self):
