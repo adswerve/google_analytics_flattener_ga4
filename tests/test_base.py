@@ -75,7 +75,7 @@ class BaseUnitTest(unittest.TestCase):
                 os.path.join(os.path.dirname(__file__), "..", "sandbox", "sa.json"))
 
     def tearDown(self):
-        # self.delete_all_flat_tables_from_dataset()
+        self.delete_all_flat_tables_from_dataset()
         self.restore_default_config()
 
     def delete_all_flat_tables_from_dataset(self):

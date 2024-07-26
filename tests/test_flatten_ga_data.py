@@ -8,7 +8,7 @@ from google.cloud.exceptions import NotFound
 class TestCFFlattenMethods(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
-                                            dataset=c.env["dataset"],
+                                            dataset=c.env["dataset_adswerve"],
                                             table_type=c.env["table_type"],
                                             date_shard=c.env["date"],
                                             )
@@ -246,5 +246,5 @@ class TestCFFlattenMethodsUsersSourceDoesNotExist(BaseUnitTest):
         assert not self.tbl_exists(dataset=self.ga_source.dataset,
                                table_name=f"flat_pseudo_user_audiences_{self.ga_source.date_shard}")
     def tearDown(self):
-        # self.delete_all_flat_tables_from_dataset()
+        self.delete_all_flat_tables_from_dataset()
         pass
