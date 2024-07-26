@@ -14,7 +14,7 @@ import pandas as pd
 from tests.test_base import BaseUnitTest
 from tests.test_base import Context
 from cf.main import GaExportedNestedDataStorage
-
+from google.cloud.exceptions import NotFound
 
 class TestPartitioning(BaseUnitTest):
     c = Context()
@@ -24,52 +24,65 @@ class TestPartitioning(BaseUnitTest):
                                             date_shard=c.env["date"],
                                             )
 
+
+    def tbl_exists(self, dataset, table_name):
+        """
+         https://stackoverflow.com/questions/28731102/bigquery-check-if-table-already-exists
+         """
+        client = bigquery.Client(project=self.ga_source.gcp_project)
+
+        full_table_path = f"{self.ga_source.gcp_project}.{dataset}.{table_name}"
+        table_id = bigquery.Table(full_table_path)
+        try:
+            client.get_table(table_id)
+            return True
+        except NotFound:
+            return False
+
     # SIMPLE TESTS
     def test_flatten_ga_data_config_output_type_partitioned_only(self):
-        self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(),
-                                     table_type="flat_event_params",
-                                     sharded_output_required=False,
-                                     partitioned_output_required=True)
 
-        self.ga_source.run_query_job(query=self.ga_source.get_events_query(),
-                                     table_type="flat_events",
-                                     sharded_output_required=False,
-                                     partitioned_output_required=True)
+        sharded_output_required = False
+        partitioned_output_required = True
 
-        self.ga_source.run_query_job(query=self.ga_source.get_items_query(),
-                                     table_type="flat_items",
-                                     sharded_output_required=False,
-                                     partitioned_output_required=True)
+        list_tables = ["flat_events",
+                     "flat_event_params",
+                     "flat_items",
+                     "flat_user_properties"]
 
-        self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-                                     table_type="flat_user_properties",
-                                     sharded_output_required=False,
-                                     partitioned_output_required=True)
+        query = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
+                                                partitioned_output_required=partitioned_output_required,
+                                                list_of_flat_tables=list_tables)
 
-        self.assertTrue(True)
+        self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
+
+        for table in list_tables:
+
+            assert self.tbl_exists(dataset=self.ga_source.dataset,
+                               table_name=table)
 
     def test_flatten_ga_data_config_output_type_sharded_and_partitioned(self):
-        self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(),
-                                     table_type="flat_event_params",
-                                     sharded_output_required=True,
-                                     partitioned_output_required=True)
+        sharded_output_required = True
+        partitioned_output_required = True
 
-        self.ga_source.run_query_job(query=self.ga_source.get_events_query(),
-                                     table_type="flat_events",
-                                     sharded_output_required=True,
-                                     partitioned_output_required=True)
+        list_tables = ["flat_events",
+                     "flat_event_params",
+                     "flat_items",
+                     "flat_user_properties"]
 
-        self.ga_source.run_query_job(query=self.ga_source.get_items_query(),
-                                     table_type="flat_items",
-                                     sharded_output_required=True,
-                                     partitioned_output_required=True)
+        query = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
+                                                partitioned_output_required=partitioned_output_required,
+                                                list_of_flat_tables=list_tables)
 
-        self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-                                     table_type="flat_user_properties",
-                                     sharded_output_required=True,
-                                     partitioned_output_required=True)
+        self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
 
-        self.assertTrue(True)
+        for table in list_tables:
+
+            assert self.tbl_exists(dataset=self.ga_source.dataset,
+                               table_name=table)
+
+            assert self.tbl_exists(dataset=self.ga_source.dataset,
+                                   table_name=f"{table}_{self.ga_source.date_shard}")
 
     # INTEGRATED TESTS
     # check output schema
@@ -174,33 +187,34 @@ class TestPartitioning(BaseUnitTest):
         # we will wait for the job to complete, or else the unit test fails
         # (we need to wait for the correct output to be produced before we verify/check the output)
         if table_type == "flat_event_params":
-            self.ga_source.run_query_job(query=self.ga_source.get_event_params_query(),
-                                         table_type=table_type,
-                                         sharded_output_required=True,
-                                         partitioned_output_required=True,
-                                         wait_for_the_query_job_to_complete=True)
+
+            query = self.ga_source.build_full_query(sharded_output_required=True,
+                                                    partitioned_output_required=True,
+                                                    list_of_flat_tables=["flat_event_params"])
+
+            self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
+
 
         elif table_type == "flat_events":
-            self.ga_source.run_query_job(query=self.ga_source.get_events_query(),
-                                         table_type=table_type,
-                                         sharded_output_required=True,
-                                         partitioned_output_required=True,
-                                         wait_for_the_query_job_to_complete=True)
+            query = self.ga_source.build_full_query(sharded_output_required=True,
+                                                    partitioned_output_required=True,
+                                                    list_of_flat_tables=["flat_events"])
+
+            self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
 
         elif table_type == "flat_items":
-            self.ga_source.run_query_job(query=self.ga_source.get_items_query(),
-                                         table_type=table_type,
-                                         sharded_output_required=True,
-                                         partitioned_output_required=True,
-                                         wait_for_the_query_job_to_complete=True)
+            query = self.ga_source.build_full_query(sharded_output_required=True,
+                                                    partitioned_output_required=True,
+                                                    list_of_flat_tables=["flat_items"])
+
+            self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
 
         elif table_type == "flat_user_properties":
-            self.ga_source.run_query_job(query=self.ga_source.get_user_properties_query(),
-                                         table_type=table_type,
-                                         sharded_output_required=True,
-                                         partitioned_output_required=True,
-                                         wait_for_the_query_job_to_complete=True)
+            query = self.ga_source.build_full_query(sharded_output_required=True,
+                                                    partitioned_output_required=True,
+                                                    list_of_flat_tables=["flat_user_properties"])
 
+            self.ga_source.run_query_job(query, wait_for_the_query_job_to_complete=True)
     def flatten_ga_data_check_number_of_rows(self, dates_list=["20211201", "20211202"],
                                              table_type="flat_events"):
 

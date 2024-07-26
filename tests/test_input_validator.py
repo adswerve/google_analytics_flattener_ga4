@@ -9,13 +9,42 @@ import os
 
 
 class TestInputValidator(BaseUnitTest):
-    def test_input_validator(self):
+    def test_input_validator_events(self):
         # context and configuration
         c = Context()
         project_id = c.env["project"]
         dataset_id = c.env["dataset"]
         date_shard = c.env["date"]
         table_type = c.env["table_type"]
+
+        # inputs
+        SAMPLE_LOAD_DATA = {
+            "protoPayload": {
+                            "resourceName": f"projects/{project_id}/datasets/{dataset_id}/tables/{table_type}_{date_shard}"
+        }}
+
+        SAMPLE_PUBSUB_MESSAGE = {'@type': 'type.googleapis.com/google.pubsub.v1.PubsubMessage', 'attributes':
+            {'origin': 'python-unit-test', 'username': 'gcp'}
+            , 'data': base64.b64encode(json.dumps(SAMPLE_LOAD_DATA).encode('utf-8'))}
+
+        # validate input
+        iv = InputValidator(SAMPLE_PUBSUB_MESSAGE)
+
+        # checks
+        self.assertEqual(date_shard, iv.table_date_shard)
+        self.assertEqual(project_id, iv.gcp_project)
+        self.assertEqual(dataset_id, iv.dataset)
+        self.assertEqual(table_type, iv.table_type)
+        assert isinstance(iv.valid_dataset(), bool)
+        self.assertTrue(True)
+
+    def test_input_validator_users(self):
+        # context and configuration
+        c = Context()
+        project_id = c.env["project"]
+        dataset_id = c.env["dataset"]
+        date_shard = c.env["date"]
+        table_type = "pseudonymous_users"
 
         # inputs
         SAMPLE_LOAD_DATA = {

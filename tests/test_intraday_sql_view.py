@@ -21,6 +21,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
 
     def setUp(self):
         self.delete_all_flat_views_from_dataset()
+        # pass
 
     def tbl_exists(self, dataset, table_name):
         """
@@ -38,7 +39,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
 
     # EVENT_PARAMS
     def test_create_sql_view_intraday_event_params(self):
-        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_event_params_query(),
+        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_event_params_query_select_statement(),
                                      table_type="flat_event_params",
                                      wait_for_the_query_job_to_complete=True)
 
@@ -47,7 +48,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
 
     # USER_PROPERTIES
     def test_create_sql_view_intraday_user_properties(self):
-        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_user_properties_query(),
+        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_user_properties_query_select_statement(),
                                      table_type="flat_user_properties",
                                      wait_for_the_query_job_to_complete=True)
 
@@ -56,7 +57,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
 
     # ITEMS
     def test_create_sql_view_intraday_items(self):
-        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_items_query(),
+        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_items_query_select_statement(),
                                      table_type="flat_items",
                                      wait_for_the_query_job_to_complete=True)
 
@@ -65,7 +66,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
 
     # EVENTS
     def test_create_sql_view_intraday_events(self):
-        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_events_query(),
+        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_events_query_select_statement(),
                                      table_type="flat_events",
                                      wait_for_the_query_job_to_complete=True)
 
@@ -75,7 +76,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
 
     def test_create_and_delete_sql_views_intraday(self):
 
-        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_events_query(),
+        self.ga_source_intraday.create_intraday_sql_views(query=self.ga_source_intraday.get_events_query_select_statement(),
                                      table_type="flat_events",
                                      wait_for_the_query_job_to_complete=True)
 
@@ -86,6 +87,7 @@ class TestCFIntradaySQLView(BaseUnitTest):
 
     def tearDown(self):
         self.delete_all_flat_views_from_dataset()
+        # pass
 
 class TestManageIntradaySQLView(BaseUnitTest):
 

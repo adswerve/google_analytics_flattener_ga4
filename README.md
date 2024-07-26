@@ -74,9 +74,20 @@ The GCP resources for the solutions are installed via Deployment Manager.
 1. Browse to https://console.cloud.google.com/ to create Google GCP project or use an existing project that has Google
    Analytics data flowing to it. Referred to as **[PROJECT_ID]**.
 
-2. Grant the installing user (you most likely) the basic IAM role of `Editor`.
+2. Grant the installing user (you most likely) the basic IAM role of `Owner`.
 
-3. As the installing user for **[PROJECT_ID]**, enable the following APIs
+3. As the installing user for **[PROJECT_ID]**, grant the following pre-defined IAM roles to
+   **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com (built in service account). Otherwise deployment will fail with
+   permission errors. See
+   <https://cloud.google.com/deployment-manager/docs/access-control> for detailed explanation.
+    * Logs Configuration Writer
+    * Cloud Functions Developer
+    * Pub/Sub Admin
+
+    If your GCP project is brand new, you might not have **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com yet. To fix
+    this, enable Compute Engine API and then disable it. The service account **[PROJECT_NUMBER]**@cloudservices.gserviceaccount.com will appear in your GCP project under IAM.
+
+4. As the installing user for **[PROJECT_ID]**, enable the following APIs
     * Cloud Build API
     * Cloud Deployment Manager V2 API
     * Cloud Functions API
@@ -84,7 +95,7 @@ The GCP resources for the solutions are installed via Deployment Manager.
     * Identity and Access Management (IAM) API
     * Cloud Scheduler API (if you need to flatten intraday tables)
 
-4. As the installing user for **[PROJECT_ID]**, create a bucket or use an existing bucket for staging code, for example:
+5. As the installing user for **[PROJECT_ID]**, create a bucket or use an existing bucket for staging code, for example:
    **`[PROJECT_NUMBER]**-function-code-staging`. Referred to as **[BUCKET_NAME]**.
 
     We recommend adding a label to this GCS bucket, for example:
@@ -96,9 +107,9 @@ The GCP resources for the solutions are installed via Deployment Manager.
     This label will help you roughly estimate GCS cost related to flattener. 
 
 
-5. Clone this github repo or download the source code from the releases section to your local machine or cloud shell.
+6. Clone this github repo or download the source code from the releases section to your local machine or cloud shell.
 
-6. Edit the _ga_flattener.yaml_ and _ga_flattener_colon.yaml_ files, specifically all occurrences of _properties-->
+7. Edit the _ga_flattener.yaml_ and _ga_flattener_colon.yaml_ files, specifically all occurrences of _properties-->
    codeBucket_ value. Set the value to **[BUCKET_NAME]** (see step above)
 
 ## Installation steps ##

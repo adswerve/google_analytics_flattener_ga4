@@ -1,8 +1,11 @@
 sample_events_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     
+    CONCAT(user_pseudo_id, ".",(SELECT value.int_value from UNNEST(event_params) WHERE key = 'ga_session_id')) as session_id,
+    CONCAT(user_pseudo_id, ".",(SELECT value.int_value from UNNEST(event_params) WHERE key = 'ga_session_number')) as session_id_1,
+
     event_timestamp AS event_timestamp,
     event_name AS event_name,
     event_previous_timestamp AS event_previous_timestamp,
@@ -74,13 +77,13 @@ SELECT
     
     'daily' AS source_table_type
     
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events ;
 """
 
 sample_events_query_on_and_after_20230503 = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
 
     event_timestamp AS event_timestamp,
     event_name AS event_name,
@@ -163,14 +166,14 @@ SELECT
 
     'daily' AS source_table_type
 
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events ; 
 """
 
 
 sample_events_query_on_and_after_20230717 = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
 
     event_timestamp AS event_timestamp,
     event_name AS event_name,
@@ -255,13 +258,13 @@ SELECT
 
     'daily' AS source_table_type
 
- FROM `gcp-project.dataset.events_date_shard` 
+ FROM temp_events ; 
 """
 
 sample_event_params_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     event_params.key as event_params_key,     
     COALESCE(event_params.value.string_value,
         CAST(event_params.value.int_value AS STRING),
@@ -271,15 +274,15 @@ SELECT
     
     'daily' AS source_table_type
                             
-FROM `gcp-project.dataset.events_date_shard` 
-,UNNEST (event_params) AS event_params
+FROM temp_events 
+,UNNEST (event_params) AS event_params ; 
 """
 
 
 sample_user_properties_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     user_properties.key	AS user_properties_key,            
     COALESCE(user_properties.value.string_value,
         CAST(user_properties.value.int_value AS STRING),
@@ -291,15 +294,15 @@ SELECT
     
     'daily' AS source_table_type
     
- FROM `gcp-project.dataset.events_date_shard` 
-  ,UNNEST (user_properties) AS user_properties
+ FROM temp_events
+  ,UNNEST (user_properties) AS user_properties ;
 """
 
 sample_items_query = """
 SELECT 
     
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
-    CONCAT(stream_id, '_' , user_pseudo_id, '_' ,  event_name,  '_' , event_timestamp) AS event_id,
+    event_id,
     
     items.item_id AS items_item_id,
     items.item_name AS items_item_name,
@@ -330,6 +333,82 @@ SELECT
     
     'daily' AS source_table_type
 
- FROM `gcp-project.dataset.events_date_shard` 
-  ,UNNEST(items) AS items
+ FROM temp_events
+  ,UNNEST(items) AS items ;
+"""
+
+sample_pseudo_users_query = """
+SELECT
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+  pseudo_user_id,
+  stream_id,
+
+  user_info.last_active_timestamp_micros AS user_info_last_active_timestamp_micros,
+  user_info.user_first_touch_timestamp_micros AS user_info_user_first_touch_timestamp_micros,
+  user_info.first_purchase_date AS user_info_first_purchase_date,
+
+  device.operating_system AS device_operating_system,
+  device.category AS device_category,
+  device.mobile_brand_name AS device_mobile_brand_name,
+  device.mobile_model_name AS device_mobile_model_name,
+  device.unified_screen_name AS device_unified_screen_name,
+
+  geo.city AS geo_city,
+  geo.country AS geo_country,
+  geo.continent AS geo_continent,
+  geo.region AS geo_region,
+
+  user_ltv.revenue_in_usd AS user_ltv_revenue_in_usd,
+  user_ltv.sessions AS user_ltv_sessions,
+  user_ltv.engagement_time_millis AS user_ltv_engagement_time_millis,
+  user_ltv.purchases AS user_ltv_purchases,
+  user_ltv.engaged_sessions AS user_ltv_engaged_sessions,
+  user_ltv.session_duration_micros AS user_ltv_session_duration_micros,
+
+  predictions.in_app_purchase_score_7d AS predictions_in_app_purchase_score_7d,
+  predictions.purchase_score_7d AS predictions_purchase_score_7d,
+  predictions.churn_score_7d AS predictions_churn_score_7d,
+  predictions.revenue_28d_in_usd AS predictions_revenue_28d_in_usd,
+
+  privacy_info.is_limited_ad_tracking AS privacy_info_is_limited_ad_tracking,
+  privacy_info.is_ads_personalization_allowed AS privacy_info_is_ads_personalization_allowed,
+
+  occurrence_date,
+  last_updated_date
+FROM
+  `gcp-project.dataset.pseudonymous_users_*`
+WHERE _TABLE_SUFFIX = "date_shard"   
+  ;
+"""
+
+sample_pseudo_user_properties_query = """
+SELECT
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+  
+  pseudo_user_id,
+  up.key user_property_key,
+  up.value.string_value user_property_value,
+  up.value.set_timestamp_micros user_property_set_timestamp_micros,
+  up.value.user_property_name
+FROM
+    `gcp-project.dataset.pseudonymous_users_*`,
+    UNNEST(user_properties) up
+WHERE _TABLE_SUFFIX = "date_shard"    
+  ;
+"""
+
+sample_pseudo_user_audiences_query = """
+SELECT
+  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+  pseudo_user_id,
+  a.id audience_id,
+  a.name audience_name,
+  a.membership_start_timestamp_micros audience_membership_start_timestamp_micros,
+  a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
+  a.npa audience_npa
+FROM
+    `gcp-project.dataset.pseudonymous_users_*`,
+  UNNEST(audiences) a
+WHERE _TABLE_SUFFIX = "date_shard" 
+    ;
 """

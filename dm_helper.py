@@ -96,6 +96,9 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "EVENT_PARAMS": "event_params",
             "USER_PROPERTIES": "user_properties",
             "ITEMS": "items",
+            "PSEUDO_USERS": "pseudo_users",
+            "PSEUDO_USER_PROPERTIES": "pseudo_user_properties",
+            "PSEUDO_USER_AUDIENCES": "pseudo_user_audiences",
             "LOCATION_ID": "us-central1",
             "TOPIC_NAME": self.get_topic_id()
         }
