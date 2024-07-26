@@ -204,24 +204,44 @@ class GaExportedNestedDataStorage(object):
                     ecommerce.tax_value_in_usd AS ecommerce_tax_value_in_usd,
                     ecommerce.tax_value AS ecommerce_tax_value,
                     ecommerce.unique_items AS ecommerce_unique_items,
-                    ecommerce.transaction_id AS ecommerce_transaction_id
-                """
+                    ecommerce.transaction_id AS ecommerce_transaction_id,
+                 
+                    collected_traffic_source.manual_campaign_id AS collected_traffic_source_manual_campaign_id,
+                    collected_traffic_source.manual_campaign_name AS collected_traffic_source_manual_campaign_name,
+                    collected_traffic_source.manual_source AS collected_traffic_source_manual_source,
+                    collected_traffic_source.manual_medium AS collected_traffic_source_manual_medium,
+                    collected_traffic_source.manual_term AS collected_traffic_source_manual_term,
+                    collected_traffic_source.manual_content AS collected_traffic_source_manual_content,
+                    collected_traffic_source.manual_source_platform AS collected_traffic_source_manual_source_platform, 
+                    collected_traffic_source.manual_creative_format AS collected_traffic_source_manual_creative_format, 
+                    collected_traffic_source.manual_marketing_tactic AS collected_traffic_source_manual_marketing_tactic,
+                    collected_traffic_source.gclid AS collected_traffic_source_gclid,
+                    collected_traffic_source.dclid AS collected_traffic_source_dclid,
+                    collected_traffic_source.srsltid AS collected_traffic_source_srsltid,
+                    is_active_user AS is_active_user,
+                    
+                    batch_event_index AS batch_event_index, 
+                    batch_page_id AS batch_page_id, 
+                    batch_ordering_id AS batch_ordering_id, 
+                
+                    session_traffic_source_last_click.manual_campaign.campaign_id AS session_traffic_source_last_click_manual_campaign_campaign_id, 
+                    session_traffic_source_last_click.manual_campaign.campaign_name AS session_traffic_source_last_click_manual_campaign_campaign_name, 
+                    session_traffic_source_last_click.manual_campaign.`source` AS session_traffic_source_last_click_manual_campaign_source, 
+                    session_traffic_source_last_click.manual_campaign.medium AS session_traffic_source_last_click_manual_campaign_medium, 
+                    session_traffic_source_last_click.manual_campaign.term AS session_traffic_source_last_click_manual_campaign_term, 
+                    session_traffic_source_last_click.manual_campaign.content AS session_traffic_source_last_click_manual_campaign_content, 
+                    session_traffic_source_last_click.manual_campaign.source_platform AS session_traffic_source_last_click_manual_campaign_source_platform, 
+                    session_traffic_source_last_click.manual_campaign.creative_format AS session_traffic_source_last_click_manual_campaign_creative_format, 
+                    session_traffic_source_last_click.manual_campaign.marketing_tactic AS session_traffic_source_last_click_manual_campaign_marketing_tactic,
+                    
+                    session_traffic_source_last_click.google_ads_campaign.customer_id AS session_traffic_source_last_click_google_ads_campaign_customer_id,
+                    session_traffic_source_last_click.google_ads_campaign.account_name AS session_traffic_source_last_click_google_ads_campaign_account_name, 
+                    session_traffic_source_last_click.google_ads_campaign.campaign_id AS session_traffic_source_last_click_google_ads_campaign_campaign_id, 
+                    session_traffic_source_last_click.google_ads_campaign.campaign_name AS session_traffic_source_last_click_google_ads_campaign_campaign_name, 
+                    session_traffic_source_last_click.google_ads_campaign.ad_group_id AS session_traffic_source_last_click_google_ads_campaign_ad_group_id, 
+                    session_traffic_source_last_click.google_ads_campaign.ad_group_name AS session_traffic_source_last_click_google_ads_campaign_ad_group_name
 
-        if self.date_shard >= '20230503':
-            qry += f"""
-                    ,collected_traffic_source.manual_campaign_id AS collected_traffic_source_manual_campaign_id
-                    ,collected_traffic_source.manual_campaign_name AS collected_traffic_source_manual_campaign_name
-                    ,collected_traffic_source.manual_source AS collected_traffic_source_manual_source
-                    ,collected_traffic_source.manual_medium AS collected_traffic_source_manual_medium
-                    ,collected_traffic_source.manual_term AS collected_traffic_source_manual_term
-                    ,collected_traffic_source.manual_content AS collected_traffic_source_manual_content
-                    ,collected_traffic_source.gclid AS collected_traffic_source_gclid
-                    ,collected_traffic_source.dclid AS collected_traffic_source_dclid
-                    ,collected_traffic_source.srsltid AS collected_traffic_source_srsltid
                     """
-
-        if self.date_shard >= "20230717":
-            qry += f",is_active_user AS is_active_user"
 
         qry += f""" ,{self.source_table_type} AS source_table_type
         FROM temp_events

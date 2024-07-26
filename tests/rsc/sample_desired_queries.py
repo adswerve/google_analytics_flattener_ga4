@@ -113,7 +113,7 @@ SELECT
 
     'daily' AS source_table_type
     
- FROM temp_events ;
+ FROM temp_events;
 """
 
 sample_event_params_query = """
