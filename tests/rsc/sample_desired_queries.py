@@ -75,6 +75,18 @@ SELECT
     ecommerce.unique_items AS ecommerce_unique_items,
     ecommerce.transaction_id AS ecommerce_transaction_id,
     
+    collected_traffic_source.manual_campaign_id AS collected_traffic_source_manual_campaign_id,
+    collected_traffic_source.manual_campaign_name AS collected_traffic_source_manual_campaign_name,
+    collected_traffic_source.manual_source AS collected_traffic_source_manual_source,
+    collected_traffic_source.manual_medium AS collected_traffic_source_manual_medium,
+    collected_traffic_source.manual_term AS collected_traffic_source_manual_term,
+    collected_traffic_source.manual_content AS collected_traffic_source_manual_content,
+    collected_traffic_source.gclid AS collected_traffic_source_gclid,
+    collected_traffic_source.dclid AS collected_traffic_source_dclid,
+    collected_traffic_source.srsltid AS collected_traffic_source_srsltid,
+    
+    is_active_user AS is_active_user,
+
     'daily' AS source_table_type
     
  FROM temp_events ;
