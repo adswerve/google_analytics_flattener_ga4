@@ -163,10 +163,18 @@ class TestGenerateQuerySourceTableEvents(BaseUnitTest):
                                                             sharded_output_required=False,
                                                             partitioned_output_required=True)
 
-        expected_query = f"""DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events` WHERE event_date = '{self.ga_source.date_shard}';
-                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events`
-                          AS {select_statement}"""
-
+        expected_query = f"""
+        
+        CREATE TABLE IF NOT EXISTS   `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events` 
+        
+        PARTITION BY event_date
+        
+        AS {select_statement}
+        
+        
+        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events` WHERE event_date = PARSE_DATE('%Y%m%d','{self.ga_source.date_shard}');
+                          INSERT INTO `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_events`
+                          {select_statement}"""
 
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
