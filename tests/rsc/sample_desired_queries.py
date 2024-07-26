@@ -1,3 +1,5 @@
+#TODO: don't maintain 2 copies of hte same queries (main vs. sample desired queries file).
+# Pull them from sample file into main file. Don't hardcode them in the main file. Simplify unit tests.
 sample_events_query = """
 SELECT 
     PARSE_DATE('%%Y%%m%%d', event_date) AS event_date,
