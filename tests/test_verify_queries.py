@@ -5,6 +5,8 @@ from cfintradaysqlview.main import IntradaySQLView
 from tests.rsc import sample_desired_queries
 
 
+# test_get_flat_table_update_query_sharded_and_partitioned_output_required_flat_event_params
+
 class TestGenerateQuerySourceTableEvents(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
@@ -206,10 +208,18 @@ class TestGenerateQuerySourceTableEvents(BaseUnitTest):
         CREATE OR REPLACE TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params_{self.ga_source.date_shard}`
                             AS
                             {select_statement}
+                            
+        
+        CREATE TABLE IF NOT EXISTS   `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params` 
+        
+        PARTITION BY event_date
+        
+        AS {select_statement}
 
-        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params` WHERE event_date = '{self.ga_source.date_shard}';
-                          INSERT INTO TABLE `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params`
-                          AS {select_statement}"""
+                                    
+        DELETE FROM `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params` WHERE event_date = PARSE_DATE('%Y%m%d','{self.ga_source.date_shard}');
+                          INSERT INTO `{self.ga_source.gcp_project}.{self.ga_source.dataset}.flat_event_params`
+                          {select_statement}"""
 
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
