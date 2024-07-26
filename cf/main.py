@@ -118,10 +118,33 @@ class GaExportedNestedDataStorage(object):
         """
         qry = f"""
                   CREATE OR REPLACE TEMP TABLE temp_events AS (
-                  SELECT
-                    CONCAT(stream_id, ".", COALESCE(user_pseudo_id, "user_pseudo_id_null"),".",event_name, ".", event_timestamp, ".", ROW_NUMBER() OVER(PARTITION BY stream_id, COALESCE(user_pseudo_id, "user_pseudo_id_null"),
-                        event_name,
-                        event_timestamp)) AS event_id,
+                  SELECT          
+                        CONCAT(
+                              stream_id, 
+                              ".",
+                              IFNULL(user_pseudo_id, ""), 
+                              ".",
+                              event_name,
+                              ".",
+                              event_timestamp, 
+                              ".",
+                              IFNULL(CAST(batch_event_index AS STRING),  ""),
+                              ".",
+                              IFNULL(CAST(batch_page_id AS STRING),  ""),
+                              ".",
+                              IFNULL(CAST(batch_ordering_id AS STRING), ""),
+                              ".",
+                            
+                              ROW_NUMBER() OVER (PARTITION BY CONCAT(
+                                                              stream_id, 
+                                                              IFNULL(user_pseudo_id, ""), 
+                                                              event_name,
+                                                              event_timestamp, 
+                                                              IFNULL(CAST(batch_event_index AS STRING),  ""),
+                                                              IFNULL(CAST(batch_page_id AS STRING),  ""),
+                                                              IFNULL(CAST(batch_ordering_id AS STRING), "")
+                            ))) event_id,
+                        
                     *
                   FROM
                     `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
