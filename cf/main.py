@@ -147,7 +147,8 @@ class GaExportedNestedDataStorage(object):
                         
                     *
                   FROM
-                    `{self.gcp_project}.{self.dataset}.{self.table_type}_{self.date_shard}`
+                    `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+                  WHERE _TABLE_SUFFIX = "{self.date_shard}"                           
                 )
                 ;
               """
