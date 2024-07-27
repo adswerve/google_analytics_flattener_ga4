@@ -57,6 +57,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         protoPayload.authenticationInfo.principalEmail="firebase-measurement@system.gserviceaccount.com" 
         severity: "NOTICE"
         NOT "events_intraday_"
+        NOT "tables/users_"
         '''
         self.FILTER_INTRADAY = '''
         resource.type="bigquery_resource" 
