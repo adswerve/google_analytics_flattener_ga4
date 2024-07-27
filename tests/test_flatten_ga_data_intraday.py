@@ -8,9 +8,9 @@ from google.cloud.exceptions import NotFound
 class TestCFFlattenMethodsIntraday(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
-                                            dataset=c.env["dataset"],
+                                            dataset=c.env["dataset_adswerve"],
                                             table_type=c.env["table_type_intraday"],
-                                            date_shard= "20210823"
+                                            date_shard= "20240725"
                                             # date_shard = c.env["date_intraday"],
                                             )
 

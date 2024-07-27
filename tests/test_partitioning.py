@@ -19,7 +19,7 @@ from google.cloud.exceptions import NotFound
 class TestPartitioning(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
-                                            dataset=c.env["dataset"],
+                                            dataset=c.env["dataset_adswerve"],
                                             table_type=c.env["table_type"],
                                             date_shard=c.env["date"],
                                             )
@@ -146,6 +146,7 @@ class TestPartitioning(BaseUnitTest):
 
         # extract info about partitioned table
         table_partitioned = client.get_table(table_id_partitioned)  # Make an API request.
+
 
         # verify partitioning
         self.assertIsNotNone(table_partitioned.time_partitioning)
