@@ -52,6 +52,10 @@ class InputValidator(object):
 
     def flatten_nested_tables(self):
         tables_config = self.config[self.dataset]["tables_to_flatten"]
+
+        logging.info(
+            f"table type is {self.table_type}")
+
         if self.table_type == "pseudonymous_users":
 
             tables = list(set(tables_config) & set(["pseudo_users",
@@ -621,6 +625,11 @@ def flatten_ga_data(event, context):
         flat_tables = []
         for table in tables:
             flat_tables.append(f"flat_{table}")
+
+        if len(flat_tables) == 0:
+            logging.info(
+                f"{input_event.dataset}.{input_event.table_type}_{input_event.table_date_shard} is not configured for flattening. Exiting the function.")
+            return
 
         logging.info(f"GA4 flattener is writing data to flat tables {flat_tables} in dataset {input_event.dataset} for date {input_event.table_date_shard}")
 
