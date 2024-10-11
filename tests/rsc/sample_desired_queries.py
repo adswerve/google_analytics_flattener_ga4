@@ -128,6 +128,8 @@ SELECT
         CAST(event_params.value.float_value AS STRING),
         CAST(event_params.value.double_value AS STRING) 
     ) AS event_params_value,
+    event_params.value.string_value AS event_params_string_value,
+    event_params.value.int_value AS event_params_int_value,
     
     'daily' AS source_table_type
                             
