@@ -125,19 +125,19 @@ class GaExportedNestedDataStorage(object):
                   SELECT          
                         CONCAT(
                               stream_id, 
-                              ".",
+                              "_",
                               IFNULL(user_pseudo_id, ""), 
-                              ".",
+                              "_",
                               event_name,
-                              ".",
+                              "_",
                               event_timestamp, 
-                              ".",
+                              "_",
                               IFNULL(CAST(batch_event_index AS STRING),  ""),
-                              ".",
+                              "_",
                               IFNULL(CAST(batch_page_id AS STRING),  ""),
-                              ".",
+                              "_",
                               IFNULL(CAST(batch_ordering_id AS STRING), ""),
-                              ".",
+                              "_",
                             
                               ROW_NUMBER() OVER (PARTITION BY CONCAT(
                                                               stream_id, 
@@ -162,8 +162,8 @@ class GaExportedNestedDataStorage(object):
         qry = f"""SELECT
                     PARSE_DATE('%Y%m%d', event_date) AS event_date,
                     event_id,
-                    CONCAT(user_pseudo_id, ".",(SELECT value.int_value from UNNEST(event_params) WHERE key = 'ga_session_id')) as session_id,
-                    CONCAT(user_pseudo_id, ".",(SELECT value.int_value from UNNEST(event_params) WHERE key = 'ga_session_number')) as session_id_1,
+                    CONCAT(user_pseudo_id, "_",(SELECT value.int_value from UNNEST(event_params) WHERE key = 'ga_session_id')) as session_id,
+                    CONCAT(user_pseudo_id, "_",(SELECT value.int_value from UNNEST(event_params) WHERE key = 'ga_session_number')) as session_id_1,
                 
                     event_timestamp AS event_timestamp,
                     event_name AS event_name,
