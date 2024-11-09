@@ -10,7 +10,7 @@ env:
 
 on:
   push:
-    branches: [ staging, development-users ]
+    branches: [ staging ]
   pull_request:
     branches: [ master ]
 
@@ -76,9 +76,9 @@ jobs:
           gsutil stat gs://ga4-flattener-deployment-464892960897-adswerve-ga-flat-config/config_datasets.json || echo "ERROR: GCS config file not found"
 
 #      - name: Test with pytest
-#        run: |
-#          # test
-#          pytest --verbose
+        run: |
+          # test
+          pytest --verbose
       - name: Clean up
         run: |
           # clean up
