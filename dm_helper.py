@@ -57,7 +57,6 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
         protoPayload.authenticationInfo.principalEmail="firebase-measurement@system.gserviceaccount.com" 
         severity: "NOTICE"
         NOT "events_intraday_"
-        NOT "tables/users_"
         '''
         self.FILTER_INTRADAY = '''
         resource.type="bigquery_resource" 
@@ -101,7 +100,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "PSEUDO_USER_PROPERTIES": "pseudo_user_properties",
             "PSEUDO_USER_AUDIENCES": "pseudo_user_audiences",
             "LOCATION_ID": "us-central1",
-            "TOPIC_NAME": self.get_topic_id()
+            "TOPIC_NAME": self.get_topic_id()     #TODO: add users
         }
 
     def get_project(self):
