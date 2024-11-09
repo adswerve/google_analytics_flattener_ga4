@@ -82,6 +82,9 @@ FROM (
             , os.environ["PSEUDO_USERS"]
             , os.environ["PSEUDO_USER_PROPERTIES"]
             , os.environ["PSEUDO_USER_AUDIENCES"]
+            , os.environ["USERS"]
+            , os.environ["USERS_USER_PROPERTIES"]
+            , os.environ["USERS_USER_AUDIENCES"]
                                          ]
         return ret_val
 
