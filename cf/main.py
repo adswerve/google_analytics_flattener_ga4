@@ -99,7 +99,7 @@ class GaExportedNestedDataStorage(object):
 
         if self.table_type == "pseudonymous_users" or self.table_type=="users":
             self.date_field_name = "`date`"
-        elif self.table_type == "events":
+        elif self.table_type == "events" or self.table_type == "events_intraday":
             self.date_field_name = "event_date"
 
     def source_table_is_intraday(self):
@@ -128,7 +128,7 @@ class GaExportedNestedDataStorage(object):
 
         qry = ""
 
-        if self.table_type == "events":
+        if self.table_type in ("events", "events_intraday" ):
 
             qry = f"""
                       CREATE OR REPLACE TEMP TABLE temp_events AS (
@@ -664,7 +664,7 @@ class GaExportedNestedDataStorage(object):
         assert len(list_of_flat_tables) >= 1, "At least 1 flat table needs to be included in the config file"
         query = ""
 
-        if self.table_type in ("events", "users"):
+        if self.table_type in ("events", "events_intraday", "users"):
 
             query += self.get_temp_table_query()
 
