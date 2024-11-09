@@ -103,7 +103,7 @@ class GaFlattenerDeploymentConfiguration(DeploymentConfiguration):
             "USERS_USER_PROPERTIES": "users_user_properties",
             "USERS_USER_AUDIENCES": "users_user_audiences",
             "LOCATION_ID": "us-central1",
-            "TOPIC_NAME": self.get_topic_id()     #TODO: add users
+            "TOPIC_NAME": self.get_topic_id()
         }
 
     def get_project(self):
