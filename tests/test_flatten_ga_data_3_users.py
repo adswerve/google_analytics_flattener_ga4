@@ -106,5 +106,5 @@ class TestCFFlattenMethodsUsersSourceDoesNotExist(BaseUnitTest):
         assert not self.tbl_exists(dataset=self.ga_source.dataset,
                                table_name=f"flat_users_user_audiences_{self.ga_source.date_shard}")
     def tearDown(self):
-        # self.delete_all_flat_tables_from_dataset()
-        pass
+        self.delete_all_flat_tables_from_dataset()
+        # pass
