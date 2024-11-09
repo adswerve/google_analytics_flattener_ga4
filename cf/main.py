@@ -1,5 +1,4 @@
-#TODO: (optional for now) - intraday
-#TODO: (optional for now) - remaining unit tests other than the most important ones
+#TODO: (optional for now) - intraday flattening
 import base64
 import json
 from google.cloud import bigquery
