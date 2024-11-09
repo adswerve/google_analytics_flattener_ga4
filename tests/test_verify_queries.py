@@ -268,7 +268,7 @@ class TestGenerateQuerySourceTableEvents(BaseUnitTest):
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
 
-class TestGenerateQuerySourceTableUsers(BaseUnitTest):
+class TestGenerateQuerySourceTablePseudoUsers(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset"],
