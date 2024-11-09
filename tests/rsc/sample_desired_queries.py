@@ -271,3 +271,78 @@ FROM
 WHERE _TABLE_SUFFIX = "date_shard" 
     ;
 """
+
+sample_users_query = """
+SELECT
+  row_id,
+  `date`,
+
+  user_id,
+
+  user_info.last_active_timestamp_micros as user_info_last_active_timestamp_micros,
+  user_info.user_first_touch_timestamp_micros as user_info_user_first_touch_timestamp_micros,
+  user_info.first_purchase_date as user_info_first_purchase_date,
+
+  device.operating_system as device_operating_system,
+  device.category as device_category,
+  device.mobile_brand_name as device_mobile_brand_name,
+  device.mobile_model_name as device_mobile_model_name,
+  device.unified_screen_name as device_unified_screen_name,
+
+  geo.city as geo_city,
+  geo.country as geo_country,
+  geo.continent as geo_continent,
+  geo.region as geo_region,
+
+  user_ltv.revenue_in_usd as user_ltv_revenue_in_usd,
+  user_ltv.sessions as user_ltv_sessions,
+  user_ltv.engagement_time_millis as user_ltv_engagement_time_millis,
+  user_ltv.purchases as user_ltv_purchases,
+  user_ltv.engaged_sessions as user_ltv_engaged_sessions,
+  user_ltv.session_duration_micros as user_ltv_session_duration_micros,
+
+  predictions.in_app_purchase_score_7d as predictions_in_app_purchase_score_7d,
+  predictions.purchase_score_7d as predictions_purchase_score_7d,
+  predictions.churn_score_7d as predictions_churn_score_7d,
+  predictions.revenue_28d_in_usd as predictions_revenue_28d_in_usd,
+
+  privacy_info.is_limited_ad_tracking as privacy_info_is_limited_ad_tracking,
+  privacy_info.is_ads_personalization_allowed as privacy_info_is_ads_personalization_allowed,
+
+  occurrence_date,
+  last_updated_date
+FROM
+  temp_users
+  ;
+"""
+
+sample_users_user_properties_query = """
+SELECT
+  row_id,
+  `date`,
+  user_id,
+  up.key user_property_key,
+  up.value.string_value user_property_value,
+  up.value.set_timestamp_micros user_property_set_timestamp_micros,
+  up.value.user_property_name
+FROM
+    temp_users
+   ,UNNEST(user_properties) up
+  ;
+"""
+
+sample_users_user_audiences_query = """
+SELECT
+  row_id,
+  `date`,
+  user_id,
+  a.id audience_id,
+  a.name audience_name,
+  a.membership_start_timestamp_micros audience_membership_start_timestamp_micros,
+  a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
+  a.npa audience_npa
+FROM
+  temp_users
+  ,UNNEST(audiences) a
+    ;
+"""
