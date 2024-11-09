@@ -275,7 +275,7 @@ WHERE _TABLE_SUFFIX = "date_shard"
 sample_users_query = """
 SELECT
   row_id,
-  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,
+  `date`,
 
   user_id,
 
@@ -319,7 +319,7 @@ FROM
 sample_users_user_properties_query = """
 SELECT
   row_id,
-  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,
+  `date`,
   user_id,
   up.key user_property_key,
   up.value.string_value user_property_value,
@@ -334,7 +334,7 @@ FROM
 sample_users_user_audiences_query = """
 SELECT
   row_id,
-  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,
+  `date`,
   user_id,
   a.id audience_id,
   a.name audience_name,
