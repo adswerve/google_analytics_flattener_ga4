@@ -1,13 +1,14 @@
 import unittest
 from tests.test_build_ga_flattener_config import TestCFBuildFlattenerGaDatasetConfig
-from tests.test_flatten_ga_data import (TestCFFlattenMethods,
-                                        TestCFFlattenMethodsSchemaChangeCollectedTrafficSource,
-                                        TestCFFlattenMethodsSchemaChangeIsActiveUser,
-                                        TestCFFlattenMethodsUsersSourceDoesNotExist,
-                                        TestCFFlattenMethodsPseudoUsers,
-                                        # TestCFFlattenMethodsUsers,
-                                        )
-from tests.test_flatten_ga_data_intraday import TestCFFlattenMethodsIntraday
+from tests.test_flatten_ga_data_1_events import (TestCFFlattenMethods,
+                                                 TestCFFlattenMethodsSchemaChangeCollectedTrafficSource,
+                                                 TestCFFlattenMethodsSchemaChangeIsActiveUser,
+                                                 )
+
+from tests.test_flatten_ga_data_2_pseudo_users import TestCFFlattenMethodsPseudoUsers, TestCFFlattenMethodsPseudoUsersSourceDoesNotExist
+from tests.test_flatten_ga_data_3_users import TestCFFlattenMethodsUsers, TestCFFlattenMethodsUsersSourceDoesNotExist
+from tests.test_flatten_ga_data_4_intraday import TestCFFlattenMethodsIntraday
+
 from tests.test_generate_config_b import TestGenerateConfigB
 from tests.test_generate_config_cf import TestGenerateConfigCf
 from tests.test_generate_config_lm import TestGenerateConfigLm
@@ -30,15 +31,23 @@ if __name__ == '__main__':
     # tests
     test_suite.addTest(unittest.makeSuite(TestCFBuildFlattenerGaDatasetConfig))
 
+    # FLATTEN tests start
+    # events
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethods))
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsSchemaChangeCollectedTrafficSource))
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsSchemaChangeIsActiveUser))
 
-    test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsUsersSourceDoesNotExist))
+    # pseudo users
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsPseudoUsers))
-    test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsUsers))
+    test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsPseudoUsersSourceDoesNotExist))
 
+    # users
+    test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsUsers))
+    test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsUsersSourceDoesNotExist))
+
+    # intraday
     test_suite.addTest(unittest.makeSuite(TestCFFlattenMethodsIntraday))
+    # FLATTEN tests end
 
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigB))
     test_suite.addTest(unittest.makeSuite(TestGenerateConfigCf))
