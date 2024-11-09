@@ -181,15 +181,20 @@ class TestGenerateQuerySourceTableUsers(BaseUnitTest):
                             {_3}
                             {_4}
                             """
-        assert "pseudo" not in expected_query
 
         result = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
                                                  partitioned_output_required=partitioned_output_required,
                                                  list_of_flat_tables=["flat_users",
                                                                       "flat_users_user_properties",
                                                                       "flat_users_user_audiences"])
+
+        assert "pseudo" not in expected_query
+        assert "pseudo" not in result
+
+
         self.assertEqual(result.replace(" ", "").replace("\n", "").upper(),
                          expected_query.replace(" ", "").replace("\n", "").upper())
+
 
     def tearDown(self):
         pass
