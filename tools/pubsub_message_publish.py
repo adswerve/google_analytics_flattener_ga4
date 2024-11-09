@@ -27,7 +27,7 @@ dry_run = False  # set to False to Backfill.  Setting to True will not pubish an
 
 # TESTING USERS
 datasets_to_backfill = ["analytics_123456789"]  # GA properties to backfill, "analytics_222460912"
-backfill_range_start = datetime.datetime(2024, 10, 28)
+backfill_range_start = datetime.datetime(2024, 11, 7)
 backfill_range_end = datetime.datetime(2024, 11, 7)  # datetime.datetime.today()
 
 table_types = [

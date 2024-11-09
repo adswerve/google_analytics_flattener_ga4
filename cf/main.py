@@ -71,7 +71,7 @@ class InputValidator(object):
 
             tables = list(set(tables_config) & set(["users",
                                                     "users_user_properties",
-                                                    "users_audiences"]))
+                                                    "users_user_audiences"]))
 
         return tables
 
