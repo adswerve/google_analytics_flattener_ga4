@@ -1,3 +1,5 @@
+from collections import UserString
+
 from google.cloud import pubsub_v1
 import json
 import datetime, time
@@ -17,12 +19,21 @@ topic_id = "ga4-flattener-deployment-topic"  # pubsub topic your cloud function 
 project_id = "as-dev-ga4-flattener-320623" # GCP project ID, example:  [PROJECT_ID]
 dry_run = False  # set to False to Backfill.  Setting to True will not pubish any messages to pubsub, but simply show what would have been published.
 # Desired dates to backfill, both start and end are inclusive
-backfill_range_start = datetime.datetime(2024, 6, 11)
-backfill_range_end = datetime.datetime(2024, 6, 11)  # datetime.datetime.today()
-datasets_to_backfill = ["analytics_222460912"]  # GA properties to backfill, "analytics_222460912"
+
+# TESTING EVENTS
+# datasets_to_backfill = ["analytics_222460912"]  # GA properties to backfill, "analytics_222460912"
+# backfill_range_start = datetime.datetime(2024, 6, 11)
+# backfill_range_end = datetime.datetime(2024, 6, 11)  # datetime.datetime.today()
+
+# TESTING USERS
+datasets_to_backfill = ["analytics_123456789"]  # GA properties to backfill, "analytics_222460912"
+backfill_range_start = datetime.datetime(2024, 10, 28)
+backfill_range_end = datetime.datetime(2024, 11, 7)  # datetime.datetime.today()
+
 table_types = [
-                "events",
-               "pseudonymous_users"
+               #  "events",
+               # "pseudonymous_users",
+                "users"
 ]
 '''*****************************'''
 '''  Configuration Section End  '''
