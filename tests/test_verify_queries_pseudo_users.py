@@ -45,7 +45,7 @@ class TestGenerateQuerySourceTablePseudoUsers(BaseUnitTest):
         test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
                                                                                      self.ga_source)
 
-        assert test_dynamic_query.endswith('FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_*`WHERE_TABLE_SUFFIX="DATE_SHARD";')
+        assert test_dynamic_query.endswith('FROMTEMP_PSEUDO_USERS;')
 
         assert sample_hardcoded_query == test_dynamic_query
 
@@ -57,7 +57,7 @@ class TestGenerateQuerySourceTablePseudoUsers(BaseUnitTest):
         test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
                                                                                      self.ga_source)
 
-        assert test_dynamic_query.endswith('FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_*`,UNNEST(USER_PROPERTIES)UPWHERE_TABLE_SUFFIX="DATE_SHARD";')
+        assert test_dynamic_query.endswith('FROMTEMP_PSEUDO_USERS,UNNEST(USER_PROPERTIES)UP;')
 
         assert sample_hardcoded_query == test_dynamic_query
 
@@ -70,7 +70,7 @@ class TestGenerateQuerySourceTablePseudoUsers(BaseUnitTest):
         test_dynamic_query = self.helper_clean_up_dynamically_generated_query(test_dynamic_query,
                                                                                      self.ga_source)
 
-        assert test_dynamic_query.endswith('FROM`GCP-PROJECT.DATASET.PSEUDONYMOUS_USERS_*`,UNNEST(AUDIENCES)AWHERE_TABLE_SUFFIX="DATE_SHARD";')
+        assert test_dynamic_query.endswith('FROMTEMP_PSEUDO_USERS,UNNEST(AUDIENCES)A;')
 
         assert sample_hardcoded_query == test_dynamic_query
 
@@ -157,19 +157,21 @@ class TestGenerateQuerySourceTablePseudoUsers(BaseUnitTest):
         sharded_output_required = True
         partitioned_output_required = False
 
-        _1 = self.ga_source.get_flat_table_update_query(
+        _1 = self.ga_source.get_temp_table_query()
+
+        _2 = self.ga_source.get_flat_table_update_query(
             select_statement=self.ga_source.get_select_statement(flat_table="flat_pseudo_users"),
             flat_table="flat_pseudo_users",
             sharded_output_required=sharded_output_required,
             partitioned_output_required=partitioned_output_required)
 
-        _2 = self.ga_source.get_flat_table_update_query(
+        _3 = self.ga_source.get_flat_table_update_query(
             select_statement=self.ga_source.get_select_statement(flat_table="flat_pseudo_user_properties"),
             flat_table="flat_pseudo_user_properties",
             sharded_output_required=sharded_output_required,
             partitioned_output_required=partitioned_output_required)
 
-        _3 = self.ga_source.get_flat_table_update_query(
+        _4 = self.ga_source.get_flat_table_update_query(
             select_statement=self.ga_source.get_select_statement(flat_table="flat_pseudo_user_audiences"),
             flat_table="flat_pseudo_user_audiences",
             sharded_output_required=sharded_output_required,
@@ -179,6 +181,7 @@ class TestGenerateQuerySourceTablePseudoUsers(BaseUnitTest):
         expected_query = f"""{_1}
                             {_2}
                             {_3}
+                            {_4}
                             """
         result = self.ga_source.build_full_query(sharded_output_required=sharded_output_required,
                                                  partitioned_output_required=partitioned_output_required,
