@@ -59,5 +59,5 @@ class TestCFFlattenMethodsIntraday(BaseUnitTest):
                                    table_name=f"flat_user_properties_{self.ga_source.date_shard}")
 
     def tearDown(self):
-        # self.delete_all_flat_tables_from_dataset()
-        pass
+        self.delete_all_flat_tables_from_dataset()
+        # pass

@@ -198,7 +198,8 @@ SELECT
 
 sample_pseudo_users_query = """
 SELECT
-  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+  row_id,
+ `date`,  
   pseudo_user_id,
   stream_id,
 
@@ -235,14 +236,14 @@ SELECT
   occurrence_date,
   last_updated_date
 FROM
-  `gcp-project.dataset.pseudonymous_users_*`
-WHERE _TABLE_SUFFIX = "date_shard"   
+  temp_pseudo_users
   ;
 """
 
 sample_pseudo_user_properties_query = """
 SELECT
-  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+  row_id,
+    `date`,  
   
   pseudo_user_id,
   up.key user_property_key,
@@ -250,15 +251,15 @@ SELECT
   up.value.set_timestamp_micros user_property_set_timestamp_micros,
   up.value.user_property_name
 FROM
-    `gcp-project.dataset.pseudonymous_users_*`,
+    temp_pseudo_users,
     UNNEST(user_properties) up
-WHERE _TABLE_SUFFIX = "date_shard"    
   ;
 """
 
 sample_pseudo_user_audiences_query = """
 SELECT
-  PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+  row_id,
+  `date`,  
   pseudo_user_id,
   a.id audience_id,
   a.name audience_name,
@@ -266,9 +267,8 @@ SELECT
   a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
   a.npa audience_npa
 FROM
-    `gcp-project.dataset.pseudonymous_users_*`,
+    temp_pseudo_users,
   UNNEST(audiences) a
-WHERE _TABLE_SUFFIX = "date_shard" 
     ;
 """
 

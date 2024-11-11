@@ -179,8 +179,20 @@ class GaExportedNestedDataStorage(object):
             )
             ;
             """
+
         elif self.table_type == "pseudonymous_users":
-            qry = ""
+            qry = f"""
+                CREATE OR REPLACE TEMP TABLE temp_pseudo_users AS (
+                SELECT
+                    GENERATE_UUID() row_id,
+                    PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,
+                    * 
+                    FROM
+                    `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
+                      WHERE _TABLE_SUFFIX = "{self.date_shard}"  
+                )
+                ;
+                """
         return qry
 
 
@@ -390,7 +402,8 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
-               PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+               row_id,
+               `date`,  
 
               pseudo_user_id,
               stream_id,
@@ -428,8 +441,7 @@ class GaExportedNestedDataStorage(object):
               occurrence_date,
               last_updated_date
             FROM
-               `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
-            WHERE _TABLE_SUFFIX = "{self.date_shard}"              
+               temp_pseudo_users             
             ;"""
 
         return qry
@@ -439,7 +451,8 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
-                PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+              row_id,
+             `date`,  
 
               pseudo_user_id,
               up.key user_property_key,
@@ -447,9 +460,8 @@ class GaExportedNestedDataStorage(object):
               up.value.set_timestamp_micros user_property_set_timestamp_micros,
               up.value.user_property_name
             FROM
-             `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
-              ,UNNEST(user_properties) up
-            WHERE _TABLE_SUFFIX = "{self.date_shard}"                         
+             temp_pseudo_users
+              ,UNNEST(user_properties) up                        
             ;"""
 
         return qry
@@ -458,7 +470,8 @@ class GaExportedNestedDataStorage(object):
 
         qry = f"""
             SELECT
-                PARSE_DATE('%Y%m%d', _TABLE_SUFFIX) `date`,  
+             row_id,
+             `date`,  
 
               pseudo_user_id,
               a.id audience_id,
@@ -467,9 +480,8 @@ class GaExportedNestedDataStorage(object):
               a.membership_expiry_timestamp_micros audience_membership_expiry_timestamp_micros,
               a.npa audience_npa
             FROM
-            `{self.gcp_project}.{self.dataset}.{self.table_type}_*`
-              ,UNNEST(audiences) a
-             WHERE _TABLE_SUFFIX = "{self.date_shard}"        
+            temp_pseudo_users
+              ,UNNEST(audiences) a    
             ;"""
 
         return qry
@@ -664,7 +676,7 @@ class GaExportedNestedDataStorage(object):
         assert len(list_of_flat_tables) >= 1, "At least 1 flat table needs to be included in the config file"
         query = ""
 
-        if self.table_type in ("events", "events_intraday", "users"):
+        if self.table_type in ("events", "events_intraday", "users", "pseudonymous_users"):
 
             query += self.get_temp_table_query()
 
