@@ -10,7 +10,7 @@ env:
 
 on:
   push:
-    branches: [ staging, development-users ]
+    branches: [ staging ]
   pull_request:
     branches: [ master ]
 
