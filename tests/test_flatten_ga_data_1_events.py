@@ -8,7 +8,7 @@ from google.cloud.exceptions import NotFound
 class TestCFFlattenMethods(BaseUnitTest):
     c = Context()
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
-                                            dataset=c.env["dataset_adswerve"],
+                                            dataset="analytics_222460912",
                                             table_type=c.env["table_type"],
                                             date_shard=c.env["date"],
                                             )
