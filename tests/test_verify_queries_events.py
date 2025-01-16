@@ -61,6 +61,9 @@ class TestGenerateQuerySourceTableEvents(BaseUnitTest):
 
         assert "'DAILY'ASSOURCE_TABLE_TYPE" in test_events_dynamic_query
         # assert "'INTRADAY'ASSOURCE_TABLE_TYPE" in test_events_dynamic_query_intraday
+        print(sample_hardcoded_events_query)
+
+        print(test_events_dynamic_query)
 
         assert sample_hardcoded_events_query == test_events_dynamic_query # == test_events_dynamic_query_intraday.replace(
             # "_INTRADAY_", "_").replace("INTRADAY", "DAILY")
