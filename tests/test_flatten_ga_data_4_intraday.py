@@ -10,7 +10,7 @@ class TestCFFlattenMethodsIntraday(BaseUnitTest):
     ga_source = GaExportedNestedDataStorage(gcp_project=c.env["project"],
                                             dataset=c.env["dataset_adswerve"],
                                             table_type=c.env["table_type_intraday"],
-                                            date_shard= "20240725"
+                                            date_shard= "20250114"
                                             # date_shard = c.env["date_intraday"],
                                             )
 
